@@ -1,0 +1,13 @@
+@import url('./main-layout.css');
+@import url('./views/view-attendance-view.css');
+@import url('./views/manage-users-view.css');
+@import url('./views/set-up-view.css');
+@import url('@fontsource/roboto/index.css');    html {
+      --lumo-size-xl: 3rem;
+      --lumo-size-l: 2.5rem;
+      --lumo-size-m: 2rem;
+      --lumo-size-s: 1.75rem;
+      --lumo-size-xs: 1.5rem;
+--lumo-font-family: Roboto;
+
+    }
