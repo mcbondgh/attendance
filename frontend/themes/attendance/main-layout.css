@@ -1,4 +1,4 @@
-vaadin-scroller[slot="drawer"] {
+/* vaadin-scroller[slot="drawer"] {
   padding: var(--lumo-space-s);
 }
 
@@ -17,4 +17,60 @@ vaadin-side-nav-item vaadin-icon {
 
 [slot="drawer"]:is(header, footer):is(:empty) {
   display: none;
+} */
+
+/*********************************************************** */
+
+
+html {
+  --container-color: rgb(238, 243, 255);
+}
+body {
+  background-color: var(--container-color);
+}
+
+
+.signout-menu-bar {
+  border: 1px solid rgb(244, 244, 244);
+  width: 100%;
+  border-radius: 5px;
+  background-color: #fff;
+}
+.signout-menu-item {
+  cursor: pointer;
+  gap: 10px;
+}
+
+.avatar {
+  /* margin-right: 5px;
+  size:12px; */
+}
+
+vaadin-scroller[slot="drawer"] {
+  padding: var(--lumo-space-s);
+}
+
+vaadin-side-nav-item vaadin-icon {
+  padding: 0;
+}
+
+[slot="drawer"]:is(header, footer) {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  min-height: var(--lumo-size-xl);
+  box-sizing: border-box;
+  background-color:rgb(66, 147, 246);
+}
+
+[slot="drawer"]:is(header, footer):is(:empty) {
+  display: none;
+}
+
+
+.app-name-text {
+  text-align: center;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
 }

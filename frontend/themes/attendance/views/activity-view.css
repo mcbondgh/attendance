@@ -1,0 +1,151 @@
+.activity-button {
+    font-size: small;
+    cursor: pointer;
+}
+.activity-button:hover {
+    background-color: rgb(227, 227, 227);
+    transition: 0.2s;
+}
+
+.activity-formlayout {
+    padding-right: 15px;
+    padding-left: 15px;
+    padding-bottom:10px;
+    border: 1px solid #eee;
+    background-color: #fff;
+    margin: -10px 0;
+
+}
+
+.activity-inner-formlayout {
+    box-sizing: border-box;
+    padding:0;
+}
+
+.activity-inner-teaderText {
+    background-color: rgb(8, 171, 163);
+    width: 100%;    
+    text-align: center;
+    padding: 10px 0;
+    color:#fff;
+}
+
+.score-field[focused]::part(input-field){
+    background-color: rgb(198, 255, 198);
+    color: green;
+    transition: 0.2s;
+}
+.disable-button {
+    opacity: 0.5;
+    background-color: #adadad;
+    color: #606060;
+}
+
+.filter-activity-field::part(input-field) {
+    border: 1px solid #adadad;
+    font-size: small;
+    
+}
+.filter-activity-field {
+    width: 100%;
+    margin-bottom: -1%;
+}
+
+.activity-table {
+    box-sizing: border-box ;
+}
+
+.grid-layout {
+    border: 1px solid rgb(224, 224, 224);
+
+}
+
+.activity-view-formlayout {
+    /* border: 1px solid rgb(233, 233, 233); */
+    box-sizing: border-box;
+    /* padding: 10px; */
+    
+}
+
+.activity-view-update-button{
+    background-color: white;
+    border: none;
+    color: green;
+    cursor: pointer;
+    font-size: x-small;
+    box-sizing: content-box;
+}
+.activity-view-update-button:hover{
+    background-color: rgb(230, 255, 230);
+    /* padding: 5px; */
+    transition: 0.3s;
+}
+
+.activity-view-dialog {
+    max-width: 100%;
+}
+.activity-view-dialog-grid{
+    box-sizing: border-box;
+    max-height: 300px;
+}
+.activity-view-dialog-grid::part(footer) {
+    background-color: red;
+}
+.activity-view-dialog-vlayout {
+    gap: 10px;
+    background-color: rgb(247, 247, 247);
+    box-sizing: content-box;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    width:600px;
+}
+.activity-view-dialog-vlayout vaadin-text-field {
+    width: 100%;
+}
+.toggle-button {
+    visibility: hidden;
+}
+
+.show-content {
+    visibility: visible;
+}
+.hide-content {
+    visibility: hidden;
+}
+
+.activity-view-list-view{
+    border: 1px solid rgb(185, 185, 185);
+    border-radius: 5px;
+    height:250px;
+    margin-top: -10px;
+    width: 100%;
+}
+
+.list-view-container  {
+    border: 1px solid rgb(222, 222, 222);
+    border-radius: 5px;
+    padding-top: 0;
+}
+
+@media screen and (max-width:600px) {
+    .dashboard-header-text {
+        font-size: ;
+    }
+    .activity-inner-formlayout {
+        margin-bottom: 10px;
+    }
+    .toggle-button{
+        visibility: visible;
+    }
+    .grid-layout {
+        margin-top: 20px;
+    }
+    .activity-view-dialog {
+        max-width: 100%;
+    }
+    .activity-view-dialog-vlayout {
+        flex-direction: column;
+        max-width: 100%;
+    }
+}

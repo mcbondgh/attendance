@@ -1,0 +1,44 @@
+.table-layout {
+    border:1px solid rgb(238, 232, 232);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.main-container {
+    background-color: #fff;
+}
+.filter-text-field::part(input-field) {
+   font-size: small;
+}
+.filter-text-field {
+    width:30%;
+    margin-bottom: 10px;
+}
+
+.view-attendance-filter-container {
+    width:100%;
+  }
+
+.attendance-date-picker-container {
+    align-items: baseline;
+}
+
+
+
+/* mobile view */
+@media screen and (max-width:600px) {
+    .take-attendance-combobox {
+        width: 100%;
+        margin-top: -10px;
+    }
+    .filter-text-field {
+        width: 100%;
+    }
+    .filter-button {
+        width: 100%;
+    }
+    .attendance-date-picker-container {
+        width: 100%;
+       flex-wrap: wrap;
+    }
+}

@@ -36,6 +36,51 @@
   font-weight: 500;
 }
 
+
+/* --------------------------------------------------------------------------------------------- */
+
+.table-layout {
+
+  padding: 0;
+}
+.take-attendance-view-select-2::part(input-field),
+.take-attendance-view-select-1::part(input-field) {
+font-size: small;
+}
+
+.buttons-layout {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.header-layout {
+  border-bottom:1px solid rgb(218, 218, 218);
+  align-items: baseline;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.save-button {
+  margin: 10px;
+  background-color: rgb(54, 176, 54);
+  color: #fff;
+  font-style: normal;
+  font-size: small;
+  cursor: pointer;
+  width: auto;
+}
+
+.attendance-table-title {
+  background-color: rgb(244, 244, 244);
+  width: 100%;
+  padding: 20px 0;
+  text-align: center;
+  color: rgb(82, 98, 124);
+  font-weight: 600;
+  font-size: medium;
+
+}
+
+
 @media screen and (max-width: 800px) {
   .view-attendance-view .filter-layout {
     display: none;
@@ -73,5 +118,12 @@
 
   .view-attendance-view .mobile-filters:hover {
     color: var(--lumo-body-text-color);
+  }
+
+  .header-layout {
+    flex-direction: column;
+  }
+  .header-layout vaadin-select, vaadin-date-picker, .filter-field{
+    width: 100%;
   }
 }

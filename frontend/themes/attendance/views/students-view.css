@@ -1,0 +1,135 @@
+.container {
+background-color: rgb(255, 252, 252);
+border-radius: 5px;
+box-sizing: border-box;
+}
+
+.header-container {
+  border-bottom: 1px solid lightgray;
+  padding: 10px;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-filter-container {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.student-dialog vaadin-horizontal-layout {
+  border-bottom: 1px solid rgb(230, 230, 230);
+  padding: 5px 0;
+}
+.student-form-layout {
+  max-width: 600px;
+}
+.close-dialog-icon {
+  font-size: large;
+  color: rgb(250, 0, 0);
+  cursor: pointer;
+}
+.filter-field, .filter-selector {
+    width: 30%;
+    font-size: small;
+    margin: 5px;
+}
+.filter-field::part(input-field) {
+    border: 1px solid rgb(184, 184, 187);
+}
+.action-button {
+  font-size: 12px;
+  color:rgb(68, 68, 68);
+  /* background-color: rgb(234, 255, 231); */
+  padding: 7px;
+  border-radius: 50%;
+}
+.action-button:hover {
+  transition: 0.3s;
+  background-color: rgb(240, 240, 240);
+  cursor: pointer;
+}
+
+.filter-selector::part(input-field){
+  font-size: small;
+}
+
+.form-header-div {
+  border-bottom: 1px solid lightgray;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+}
+.form-header-div h5 {
+  color:dodgerblue;
+}
+
+.form-layout vaadin-text-field::part(input-field), vaadin-select::part(text-field) {
+  font-size: small;
+}
+
+.form-layout {
+  margin: 10px;
+  border: 1px solid lightgray;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+
+.table-counter {
+  background-color: rgb(240, 240, 240);
+  padding: 10px;
+}
+
+
+.attendance-header-layout {
+  background-color:rgb(255, 255, 255);
+  align-items: baseline;
+  border-radius: 5px;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap;
+  padding: 10px;
+
+}
+
+
+
+
+@media screen and (max-width: 600px) {
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    max-width: 100%;
+  }
+  .header-filter-container {
+    flex-direction: column;
+    /* width: 100%; */
+  }
+  .header-filter-container, .filter-field, .filter-selector{
+    width: 100%;
+  }
+  .filter-field {
+    margin-left: 0;
+  }
+  .header-filter-container vaadin-button {
+    width: 50%;
+    align-self: center;
+  }
+
+  .radio-buttons::part(group-field) {
+    flex-direction: column;
+    width: 100%;
+    font-size: small;
+    margin-left: 20px;
+  }
+
+  .attendance-header-layout vaadin-combobox , .generate-button{
+    width: 100%;
+  }
+
+
+}

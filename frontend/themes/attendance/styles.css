@@ -1,7 +1,14 @@
+@import "theme-editor.css";
 @import url('./main-layout.css');
 @import url('./views/view-attendance-view.css');
+@import url('./views/attendance.css');
+@import url('./views/students-view.css');
 @import url('./views/manage-users-view.css');
 @import url('./views/set-up-view.css');
+@import url('./views/dashboard-view.css');
+@import url('./views/activity-view.css');
+@import url('./views/loginview.css');
+@import url('./views/users-view.css');
 @import url('@fontsource/roboto/index.css');    html {
       --lumo-size-xl: 3rem;
       --lumo-size-l: 2.5rem;

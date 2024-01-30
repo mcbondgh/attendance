@@ -1,15 +1,39 @@
 package com.cass.views.manageusers;
 
+import com.cass.data.LoadTableGrid;
+import com.cass.data.UsersEntity;
+import com.cass.dialogs.UserConfirmDialogs;
+import com.cass.security.Encryption;
+import com.cass.services.UserService;
+import com.cass.special_methods.SpecialMethods;
 import com.cass.views.MainLayout;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H5;
+import com.vaadin.flow.component.html.H6;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.dom.Style.FlexWrap;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -24,55 +48,192 @@ import com.vaadin.flow.theme.lumo.LumoUtility.MaxWidth;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
+import jakarta.annotation.security.RolesAllowed;
+
 @PageTitle("Manage Users")
 @Route(value = "manage-users", layout = MainLayout.class)
+// @RolesAllowed({"ADMIN","USERS"})
 @AnonymousAllowed
-public class ManageUsersView extends Main implements HasComponents, HasStyle {
+public class ManageUsersView extends VerticalLayout implements HasComponents, HasStyle {
 
     private OrderedList imageContainer;
-
+    private Grid<UsersEntity> usersTable = new Grid<UsersEntity>();
+    UserService SERVICE_OBJ = new UserService();
+    
     public ManageUsersView() {
-        constructUI();
+  
+        add(renderPageHeader(), renderPageView());
+    }
 
-        imageContainer.add(new ManageUsersViewCard("Snow mountains under stars",
-                "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80"));
-        imageContainer.add(new ManageUsersViewCard("Snow covered mountain",
-                "https://images.unsplash.com/photo-1512273222628-4daea6e55abb?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80"));
-        imageContainer.add(new ManageUsersViewCard("River between mountains",
-                "https://images.unsplash.com/photo-1536048810607-3dc7f86981cb?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=375&q=80"));
-        imageContainer.add(new ManageUsersViewCard("Milky way on mountains",
-                "https://images.unsplash.com/photo-1515705576963-95cad62945b6?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=750&q=80"));
-        imageContainer.add(new ManageUsersViewCard("Mountain with fog",
-                "https://images.unsplash.com/photo-1513147122760-ad1d5bf68cdb?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"));
-        imageContainer.add(new ManageUsersViewCard("Mountain at night",
-                "https://images.unsplash.com/photo-1562832135-14a35d25edef?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=815&q=80"));
+
+    private Component renderPageHeader() {
+        HorizontalLayout layout = new HorizontalLayout();
+        H5 title = new H5("USERS & ROLES BOARD");
+        Button addButton = new Button("Add New");
+        
+
+        layout.setWidthFull();
+        layout.setAlignItems(Alignment.CENTER);
+        layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        addButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+        title.setClassName("dashboard-header-text");
+        layout.addClassNames("dashboard-header-container", "view-header-containere");
+
+        layout.add(title, addButton);
+
+        //ADD CLICK LISTENER TO SHOW DIALOG BOX FOR ADDING NEW USERS
+        addButton.addClickListener(action ->  {
+            constructDialog();
+        });
+        return layout;
+    }
+
+    /***********************************************************************************
+     * RENDER PAGE VIEW
+     ***********************************************************************************/
+    private Component renderPageView() {
+        VerticalLayout layout = new VerticalLayout();
+
+        layout.add(createUsersTable());
+        layout.addClassName("container");
+        return layout;
+    }
+
+
+    /***********************************************************************************
+     * CREATE AND DESIGN OF THE 'users Table'
+     ***********************************************************************************/
+    private Component createUsersTable() {
+
+        usersTable.addColumn(UsersEntity::getId).setHeader("ROW ID");
+        usersTable.addColumn(UsersEntity::getUsername).setHeader("USERNAME");
+        usersTable.addColumn(UsersEntity::getRoleName).setHeader("ROLE");
+        usersTable.addComponentColumn(UsersEntity::getStatusValue).setHeader("STATUS");
+
+        LoadTableGrid.loadTable(usersTable, SERVICE_OBJ.getAllUsers());
+
+        usersTable.setClassName("users-table");
+
+
+        usersTable.setItemDetailsRenderer(createUserUpdateComponentRenderer());
+        return usersTable;
+    }
+
+    /***********************************************************************************
+     * CREATE A COMPONENT RENDERER TO ALLOW USER UPATE
+     ***********************************************************************************/
+    private ComponentRenderer<Component, UsersEntity> createUserUpdateComponentRenderer() { 
+        return new ComponentRenderer<>(users -> {
+            FormLayout formLayout = new FormLayout();
+            TextField usernameTextField = new TextField("Username");
+            PasswordField passwordTextField = new PasswordField("Password");
+            PasswordField confirmPasswordField = new PasswordField("Confirm Password");
+            ComboBox<String> roleSelector = new ComboBox<>("Select Role");
+            Button updateButton = new Button("Update User");
+            RadioButtonGroup<String> statusRadioGroup = new RadioButtonGroup<>("Set Status","active", "inactive");
+            H6 headerText = new H6("Update User Details");
+
+            usernameTextField.setRequired(true);
+            passwordTextField.setRequired(true);
+            confirmPasswordField.setRequired(true);
+            roleSelector.setRequired(true);
+
+            SpecialMethods.setUserRoles(roleSelector);
+
+            statusRadioGroup.setValue(users.getStatusId() == 1 ? "active": "invacive");
+            
+            //<theme-editor-local-classname>
+            statusRadioGroup.addClassName("manage-users-view-radio-group-1");
+            formLayout.addClassName("update-user-formlayout");
+            updateButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+
+            formLayout.add(headerText, usernameTextField, passwordTextField, confirmPasswordField, roleSelector, statusRadioGroup, updateButton);
+
+            formLayout.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("600px", 2)
+            );
+            formLayout.setColspan(headerText, 2);
+            formLayout.setColspan(usernameTextField, 2);
+            return formLayout;
+        });
 
     }
 
-    private void constructUI() {
-        addClassNames("manage-users-view");
-        addClassNames(MaxWidth.SCREEN_LARGE, Margin.Horizontal.AUTO, Padding.Bottom.LARGE, Padding.Horizontal.LARGE);
 
-        HorizontalLayout container = new HorizontalLayout();
-        container.addClassNames(AlignItems.CENTER, JustifyContent.BETWEEN);
+    /***********************************************************************************
+     * POP UP DIALOG FOR ADDING NEW USERS 
+     ***********************************************************************************/
+    private void constructDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Add New User");
+        TextField usernamTextField = new TextField("Username");
+        PasswordField userPasswordField = new PasswordField("Password");
+        PasswordField confirmPasswordField = new PasswordField("Confirm Password");
+        ComboBox<String> userRolePicker = new ComboBox<>("Select Role");
+        Button saveButton = new Button("Save User");
+        
+        FormLayout layout = new FormLayout();
 
-        VerticalLayout headerContainer = new VerticalLayout();
-        H2 header = new H2("Beautiful photos");
-        header.addClassNames(Margin.Bottom.NONE, Margin.Top.XLARGE, FontSize.XXXLARGE);
-        Paragraph description = new Paragraph("Royalty free photos and pictures, courtesy of Unsplash");
-        description.addClassNames(Margin.Bottom.XLARGE, Margin.Top.NONE, TextColor.SECONDARY);
-        headerContainer.add(header, description);
+        //load userRoleSelector with data
+        SpecialMethods.setUserRoles(userRolePicker);
 
-        Select<String> sortBy = new Select<>();
-        sortBy.setLabel("Sort by");
-        sortBy.setItems("Popularity", "Newest first", "Oldest first");
-        sortBy.setValue("Popularity");
 
-        imageContainer = new OrderedList();
-        imageContainer.addClassNames(Gap.MEDIUM, Display.GRID, ListStyleType.NONE, Margin.NONE, Padding.NONE);
+        dialog.addClassName("user-view-add-dialog");
+        layout.addClassName("user-view-dialog-layout");
+        usernamTextField.setPlaceholder("Username");
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        saveButton.setWidthFull();
 
-        container.add(headerContainer, sortBy);
-        add(container, imageContainer);
+        //set required fields.
+        usernamTextField.setRequired(true);
+        userPasswordField.setRequired(true);
+        confirmPasswordField.setRequired(true);
+        userRolePicker.setRequired(true);
+        usernamTextField.setInvalid(isVisible());
+        userPasswordField.setInvalid(isVisible());
+        confirmPasswordField.setInvalid(isVisible());
+        userRolePicker.setInvalid(isAttached());
+        
+        //ADD COMPONENTS TO LAYOUT
+        layout.add(usernamTextField, userPasswordField, confirmPasswordField, userRolePicker, new Hr(), saveButton);
+        dialog.add(layout);
 
+        //ADD CLICK LISTENER TO BUTTON TO CHECK AND SAVE USER
+        saveButton.addClickListener(click -> {
+            UserConfirmDialogs popUp = new UserConfirmDialogs();
+            UserService SERVICE_OBJ = new UserService();
+            UsersEntity entity = new UsersEntity();
+            boolean passwordMatches = userPasswordField.getValue().equals(confirmPasswordField.getValue());
+            boolean invalidFields = userPasswordField.isEmpty() || userRolePicker.isEmpty() || confirmPasswordField.isEmpty();
+
+            if (!passwordMatches) {
+                popUp.showError("Password fields do not match");
+            } else if(invalidFields) {
+                popUp.showError("Fill out all required fields");
+            } else {
+                new UserConfirmDialogs("SAVE USER", "Do you wish add current record to your list of users?").
+                saveDialog().addConfirmListener(confirm -> {
+                    String cipherText = Encryption.generateCipherText(userPasswordField.getValue());
+                    entity.setUsername(usernamTextField.getValue());
+                    entity.setPassword(cipherText);
+                    entity.setRoleId((byte) (userRolePicker.getValue().equals("Admin") ? 1 : 2));
+                    int responseStatus = SERVICE_OBJ.saveUser(entity);
+
+                    if (responseStatus > 0) {
+                        popUp.showSuccess("Nice, new user successfully added to list");
+                        userPasswordField.clear();
+                        usernamTextField.clear();
+                        confirmPasswordField.clear();
+                        LoadTableGrid.loadTable(usersTable, SERVICE_OBJ.getAllUsers());
+                    }
+                });
+            }
+        });
+
+        dialog.open();
     }
-}
+
+
+}//end of class..

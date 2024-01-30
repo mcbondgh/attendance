@@ -1,29 +1,31 @@
 package com.cass.views;
 
-import com.cass.data.User;
-import com.cass.security.AuthenticatedUser;
+import com.cass.security.SessionManager;
+//import com.cass.security.AuthenticatedUser;
 import com.cass.views.addstudent.AddStudentView;
 import com.cass.views.dashboard.DashboardView;
+import com.cass.views.login.UserLoginView;
 import com.cass.views.managecourse.ManageCourseView;
 import com.cass.views.manageusers.ManageUsersView;
 import com.cass.views.setup.SetUpView;
 import com.cass.views.takeattendance.TakeAttendanceView;
 import com.cass.views.viewattendance.ViewAttendanceView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.contextmenu.SubMenu;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
@@ -35,16 +37,15 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 /**
  * The main view is a top-level placeholder for other views.
  */
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
     private H2 viewTitle;
+    private H6 userNameLabel = new H6();
 
-    private AuthenticatedUser authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+//    private AuthenticatedUser authenticatedUser;
+//    private AccessAnnotationChecker accessChecker;
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
-        this.authenticatedUser = authenticatedUser;
-        this.accessChecker = accessChecker;
+    public MainLayout() {
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -62,9 +63,11 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        H1 appName = new H1("CASS");
-        appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+        H3 appName = new H3("ATTENDANCE SHEET");
+        appName.addClassNames(LumoUtility.FontSize.MEDIUM, LumoUtility.Margin.NONE);
         Header header = new Header(appName);
+        
+        appName.setClassName("app-name-text");
 
         Scroller scroller = new Scroller(createNavigation());
 
@@ -73,81 +76,62 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
-
-        if (accessChecker.hasAccess(DashboardView.class)) {
-            nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.CHART_PIE_SOLID.create()));
-
-        }
-        if (accessChecker.hasAccess(TakeAttendanceView.class)) {
+            nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.MDB.create()));
             nav.addItem(new SideNavItem("Take Attendance", TakeAttendanceView.class,
                     LineAwesomeIcon.PENCIL_ALT_SOLID.create()));
-
-        }
-        if (accessChecker.hasAccess(ViewAttendanceView.class)) {
             nav.addItem(new SideNavItem("View Attendance", ViewAttendanceView.class,
                     LineAwesomeIcon.FILTER_SOLID.create()));
-
-        }
-        if (accessChecker.hasAccess(AddStudentView.class)) {
             nav.addItem(
                     new SideNavItem("Add Student", AddStudentView.class, LineAwesomeIcon.PLUS_CIRCLE_SOLID.create()));
-
-        }
-        if (accessChecker.hasAccess(ManageCourseView.class)) {
-            nav.addItem(new SideNavItem("Manage Course", ManageCourseView.class, LineAwesomeIcon.USER.create()));
-
-        }
-        if (accessChecker.hasAccess(ManageUsersView.class)) {
+            nav.addItem(new SideNavItem("Manage Activities", ManageCourseView.class, LineAwesomeIcon.USER.create()));
             nav.addItem(
                     new SideNavItem("Manage Users", ManageUsersView.class, LineAwesomeIcon.USERS_COG_SOLID.create()));
+        // if (accessChecker.hasAccess(SetUpView.class)) {
+        //     nav.addItem(new SideNavItem("Set Up", SetUpView.class, LineAwesomeIcon.LIST_SOLID.create()));
 
-        }
-        if (accessChecker.hasAccess(SetUpView.class)) {
-            nav.addItem(new SideNavItem("Set Up", SetUpView.class, LineAwesomeIcon.LIST_SOLID.create()));
-
-        }
+        // }
 
         return nav;
     }
 
+    @Override
+    public void beforeEnter(BeforeEnterEvent beforeEvent) {
+        try {
+            String activeUser = SessionManager.getAttribute("activeUser").toString();
+            userNameLabel.setText(activeUser);
+        }catch(NullPointerException e){
+            beforeEvent.forwardTo(UserLoginView.class);
+        }
+    }
+    
     private Footer createFooter() {
         Footer layout = new Footer();
+        layout.setClassName("footer-container");
 
-        Optional<User> maybeUser = authenticatedUser.get();
-        if (maybeUser.isPresent()) {
-            User user = maybeUser.get();
+        MenuBar menuBar = new MenuBar();
+        MenuItem menuItem = menuBar.addItem(userNameLabel);
+        Avatar avatar = new Avatar();
+        avatar.setImage("icons/user-100.png");
+        avatar.setClassName("avatar");
+        menuItem.addComponentAsFirst(avatar);
+        Anchor signoutLink = new Anchor("javascript:void(0)", "sign Out");
+        signoutLink.setWidthFull();
 
-            Avatar avatar = new Avatar(user.getName());
-            StreamResource resource = new StreamResource("profile-pic",
-                    () -> new ByteArrayInputStream(user.getProfilePicture()));
-            avatar.setImageResource(resource);
-            avatar.setThemeName("xsmall");
-            avatar.getElement().setAttribute("tabindex", "-1");
+        //logout user...
+        signoutLink.getElement().addEventListener("click", callBack -> {
+            SessionManager.destroySession();
+        });
 
-            MenuBar userMenu = new MenuBar();
-            userMenu.setThemeName("tertiary-inline contrast");
+        SubMenu subMenu = menuItem.getSubMenu();
+        subMenu.addItem(signoutLink);
 
-            MenuItem userName = userMenu.addItem("");
-            Div div = new Div();
-            div.add(avatar);
-            div.add(user.getName());
-            div.add(new Icon("lumo", "dropdown"));
-            div.getElement().getStyle().set("display", "flex");
-            div.getElement().getStyle().set("align-items", "center");
-            div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
-            userName.add(div);
-            userName.getSubMenu().addItem("Sign out", e -> {
-                authenticatedUser.logout();
-            });
-
-            layout.add(userMenu);
-        } else {
-            Anchor loginLink = new Anchor("login", "Sign in");
-            layout.add(loginLink);
-        }
-
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
+        menuBar.addClassName("signout-menu-bar");
+        menuItem.addClassName("signout-menu-item");
+        layout.add(menuBar);
         return layout;
     }
+
 
     @Override
     protected void afterNavigation() {
@@ -159,4 +143,7 @@ public class MainLayout extends AppLayout {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
     }
+
+   
+
 }

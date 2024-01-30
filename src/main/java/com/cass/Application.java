@@ -3,6 +3,7 @@ package com.cass;
 import com.cass.data.SamplePersonRepository;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import javax.sql.DataSource;
 import org.springframework.boot.SpringApplication;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean;
  * and some desktop browsers.
  *
  */
+@PWA(name = "Attendance", shortName = "AT", offlinePath = "offline.html")
 @SpringBootApplication
 @NpmPackage(value = "@fontsource/roboto", version = "4.5.0")
 @Theme(value = "attendance")

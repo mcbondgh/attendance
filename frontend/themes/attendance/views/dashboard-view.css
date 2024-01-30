@@ -1,0 +1,40 @@
+.dashboard-header-container{
+    background-color: #ffffff;
+    width: 100%;
+    padding: 20px;
+    /* border: 1px solid #eee; */
+    border-radius: 5px;
+    box-shadow:1px 1px 1px 1px #e3e3e3;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.dashboard-header-text {
+    color:  #066f7f;
+}
+
+.dashboard-form-layout {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 50px 20px;
+    border: 1px solid #ddd;
+}
+
+.dashboard-form-layout div {
+    margin: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 5px;
+    background-color: #eeeeee41;
+}
+
+.dashboard-form-layout div span {
+    font-weight: 500;
+    color: #066f7f;
+}
+
+.dashboard-form-layout div h5 {
+    color: #0151AC;
+    font-size: 23px;
+}

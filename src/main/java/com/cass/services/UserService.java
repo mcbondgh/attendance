@@ -1,44 +1,25 @@
 package com.cass.services;
 
-import com.cass.data.User;
-import com.cass.data.UserRepository;
-import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
+import com.cass.data.UsersEntity;
 
-@Service
-public class UserService {
+public class UserService extends DAO{
+    
+    public int saveUser(UsersEntity entity) {
+        int status = 0;
+        try {
+            String query = "INSERT INTO users(username, password, role_id) VALUES(?, ?, ?);";
+            prepare = getCon().prepareStatement(query);
+            prepare.setString(1, entity.getUsername());
+            prepare.setString(2, entity.getPassword());
+            prepare.setByte(3, entity.getRoleId());
+            status = prepare.executeUpdate();
+            getCon().close();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
 
-    private final UserRepository repository;
-
-    public UserService(UserRepository repository) {
-        this.repository = repository;
+        return status;
     }
 
-    public Optional<User> get(Long id) {
-        return repository.findById(id);
-    }
-
-    public User update(User entity) {
-        return repository.save(entity);
-    }
-
-    public void delete(Long id) {
-        repository.deleteById(id);
-    }
-
-    public Page<User> list(Pageable pageable) {
-        return repository.findAll(pageable);
-    }
-
-    public Page<User> list(Pageable pageable, Specification<User> filter) {
-        return repository.findAll(filter, pageable);
-    }
-
-    public int count() {
-        return (int) repository.count();
-    }
 
 }

@@ -1,244 +1,216 @@
 package com.cass.views.viewattendance;
 
-import com.cass.data.SamplePerson;
-import com.cass.services.SamplePersonService;
+import com.cass.data.AttendanceEntity;
+import com.cass.data.AttendanceRecordsEntity;
+import com.cass.data.LoadTableGrid;
+import com.cass.services.DAO;
+import com.cass.special_methods.SpecialMethods;
 import com.cass.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
+
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.H3;
+
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.DataCommunicator.Filter;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
+
 import jakarta.annotation.security.PermitAll;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
+
+import java.sql.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.scheduling.config.Task;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 
 @PageTitle("View Attendance")
-@Route(value = "view/view-attendance", layout = MainLayout.class)
-@PermitAll
+@Route(value = "view-attendance", layout = MainLayout.class)
+@AnonymousAllowed
 @Uses(Icon.class)
-public class ViewAttendanceView extends Div {
+public class ViewAttendanceView extends VerticalLayout {
 
-    private Grid<SamplePerson> grid;
+    DAO DAO_OBJECT = new DAO();
 
-    private Filters filters;
-    private final SamplePersonService samplePersonService;
+    private Grid<AttendanceRecordsEntity> grid = new Grid<>();
+    private Filter filterObj;
+    private ComboBox<String> classPicker = new ComboBox<>("Select Class");
+    private DatePicker startDatePicker = new DatePicker("Start Date");
+    private DatePicker endDatePicker = new DatePicker("End Date");
+    private ComboBox<String> programPicker = new ComboBox<>("Select Program");
+    private Button generateButton = new Button("Generate");
+    private TextField filterField = new TextField();
 
-    public ViewAttendanceView(SamplePersonService SamplePersonService) {
-        this.samplePersonService = SamplePersonService;
-        setSizeFull();
-        addClassNames("view-attendance-view");
+    public ViewAttendanceView() {
+        // set component class names
+        generateButton.setClassName("generate-attendance-view-button");
+        generateButton.setEnabled(false);
+        filterField.addClassName("filter-field");
 
-        filters = new Filters(() -> refreshGrid());
-        VerticalLayout layout = new VerticalLayout(createMobileFilters(), filters, createGrid());
-        layout.setSizeFull();
-        layout.setPadding(false);
-        layout.setSpacing(false);
-        add(layout);
+        requiredFields();
+        add(renderViewHeader(), renderTableContent());
+
     }
 
-    private HorizontalLayout createMobileFilters() {
-        // Mobile version
-        HorizontalLayout mobileFilters = new HorizontalLayout();
-        mobileFilters.setWidthFull();
-        mobileFilters.addClassNames(LumoUtility.Padding.MEDIUM, LumoUtility.BoxSizing.BORDER,
-                LumoUtility.AlignItems.CENTER);
-        mobileFilters.addClassName("mobile-filters");
+    /*************************************************************************************
+     * SET REQUIRED FIELDS
+     **************************************************************************************/
 
-        Icon mobileIcon = new Icon("lumo", "plus");
-        Span filtersHeading = new Span("Filters");
-        mobileFilters.add(mobileIcon, filtersHeading);
-        mobileFilters.setFlexGrow(1, filtersHeading);
-        mobileFilters.addClickListener(e -> {
-            if (filters.getClassNames().contains("visible")) {
-                filters.removeClassName("visible");
-                mobileIcon.getElement().setAttribute("icon", "lumo:plus");
-            } else {
-                filters.addClassName("visible");
-                mobileIcon.getElement().setAttribute("icon", "lumo:minus");
-            }
+    private void requiredFields() {
+        startDatePicker.setRequired(true);
+        startDatePicker.setInvalid(startDatePicker.isEmpty());
+        endDatePicker.setRequired(true);
+        endDatePicker.setInvalid(endDatePicker.isEmpty());
+        classPicker.setInvalid(classPicker.isEmpty());
+        programPicker.setInvalid(programPicker.isEmpty());
+        programPicker.setRequired(true);
+        classPicker.setRequired(true);
+
+    }
+
+    private void isFieldEmpty(Button button) {
+        button.setEnabled(!(startDatePicker.isInvalid() || endDatePicker.isInvalid() ||
+                classPicker.isInvalid() || programPicker.isInvalid()));
+    }
+
+    /*************************************************************************************
+     * CREATE AND RENDER PAGE HEADER WITH THE FILTER COMPONENTS
+     **************************************************************************************/
+    private Component renderViewHeader() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.addClassName("attendance-header-layout");
+        layout.setBoxSizing(BoxSizing.BORDER_BOX);
+
+        HorizontalLayout hLayout = new HorizontalLayout(startDatePicker, new H3("-"), endDatePicker);
+        hLayout.setClassName("attendance-date-picker-container");
+        hLayout.setSpacing(false);
+
+        generateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        SpecialMethods.setClasses(classPicker);
+        SpecialMethods.setPrograme(programPicker);
+
+        classPicker.setClassName("take-attendance-combobox");
+        programPicker.setClassName("take-attendance-combobox");
+        generateButton.setClassName("generate-button");
+        // add components to layout
+        layout.add(hLayout, classPicker, programPicker, generateButton);
+        layout.setAlignSelf(Alignment.END, generateButton);
+
+        // add eventlistner to layout to check if field is empty and enable button same.
+        layout.getElement().addEventListener("mousemove", callBack -> {
+            isFieldEmpty(generateButton);
         });
-        return mobileFilters;
+
+        // LOAD TABLE DATA
+        generateButton.addClickListener(click -> {
+            // Timer timer = new Timer();
+            // timer.scheduleAtFixedRate(task, 1000, 1000);
+            Date start = Date.valueOf(startDatePicker.getValue());
+            Date end = Date.valueOf(endDatePicker.getValue());
+            LoadTableGrid.loadTable(
+                    grid,
+                    DAO_OBJECT.fetchAttendanceRecords(start, end, classPicker.getValue(), programPicker.getValue()));
+        });
+
+        return layout;
     }
 
-    public static class Filters extends Div implements Specification<SamplePerson> {
+    /*************************************************************************************
+     * CREATE AND RENDER PAGE BODY WITH THE GRID COMPONENTS
+     **************************************************************************************/
 
-        private final TextField name = new TextField("Name");
-        private final TextField phone = new TextField("Phone");
-        private final DatePicker startDate = new DatePicker("Date of Birth");
-        private final DatePicker endDate = new DatePicker();
-        private final MultiSelectComboBox<String> occupations = new MultiSelectComboBox<>("Occupation");
-        private final CheckboxGroup<String> roles = new CheckboxGroup<>("Role");
+    private Component renderTableContent() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setClassName("container");
 
-        public Filters(Runnable onSearch) {
+        Div filterContainer = new Div(filterField);
+        filterContainer.setClassName("view-attendance-filter-container");
+        filterField.setPlaceholder("filter by index number or name");
+        filterField.setPrefixComponent(LineAwesomeIcon.SEARCH_SOLID.create());
+        filterField.setClearButtonVisible(true);
+        filterField.addClassName("filter-text-field");
 
-            setWidthFull();
-            addClassName("filter-layout");
-            addClassNames(LumoUtility.Padding.Horizontal.LARGE, LumoUtility.Padding.Vertical.MEDIUM,
-                    LumoUtility.BoxSizing.BORDER);
-            name.setPlaceholder("First or last name");
+        filterField.setValueChangeMode(ValueChangeMode.EAGER);
+        filterField.addValueChangeListener(change -> {
+            // add filter to table
+            grid.getListDataView().setFilter(filter -> {
+                if (filterField.isEmpty()) {
+                    return true;
+                }
+                boolean matchesName = filter.getFullname().toLowerCase().contains(change.getValue().toLowerCase());
+                boolean matchesIndex = filter.getIndexNumber().toLowerCase().contains(change.getValue().toLowerCase());
 
-            occupations.setItems("Insurance Clerk", "Mortarman", "Beer Coil Cleaner", "Scale Attendant");
-
-            roles.setItems("Worker", "Supervisor", "Manager", "External");
-            roles.addClassName("double-width");
-
-            // Action buttons
-            Button resetBtn = new Button("Reset");
-            resetBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            resetBtn.addClickListener(e -> {
-                name.clear();
-                phone.clear();
-                startDate.clear();
-                endDate.clear();
-                occupations.clear();
-                roles.clear();
-                onSearch.run();
+                return matchesName || matchesIndex;
             });
-            Button searchBtn = new Button("Search");
-            searchBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            searchBtn.addClickListener(e -> onSearch.run());
+            grid.getListDataView().refreshAll();
+        });
 
-            Div actions = new Div(resetBtn, searchBtn);
-            actions.addClassName(LumoUtility.Gap.SMALL);
-            actions.addClassName("actions");
-
-            add(name, phone, createDateRangeFilter(), occupations, roles, actions);
-        }
-
-        private Component createDateRangeFilter() {
-            startDate.setPlaceholder("From");
-
-            endDate.setPlaceholder("To");
-
-            // For screen readers
-            startDate.setAriaLabel("From date");
-            endDate.setAriaLabel("To date");
-
-            FlexLayout dateRangeComponent = new FlexLayout(startDate, new Text(" – "), endDate);
-            dateRangeComponent.setAlignItems(FlexComponent.Alignment.BASELINE);
-            dateRangeComponent.addClassName(LumoUtility.Gap.XSMALL);
-
-            return dateRangeComponent;
-        }
-
-        @Override
-        public Predicate toPredicate(Root<SamplePerson> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-            List<Predicate> predicates = new ArrayList<>();
-
-            if (!name.isEmpty()) {
-                String lowerCaseFilter = name.getValue().toLowerCase();
-                Predicate firstNameMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")),
-                        lowerCaseFilter + "%");
-                Predicate lastNameMatch = criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")),
-                        lowerCaseFilter + "%");
-                predicates.add(criteriaBuilder.or(firstNameMatch, lastNameMatch));
-            }
-            if (!phone.isEmpty()) {
-                String databaseColumn = "phone";
-                String ignore = "- ()";
-
-                String lowerCaseFilter = ignoreCharacters(ignore, phone.getValue().toLowerCase());
-                Predicate phoneMatch = criteriaBuilder.like(
-                        ignoreCharacters(ignore, criteriaBuilder, criteriaBuilder.lower(root.get(databaseColumn))),
-                        "%" + lowerCaseFilter + "%");
-                predicates.add(phoneMatch);
-
-            }
-            if (startDate.getValue() != null) {
-                String databaseColumn = "dateOfBirth";
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(databaseColumn),
-                        criteriaBuilder.literal(startDate.getValue())));
-            }
-            if (endDate.getValue() != null) {
-                String databaseColumn = "dateOfBirth";
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(criteriaBuilder.literal(endDate.getValue()),
-                        root.get(databaseColumn)));
-            }
-            if (!occupations.isEmpty()) {
-                String databaseColumn = "occupation";
-                List<Predicate> occupationPredicates = new ArrayList<>();
-                for (String occupation : occupations.getValue()) {
-                    occupationPredicates
-                            .add(criteriaBuilder.equal(criteriaBuilder.literal(occupation), root.get(databaseColumn)));
-                }
-                predicates.add(criteriaBuilder.or(occupationPredicates.toArray(Predicate[]::new)));
-            }
-            if (!roles.isEmpty()) {
-                String databaseColumn = "role";
-                List<Predicate> rolePredicates = new ArrayList<>();
-                for (String role : roles.getValue()) {
-                    rolePredicates.add(criteriaBuilder.equal(criteriaBuilder.literal(role), root.get(databaseColumn)));
-                }
-                predicates.add(criteriaBuilder.or(rolePredicates.toArray(Predicate[]::new)));
-            }
-            return criteriaBuilder.and(predicates.toArray(Predicate[]::new));
-        }
-
-        private String ignoreCharacters(String characters, String in) {
-            String result = in;
-            for (int i = 0; i < characters.length(); i++) {
-                result = result.replace("" + characters.charAt(i), "");
-            }
-            return result;
-        }
-
-        private Expression<String> ignoreCharacters(String characters, CriteriaBuilder criteriaBuilder,
-                Expression<String> inExpression) {
-            Expression<String> expression = inExpression;
-            for (int i = 0; i < characters.length(); i++) {
-                expression = criteriaBuilder.function("replace", String.class, expression,
-                        criteriaBuilder.literal(characters.charAt(i)), criteriaBuilder.literal(""));
-            }
-            return expression;
-        }
-
+        layout.add(filterContainer, createGrid());
+        return layout;
     }
 
-    private Component createGrid() {
-        grid = new Grid<>(SamplePerson.class, false);
-        grid.addColumn("firstName").setAutoWidth(true);
-        grid.addColumn("lastName").setAutoWidth(true);
-        grid.addColumn("email").setAutoWidth(true);
-        grid.addColumn("phone").setAutoWidth(true);
-        grid.addColumn("dateOfBirth").setAutoWidth(true);
-        grid.addColumn("occupation").setAutoWidth(true);
-        grid.addColumn("role").setAutoWidth(true);
+    /*************************************************************************************
+     * VIEW ATTENDANCE GRID IMPLEMENTATION
+     *************************************************************************************/
 
-        grid.setItems(query -> samplePersonService.list(
-                PageRequest.of(query.getPage(), query.getPageSize(), VaadinSpringDataHelpers.toSpringDataSort(query)),
-                filters).stream());
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-        grid.addClassNames(LumoUtility.Border.TOP, LumoUtility.BorderColor.CONTRAST_10);
+    private Grid<AttendanceRecordsEntity> createGrid() {
+
+        grid.setClassName("view-attendance-grid");
+
+        // SET GRID COLUMNS
+        grid.addColumn(AttendanceRecordsEntity::getId).setHeader("NO.");
+        grid.addColumn(AttendanceRecordsEntity::getIndexNumber).setHeader("INDEX NUMBER");
+        grid.addColumn(AttendanceRecordsEntity::getFullname).setHeader("FULL NAME");
+        grid.addComponentColumn(item -> {return item.getPresentLabel();}).setHeader("PRESENT");
+        grid.addComponentColumn(item -> {return item.getAbscentLabel();}).setHeader("ABSENT");
+        grid.addComponentColumn(item -> {return item.getExcusedLabel();}).setHeader("EXCUSED");
+        grid.addComponentColumn(item -> {return item.getTotalAttendanceLabel();}).setHeader("TOTAL ATTENDANCE");
+
+        grid.getColumns().forEach(each -> each.setAutoWidth(true));
+        grid.getColumns().forEach(each -> each.setSortable(true));
+        grid.getColumns().forEach(each -> each.setTextAlign(ColumnTextAlign.START));
 
         return grid;
     }
 
-    private void refreshGrid() {
-        grid.getDataProvider().refreshAll();
-    }
+    /*************************************************************************************
+     * VIEW ATTENDANCE GRID IMPLEMENTATION
+     *************************************************************************************/
+    TimerTask task = new TimerTask() {
+        ProgressBar progressBar = new ProgressBar();
+        AtomicInteger counter = new AtomicInteger(3);
 
-}
+        @Override
+        public void run() {
+            progressBar.setIndeterminate(true);
+            progressBar.addThemeVariants(ProgressBarVariant.LUMO_SUCCESS);
+            counter.decrementAndGet();
+            progressBar.setVisible(counter.get() == 0);
+            System.out.println(counter.get());
+            if (counter.get() == 0) {
+                this.cancel();
+            }
+        }
+    };
+
+}// end of class...
