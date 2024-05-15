@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cass.data.ActivitiesEntity;
@@ -128,9 +129,10 @@ public class DAO extends Config {
     public Collection<StudentEntity> fetchActiveStudentsForAttendanceTable(String studentClass){
         Collection<StudentEntity> data = new ArrayList<>();
         try{
-            String query = "SELECT * FROM studentslist WHERE(status = 1 AND class = ?);";
-            prepare = getCon().prepareStatement(query);
-            prepare.setString(1, studentClass);
+            String query = "SELECT * FROM studentslist WHERE (status = 1)";
+            String query1 = "SELECT * FROM studentslist WHERE(status = 1 AND class = '"+studentClass+"');";
+            String preferedQuery = Objects.equals(studentClass, "All Classes") ? query : query1;
+            prepare = getCon().prepareStatement(preferedQuery);
             resultSet = prepare.executeQuery();
             while(resultSet.next()) {
                 int id = resultSet.getInt("id");
@@ -212,7 +214,8 @@ public class DAO extends Config {
                 (SELECT COUNT(*) FROM studentslist WHERE class = 'Network 2A') AS 'network2a_students',
                 (SELECT COUNT(*) FROM studentslist WHERE class = 'Network 3A') AS 'network3a_students',
                 (SELECT COUNT(*) FROM studentslist WHERE class = 'Network 2B') AS 'network2c_students',
-                (SELECT COUNT(*) FROM studentslist WHERE class = 'Network 3B') AS 'network3c_students'
+                (SELECT COUNT(*) FROM studentslist WHERE class = 'Network 3B') AS 'network3c_students',
+                 (SELECT COUNT(*) FROM studentslist WHERE class = 'BTECH Computer Sci') AS 'btech_students'
             FROM studentslist;
                     """;
             prepare = getCon().prepareStatement(query1);
@@ -225,6 +228,7 @@ public class DAO extends Config {
                 data.put("network2c_students", resultSet.getString("network2c_students"));
                 data.put("network3c_students", resultSet.getString("network3c_students"));
                 data.put("comp3_students", resultSet.getString("comp3_students"));
+                data.put("btech", resultSet.getString("btech_students"));
             }
             getCon().close();
         } catch (Exception e) {
@@ -236,10 +240,10 @@ public class DAO extends Config {
     public Collection<ActivitiesEntity> fetchStudentActivities() {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         try {
-            String query = "SELECT ar.id, rowNumber, indexNumber, fullname, activityType, programe, className, maximumScore, score, activityDate, dateCreated \n" + //
+            String query = "SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, programe, className, maximumScore, score, activityDate, dateCreated \n" + //
                     "\tFROM class_attendance.activity_records AS ar\n" + //
                     "\tINNER JOIN studentslist AS sl\n" + //
-                    "\tON ar.rowNumber = sl.id;";
+                    "\tON ar.rowNumber = sl.id WHERE(status = 1);";
             prepare = getCon().prepareStatement(query);
             resultSet = prepare.executeQuery();
             while (resultSet.next()) {
@@ -247,13 +251,14 @@ public class DAO extends Config {
                 String fullname = resultSet.getString("fullname");
                 String indexNumber = resultSet.getString("indexNumber");
                 int rowNo = resultSet.getInt("rowNumber");
-                String acivityType = resultSet.getString("activityType");
+                String title = resultSet.getString("title");
+                String activityType = resultSet.getString("activityType");
                 String programe = resultSet.getString("programe");
                 String studentClass = resultSet.getString("className");
                 double maxScore = resultSet.getDouble("maximumScore");
                 double score = resultSet.getDouble("score");
                 Date activityDate = resultSet.getDate("activityDate");
-                data.add(new ActivitiesEntity(id, fullname, indexNumber, studentClass, acivityType, activityDate, maxScore, score, rowNo, programe));
+                data.add(new ActivitiesEntity(id, fullname, indexNumber, studentClass, title, activityType, activityDate, maxScore, score, rowNo, programe));
             }
             getCon().close();
         } catch (Exception e) {

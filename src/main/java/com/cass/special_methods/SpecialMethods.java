@@ -14,11 +14,11 @@ public class SpecialMethods {
         selector.setItems(classes);
     }
     public static void setPrograme(Select<String> selector) {
-        String classes[] = {"SYSTEMS ANALYSIS & DESIGN", "ITCM", "IT PROJECT MANAGEMENT"};
+        String classes[] = {"SYSTEMS ANALYSIS & DESIGN", "ITCM"};
         selector.setItems(classes);
     }
     public static void setPrograme(ComboBox<String> selector) {
-        String classes[] = {"SYSTEMS A. & DESIGN", "ITCM", "IT PROJECT MANAGEMENT"};
+        String classes[] = {"SYSTEMS A. & DESIGN", "ITCM"};
         selector.setItems(classes);
     }
     public static void setDepartment(Select<String> selector) {
@@ -30,7 +30,7 @@ public class SpecialMethods {
         selector.setItems(classes);
     }
     public static void setJointClasses(ComboBox<String> selector) {
-        String classes[] = {"BTECH Computer Sci", "Computer Sci 2", "Computer Sci 3", "Network 2A", "Network 2B","Network 3A", "Network 3B"};
+        String classes[] = {"All Classes", "BTECH Computer Sci", "Computer Sci 2", "Computer Sci 3", "Network 2A", "Network 2B","Network 3A", "Network 3B"};
         selector.setItems(classes);
     }
     public static void setActivityTypes(ComboBox<String> selector) {

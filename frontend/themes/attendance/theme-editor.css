@@ -8,20 +8,19 @@ vaadin-combo-box::part(input-field) { font-size:var(--lumo-font-size-xxs); }
 
 vaadin-combo-box::part(label) { font-size:var(--lumo-font-size-xxs); }
 
-vaadin-date-picker-overlay vaadin-month-calendar::part(date) { font-size:var(--lumo-font-size-xs); }
+vaadin-date-picker-overlay vaadin-month-calendar::part(month-header) { font-size:var(--lumo-font-size-m); }
 
-vaadin-date-picker-overlay vaadin-month-calendar::part(month-header) { font-size:var(--lumo-font-size-s); }
-
-vaadin-date-picker::part(input-field) {
-  font-size:var(--lumo-font-size-s);
-  height:var(--lumo-size-m);
-}
+vaadin-date-picker::part(input-field) { font-size:var(--lumo-font-size-s); }
 
 vaadin-grid::part(body-cell) { font-size:var(--lumo-font-size-s); }
 
-vaadin-grid::part(even-row-cell) { background-color:rgba(230,228,228,0.51); }
+vaadin-grid::part(even-row-cell) { background-color:rgba(230,227,227,0.16); }
 
 vaadin-grid::part(header-cell) { --lumo-font-size-s:var(--lumo-font-size-xs); }
+
+vaadin-radio-group vaadin-radio-button { --vaadin-radio-button-size:var(--lumo-font-size-s); }
+
+vaadin-radio-group vaadin-radio-button[checked]::part(radio) { background-color:rgba(4,98,219,1); }
 
 vaadin-radio-group.manage-users-view-radio-group-1 vaadin-radio-button { --vaadin-radio-button-size:var(--lumo-font-size-xxs); }
 
@@ -31,14 +30,22 @@ vaadin-radio-group.manage-users-view-radio-group-1::part(helper-text) { font-siz
 
 vaadin-radio-group.manage-users-view-radio-group-1::part(label) { font-size:var(--lumo-font-size-xxs); }
 
+vaadin-radio-group::part(label) { font-size:var(--lumo-font-size-xxs); }
+
 vaadin-select vaadin-select-value-button>vaadin-select-item { font-size:var(--lumo-font-size-xxs); }
 
 vaadin-select-overlay vaadin-select-item { font-size:var(--lumo-font-size-s); }
 
 vaadin-select::part(label) { font-size:var(--lumo-font-size-xs); }
 
+vaadin-side-nav-item::part(item) { font-size:var(--lumo-font-size-xxs); }
+
 vaadin-side-nav-item>[slot="prefix"] { font-size:var(--lumo-font-size-xxs); }
 
 vaadin-side-nav-item[active]::part(item) { font-size:var(--lumo-font-size-xxs); }
 
 vaadin-side-nav-item[active]::part(toggle-button)::before { font-size:var(--lumo-font-size-xxs); }
+
+vaadin-side-nav-item[active]>[slot="prefix"] { font-size:var(--lumo-font-size-xxs); }
+
+vaadin-text-field::part(input-field) { font-size:var(--lumo-font-size-xs); }

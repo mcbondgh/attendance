@@ -20,7 +20,7 @@ import com.vaadin.flow.component.grid.Grid;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
-
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -77,7 +77,6 @@ public class ViewAttendanceView extends VerticalLayout {
      **************************************************************************************/
 
     private void requiredFields() {
-        startDatePicker.setRequired(true);
         startDatePicker.setInvalid(startDatePicker.isEmpty());
         endDatePicker.setRequired(true);
         endDatePicker.setInvalid(endDatePicker.isEmpty());
@@ -85,7 +84,6 @@ public class ViewAttendanceView extends VerticalLayout {
         programPicker.setInvalid(programPicker.isEmpty());
         programPicker.setRequired(true);
         classPicker.setRequired(true);
-
     }
 
     private void isFieldEmpty(Button button) {
@@ -123,6 +121,7 @@ public class ViewAttendanceView extends VerticalLayout {
 
         // LOAD TABLE DATA
         generateButton.addClickListener(click -> {
+
             // Timer timer = new Timer();
             // timer.scheduleAtFixedRate(task, 1000, 1000);
             Date start = Date.valueOf(startDatePicker.getValue());
@@ -130,7 +129,26 @@ public class ViewAttendanceView extends VerticalLayout {
             LoadTableGrid.loadTable(
                     grid,
                     DAO_OBJECT.fetchAttendanceRecords(start, end, classPicker.getValue(), programPicker.getValue()));
+            AtomicInteger presentCounter = new AtomicInteger(0);
+            AtomicInteger abscentCounter = new AtomicInteger(0);
+            AtomicInteger excusedCounter = new AtomicInteger(0);
+
+            grid.getListDataView().getItems().forEach(eachItem -> {
+                if (eachItem.getPresent() >= 1) {
+                    presentCounter.incrementAndGet();
+                }
+                if (eachItem.getAbscent() >= 1) {
+                    abscentCounter.incrementAndGet();
+                }
+                if (eachItem.getExcused() >= 1) {
+                    excusedCounter.incrementAndGet();
+                }
+            });
+            grid.getColumnByKey("absentColumn").setFooter(new Span("TOTAL: " + abscentCounter.get()));
+            grid.getColumnByKey("presentColumn").setFooter(new Span("TOTAL: " + presentCounter.get()));
+            grid.getColumnByKey("excusedColumn").setFooter(new Span("TOTAL: " + excusedCounter.get()));
         });
+
 
         return layout;
     }
@@ -181,9 +199,9 @@ public class ViewAttendanceView extends VerticalLayout {
         grid.addColumn(AttendanceRecordsEntity::getId).setHeader("NO.");
         grid.addColumn(AttendanceRecordsEntity::getIndexNumber).setHeader("INDEX NUMBER");
         grid.addColumn(AttendanceRecordsEntity::getFullname).setHeader("FULL NAME");
-        grid.addComponentColumn(item -> {return item.getPresentLabel();}).setHeader("PRESENT");
-        grid.addComponentColumn(item -> {return item.getAbscentLabel();}).setHeader("ABSENT");
-        grid.addComponentColumn(item -> {return item.getExcusedLabel();}).setHeader("EXCUSED");
+        grid.addComponentColumn(item -> {return item.getPresentLabel();}).setHeader("PRESENT").setKey("presentColumn");
+        grid.addComponentColumn(item -> {return item.getAbscentLabel();}).setHeader("ABSENT").setKey("absentColumn");
+        grid.addComponentColumn(item -> {return item.getExcusedLabel();}).setHeader("EXCUSED").setKey("excusedColumn");
         grid.addComponentColumn(item -> {return item.getTotalAttendanceLabel();}).setHeader("TOTAL ATTENDANCE");
 
         grid.getColumns().forEach(each -> each.setAutoWidth(true));
@@ -199,6 +217,7 @@ public class ViewAttendanceView extends VerticalLayout {
     TimerTask task = new TimerTask() {
         ProgressBar progressBar = new ProgressBar();
         AtomicInteger counter = new AtomicInteger(3);
+        
 
         @Override
         public void run() {

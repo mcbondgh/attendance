@@ -12,7 +12,6 @@ public class LoadTableGrid {
         GridListDataView<T> data = tableName.setItems(dataCollection);
         return data;
     }
-
     public static <T> GridListDataView<T> loadTable(Grid<T> tableName, Collection<T> dataCollection) {
         GridListDataView<T> data = tableName.setItems(dataCollection);
         return data;

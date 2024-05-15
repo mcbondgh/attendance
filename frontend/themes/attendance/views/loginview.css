@@ -7,7 +7,7 @@
 .login-main-div {
     margin: auto;
     margin-top:70px;
-    border: 1px solid rgb(223, 223, 223);
+    border: 1px solid rgb(234, 234, 234);
     width: 300px;
     box-shadow:rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     border-radius: 5px;
@@ -15,6 +15,14 @@
 
 .login-div {
     padding: 10px;
+}
+
+.login-footer-text {
+    font-size: small;
+    text-align: center;
+    margin-top: 18px;
+    margin-bottom: -15px;
+    color: rgb(97, 97, 97);
 }
 
 .login-input-div {
@@ -43,6 +51,12 @@
     font-size: small;
     padding: 2px;
 }
+
+.login-footer-text {
+    
+}
+
+
 
 
 @media screen and (max-width:760px) {

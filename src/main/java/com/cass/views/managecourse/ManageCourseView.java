@@ -54,7 +54,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
 import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Manage Course")
-@Route(value = "manage-course", layout = MainLayout.class)
+@Route(value = "activities", layout = MainLayout.class)
 // @RolesAllowed({ "ADMIN", "USERS" })
 @AnonymousAllowed
 @Uses(Icon.class)
@@ -67,6 +67,7 @@ public class ManageCourseView extends Composite<VerticalLayout> {
     private ComboBox<String> activitySelector = new ComboBox<>("Activity Type");
     private DatePicker datePicker = new DatePicker("Activity Date");
     private ComboBox<String> classSelector = new ComboBox<>("Calss");
+    private TextField titleField = new TextField("Title");
     private ComboBox<String> programeSelector = new ComboBox<>("Programe");
     private NumberField maxScoreField = new NumberField("Maximum Score");
     private Button toggleButton = new Button(" Add Activity");
@@ -93,13 +94,14 @@ public class ManageCourseView extends Composite<VerticalLayout> {
         programeSelector.setInvalid(programeSelector.isEmpty());
         activitySelector.setRequired(true);
         activitySelector.setInvalid(activitySelector.isEmpty());
+        titleField.setInvalid(titleField.isEmpty());
     }
 
     private void checkForEmptyFields(Component component) {
         component.getElement().addEventListener("mousemove", callBack -> {
             UI.getCurrent().access(() -> {
                 createActivityButton.setEnabled(
-                        !(datePicker.isInvalid() || maxScoreField.isEmpty() || activitySelector.isInvalid() ||
+                        !(datePicker.isInvalid() || titleField.isInvalid() || maxScoreField.isEmpty() || activitySelector.isInvalid() ||
                                 classSelector.isInvalid() || programeSelector.isInvalid()));
             });
         });
@@ -167,7 +169,7 @@ public class ManageCourseView extends Composite<VerticalLayout> {
         // }
         // });
 
-        formlayout.add(datePicker, activitySelector, classSelector, programeSelector, maxScoreField, new Hr(),
+        formlayout.add(datePicker, titleField, activitySelector, classSelector, programeSelector, maxScoreField, new Hr(),
                 createActivityButton);
 
         layout.add(headerText, formlayout);
@@ -272,6 +274,7 @@ public class ManageCourseView extends Composite<VerticalLayout> {
                         entity.setMaximumScore(maxScoreField.getValue());
                         entity.setActivityDate(Date.valueOf(datePicker.getValue()));
                         entity.setScore(item.getScoreField().getValue());
+                        entity.setActivityTitle(titleField.getValue());
                         counter.addAndGet(new ActivityService().saveAcademicActivity(entity));
                     });
                     if(counter.get() > 1) {

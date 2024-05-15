@@ -212,6 +212,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
             //<theme-editor-local-classname>
             studentClass.addClassName("add-student-view-select-3");
             Button updateButton = new Button("Update");
+            Button removeButton = new Button("Remove");
 
 
             //set component class names
@@ -221,8 +222,8 @@ public class AddStudentView extends Composite<VerticalLayout> {
             checkbox.setValue(student.getStatus() == 1 ? "active" : "inactive");
             studentClass.setLabel("Class");
             checkbox.setLabel("Student Status");
-            updateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            updateButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            updateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+            removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
             
             SpecialMethods.setClasses(studentClass);
 
@@ -238,11 +239,12 @@ public class AddStudentView extends Composite<VerticalLayout> {
         
             form.setResponsiveSteps(
                     new FormLayout.ResponsiveStep("0", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP),
-                    new FormLayout.ResponsiveStep("600px", 3, FormLayout.ResponsiveStep.LabelsPosition.TOP)
+                    new FormLayout.ResponsiveStep("600px", 4, FormLayout.ResponsiveStep.LabelsPosition.TOP)
             );
 
-            form.setColspan(div1, 3);
-            form.add(div1, nameField, studentNumberField, rowNumber, studentClass,  checkbox, updateButton);
+            form.setColspan(div1, 4);
+            form.setColspan(nameField, 2);
+            form.add(div1, nameField, studentNumberField, rowNumber, studentClass,  checkbox, updateButton, removeButton);
 
             //ACTION EVENTS 
             updateButton.addClickListener(event -> {
@@ -265,11 +267,22 @@ public class AddStudentView extends Composite<VerticalLayout> {
                                 new UserConfirmDialogs().showSuccess("Nice, Student data successfully updated.");
                                 studentsTable.getListDataView().refreshAll();
                                 LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue()));
-                                
                             });
                         }
                     });
                 }
+            });
+
+            //REMOVE STUDENT BUTTON CLICKED
+            removeButton.addClickListener(event -> {
+                UserConfirmDialogs confirmDialogs = new UserConfirmDialogs();
+               new UserConfirmDialogs("REMOVE STUDENT", "By confirming, this student shall be permanently removed from the class list. Do you wish to continue?").saveDialog().addConfirmListener(confirmEvent -> {
+                int responseStatus = STUDENT_SERVICE_OBJ.removeStudent(Integer.parseInt(rowNumber.getValue()));
+                if (responseStatus > 0) {
+                    confirmDialogs.showSuccess("NICE, Student successfully removed from class list.");
+                    LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue()));
+                }
+               });
             });
             return form;
         });
@@ -287,6 +300,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         departmentSelector.setEmptySelectionAllowed(false);
         studentNumberField.setInvalid(studentNumberField.isEmpty());
         fullnameField.setInvalid(fullnameField.isEmpty());
+    
 
         departmentSelector.setItems("Computer Science");
 
@@ -351,6 +365,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         studentFormDialog.setCloseOnOutsideClick(false);
         studentFormDialog.getHeader().add(hLayout);
         studentFormDialog.getFooter().add(saveStudentButton, earaseButton);
+        studentFormDialog.setDraggable(true);
 
         close.addClickListener(event -> {
             studentFormDialog.close();

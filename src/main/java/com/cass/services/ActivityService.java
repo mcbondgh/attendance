@@ -11,17 +11,18 @@ public class ActivityService extends DAO {
         AtomicInteger status = new AtomicInteger();
         try {
             String query = """
-                INSERT INTO activity_records(rowNumber, activityType, programe, className, maximumScore, score, activityDate)
-                VALUES(?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO activity_records(rowNumber, title, activityType, programe, className, maximumScore, score, activityDate)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?);
             """;
             prepare = getCon().prepareStatement(query);
             prepare.setInt(1, entity.getRowNumber());
-            prepare.setString(2, entity.getActivityType());
-            prepare.setString(3, entity.getPrograme());
-            prepare.setString(4, entity.getClassName());
-            prepare.setDouble(5, entity.getMaximumSocre());
-            prepare.setDouble(6, entity.getScore());
-            prepare.setDate(7, entity.getActivityDate());
+            prepare.setString(2, entity.getActivityTitle());
+            prepare.setString(3, entity.getActivityType());
+            prepare.setString(4, entity.getPrograme());
+            prepare.setString(5, entity.getClassName());
+            prepare.setDouble(6, entity.getMaximumSocre());
+            prepare.setDouble(7, entity.getScore());
+            prepare.setDate(8, entity.getActivityDate());
             status.set(prepare.executeUpdate());
             getCon().close();
         } catch (SQLException igonre) { igonre.printStackTrace();

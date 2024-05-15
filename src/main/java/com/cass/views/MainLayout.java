@@ -38,7 +38,6 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
  * The main view is a top-level placeholder for other views.
  */
 public class MainLayout extends AppLayout implements BeforeEnterObserver {
-
     private H2 viewTitle;
     private H6 userNameLabel = new H6();
 
@@ -82,7 +81,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
             nav.addItem(new SideNavItem("View Attendance", ViewAttendanceView.class,
                     LineAwesomeIcon.FILTER_SOLID.create()));
             nav.addItem(
-                    new SideNavItem("Add Student", AddStudentView.class, LineAwesomeIcon.PLUS_CIRCLE_SOLID.create()));
+                    new SideNavItem("Manage Students", AddStudentView.class, LineAwesomeIcon.PLUS_CIRCLE_SOLID.create()));
             nav.addItem(new SideNavItem("Manage Activities", ManageCourseView.class, LineAwesomeIcon.USER.create()));
             nav.addItem(
                     new SideNavItem("Manage Users", ManageUsersView.class, LineAwesomeIcon.USERS_COG_SOLID.create()));
@@ -114,7 +113,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         avatar.setImage("icons/user-100.png");
         avatar.setClassName("avatar");
         menuItem.addComponentAsFirst(avatar);
-        Anchor signoutLink = new Anchor("javascript:void(0)", "sign Out");
+        Anchor signoutLink = new Anchor("javascript:void(0)", "sign out");
         signoutLink.setWidthFull();
 
         //logout user...

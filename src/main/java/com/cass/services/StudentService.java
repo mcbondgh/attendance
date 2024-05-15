@@ -1,6 +1,7 @@
 package com.cass.services;
 
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cass.data.AttendanceEntity;
 import com.cass.data.StudentEntity;
@@ -68,6 +69,17 @@ public class StudentService extends DAO{
         }catch(SQLException ignore){ignore.printStackTrace();}
 
         return status;
+    }
+
+    public int removeStudent(int studentRowNumber) {
+        AtomicInteger responseStatus = new AtomicInteger();
+        try {
+            String query = "DELETE FROM studentslist WHERE id = '"+studentRowNumber+"'";
+            prepare = getCon().prepareStatement(query);
+            responseStatus.getAndSet(prepare.executeUpdate());
+            getCon().close();
+        }catch (SQLException ignore){};
+        return responseStatus.get();
     }
     
     

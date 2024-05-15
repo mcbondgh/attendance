@@ -2,6 +2,7 @@ package com.cass.dialogs;
 
 import java.time.Duration;
 
+import com.vaadin.flow.component.notification.NotificationVariant;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.vaadin.flow.component.button.Button;
@@ -66,13 +67,18 @@ public class UserConfirmDialogs {
     public void showError(String message) {
         HorizontalLayout layout = new HorizontalLayout();
         Span span = new Span(message);
+        span.getStyle().setFontSize("12");
+        span.getStyle().setFont("poppins");
+        String backgroundColor = "#ff0000";
         layout.add(VaadinIcon.EXCLAMATION_CIRCLE_O.create(), span);
         layout.setBoxSizing(BoxSizing.BORDER_BOX);
+        layout.setWidthFull();
         layout.setAlignItems(Alignment.CENTER);
         layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
         notify.setPosition(Position.TOP_END);
-        layout.getStyle().setColor("RED");
+        notify.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        layout.getStyle().setColor("#ffff");
         notify.setDuration(3000);
         notify.add(layout);
         notify.open();

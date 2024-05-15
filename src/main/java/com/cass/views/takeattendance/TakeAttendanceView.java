@@ -187,12 +187,13 @@ public class TakeAttendanceView extends VerticalLayout {
                 }
                 boolean matchesName = filter.getFullName().toLowerCase().contains(value.getValue().toLowerCase());
                 boolean matchesIndex = filter.getIndexNumber().toLowerCase().contains(value.getValue().toLowerCase());
-                return matchesName || matchesIndex;
+                boolean matchesRowNo = String.valueOf(filter.getId()).contains(value.getValue());
+                return matchesName || matchesIndex || matchesRowNo;
             });
             attendanceTable.getListDataView().refreshAll();
         });
 
-        // ADD EVENT LISTNER TO SAVE BUTTO TO ITERATE THROUGH TABLE AND GET ALL VALUES
+        // ADD EVENT LISTENER TO SAVE BUTTON TO ITERATE THROUGH TABLE AND GET ALL VALUES
         saveAttendanceBtn.addClickListener(event -> {
             boolean isTableEmpty = attendanceTable.getListDataView().getItemCount() == 0;
             if (isTableEmpty) {
@@ -207,7 +208,7 @@ public class TakeAttendanceView extends VerticalLayout {
                         attendanceTable.getListDataView().getItems().forEach(each -> {
 
                             Date date = Date.valueOf(datePicker.getValue());
-                            String attendanceValue = each.getAttendanceButton().getValue();
+                            String attendanceValue = each.getAttendanceButton().isEmpty() ? "A" : each.getAttendanceButton().getValue();
                             entity.setRowNumber(each.getId());
                             entity.setIndexNumber(each.getIndexNumber());
                             entity.setclassName(each.getStudentClass());
@@ -229,7 +230,6 @@ public class TakeAttendanceView extends VerticalLayout {
                         }
                     });
             }
-            
         });
         return layout;
     }

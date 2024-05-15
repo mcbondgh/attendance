@@ -10,6 +10,7 @@ import com.vaadin.flow.dom.Style.TextAlign;
 public class ActivitiesEntity {
     private int id;
     private String indexNumber, name, className, activityType;
+    private String activityTitle;
     private Date activityDate;
     private double maximumScore, score;
     private String fullname;
@@ -33,21 +34,23 @@ public class ActivitiesEntity {
 
     
 
-    public ActivitiesEntity(String activityType, double maximumScore, double score, String programe) {
+    public ActivitiesEntity(String activityType, String activityTitle, Date activityDate, double maximumScore, double score, String programe) {
         this.activityType = activityType;
+        this.activityTitle = activityTitle;
+        this.activityDate = activityDate;
         this.maximumScore = maximumScore;
         this.score = score;
         this.programe = programe;
     }
 
-
-    public ActivitiesEntity(int id, String fullname, String indexNumber,String className, String activityType, Date activityDate, double maximumScore,
+    public ActivitiesEntity(int id, String fullname, String indexNumber,String className, String title, String activityType, Date activityDate, double maximumScore,
             double score, int rowNo, String programe) {
         this.id = id;
         this.className = className;
         this.fullname = fullname;
         this.indexNumber = indexNumber;
         this.activityType = activityType;
+        this.activityTitle = title;
         this.activityDate = activityDate;
         this.maximumScore = maximumScore;
         this.score = score;
@@ -102,6 +105,16 @@ public class ActivitiesEntity {
 
     public String getFullname() {
         return fullname;
+    }
+
+
+    public String getActivityTitle() {
+        return activityTitle;
+    }
+
+
+    public void setActivityTitle(String activityTitle) {
+        this.activityTitle = activityTitle;
     }
 
 

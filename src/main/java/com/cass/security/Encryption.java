@@ -13,4 +13,5 @@ public class Encryption {
         byte[] hashedByte = decoder.decode(hashCode);
         return new String(hashedByte);
     }
+
 }

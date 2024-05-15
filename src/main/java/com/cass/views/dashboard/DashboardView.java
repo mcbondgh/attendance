@@ -60,21 +60,21 @@ public class DashboardView extends VerticalLayout {
         HorizontalLayout hLayout = new HorizontalLayout();
 
         FormLayout layout = new FormLayout();
-        Span title1 = new Span("TOTAL PROGRAMES");
+        Span title1 = new Span("BTech Computer Sci");
         Span title2 = new Span("TOTAL STUDENT");
         Span title3 = new Span("TOTAL CLASSES");
-        Span title4 = new Span("Computer Science 2 A&B");
-        Span title5 = new Span("Network 2 A&B");
-        Span title6 = new Span("Network 2 C&D");
-        Span title7 = new Span("Computer Science 3 A&B");
-        Span title8 = new Span("Network 3 A&B");
-        Span title9 = new Span("Network 3 C&D");
+        Span title4 = new Span("Computer Science 2");
+        Span title5 = new Span("Network 2A");
+        Span title6 = new Span("Network 2B");
+        Span title7 = new Span("Computer Science 3");
+        Span title8 = new Span("Network 3A");
+        Span title9 = new Span("Network 3B");
 
-        H5 content1 = new H5("3");
+        H5 content1 = new H5(dataCounter.get("btech").toString());
         content1.addComponentAsFirst(LineAwesomeIcon.PROJECT_DIAGRAM_SOLID.create());
         H5 content2 = new H5(dataCounter.get("totalStudents").toString());
         content2.addComponentAsFirst(LineAwesomeIcon.GRADUATION_CAP_SOLID.create());
-        H5 content3 = new H5("6");
+        H5 content3 = new H5("7");
         content3.addComponentAsFirst(LineAwesomeIcon.SCHOOL_SOLID.create());
         H5 content4 = new H5(dataCounter.get("comp2_students").toString());
         H5 content5 = new H5(dataCounter.get("network2a_students").toString());
@@ -93,7 +93,7 @@ public class DashboardView extends VerticalLayout {
         Div div8 = new Div(title8, content8);
         Div div9 = new Div(title9, content9);
         
-        layout.add(div1, div3, div2, div4, div5, div6, div7, div8, div9);
+        layout.add(div2, div3, div1, div4, div5, div6, div7, div8, div9);
 
         layout.setClassName("dashboard-form-layout");
 
@@ -101,7 +101,6 @@ public class DashboardView extends VerticalLayout {
             new FormLayout.ResponsiveStep("0", 1),
             new FormLayout.ResponsiveStep("600px", 3)
         );
-        
         return layout;
      }
 

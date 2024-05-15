@@ -1,24 +1,23 @@
 package com.cass.views.managecourse;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.avatar.AvatarVariant;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.server.AbstractStreamResource;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.cass.data.ActivitiesEntity;
-import com.cass.data.LoadTableGrid;
 import com.cass.data.StudentEntity;
 import com.cass.dialogs.UserConfirmDialogs;
 import com.cass.services.ActivityService;
-import com.cass.services.DAO;
 import com.cass.special_methods.SpecialMethods;
 import com.cass.views.MainLayout;
-import com.flowingcode.vaadin.addons.gridexporter.GridExporter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -29,9 +28,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.H5;
-import com.vaadin.flow.component.html.H6;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.listbox.ListBox;
@@ -39,15 +36,12 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.virtuallist.VirtualList;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-import jakarta.annotation.security.RolesAllowed;
+import javax.imageio.stream.ImageInputStream;
 
 @PageTitle("View Activity")
 @Route(value = "view-activity", layout = MainLayout.class)
@@ -55,8 +49,8 @@ import jakarta.annotation.security.RolesAllowed;
 @AnonymousAllowed
 @Uses(Icon.class)
 public class ActivitiesView extends VerticalLayout {
-    private Grid<StudentEntity> studentGrid = new Grid<>();
-    private ActivityService SERVICE_OBJ = new ActivityService();
+    private final Grid<StudentEntity> studentGrid = new Grid<>();
+    private final ActivityService SERVICE_OBJ = new ActivityService();
 
     public ActivitiesView() {
         add(renderPageHeader(), renderPageView());
@@ -165,7 +159,7 @@ public class ActivitiesView extends VerticalLayout {
         studentGrid.setWidthFull();
         studentGrid.addClassName("grid-layout");
         // set grid columns
-        studentGrid.addComponentColumn(compnent -> {return renderAvatar();});
+        studentGrid.addComponentColumn(component -> renderAvatar());
         studentGrid.addColumn(StudentEntity::getId).setHeader("ROW NUMBER").setClassName("row-number");
         studentGrid.addColumn(StudentEntity::getFullName).setHeader("NAME");
         studentGrid.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER");
@@ -210,7 +204,8 @@ public class ActivitiesView extends VerticalLayout {
 
     private Component renderAvatar() {
         Avatar avator = new Avatar();
-        avator.setImage("icons/student-icon.png");
+        avator.setImage("/icons/user-100.png");
+        avator.addThemeVariants(AvatarVariant.LUMO_SMALL);
         avator.setClassName("activity-view-avator");
         return avator;
     }
@@ -227,7 +222,7 @@ public class ActivitiesView extends VerticalLayout {
         return button;
     }
 
-    private Component renderDialogView(int studentIndex) {
+    private void renderDialogView(int studentIndex) {
         Dialog dialog = new Dialog();
         Grid<ActivitiesEntity> grid = new Grid<>();
         dialog.setHeaderTitle("STUDENT RECORD");
@@ -241,13 +236,16 @@ public class ActivitiesView extends VerticalLayout {
         indexNumberField.setReadOnly(isAttached());
         
         
-        grid.addColumn(ActivitiesEntity::getPrograme).setHeader("PROGRAME");
+        grid.addColumn(ActivitiesEntity::getPrograme).setHeader("PROGRAM");
+        grid.addColumn(ActivitiesEntity::getActivityTitle).setHeader("TITLE");
         grid.addColumn(ActivitiesEntity::getActivityType).setHeader("ACTIVITY TYPE");
+        grid.addColumn(ActivitiesEntity::getActivityDate).setHeader("ENTRY DATE");
         grid.addColumn(ActivitiesEntity::getScore).setHeader("SCORE").setKey("score");
         grid.addColumn(ActivitiesEntity::getmaximumScore).setHeader("MAX SCORE").setKey("max");
         grid.getColumns().forEach(each -> each.setAutoWidth(true));
 
         FlexLayout vLayout = new FlexLayout(nameField, indexNumberField);
+        vLayout.setWidthFull();
 
         grid.addClassName("activity-view-dialog-grid");
         vLayout.setClassName("activity-view-dialog-vlayout");
@@ -256,6 +254,7 @@ public class ActivitiesView extends VerticalLayout {
                 
         dialog.add(vLayout, grid);
         dialog.setResizable(isAttached());
+        dialog.setWidth("900px");
         dialog.setDraggable(true);
         
         //load grid based on selected student
@@ -267,19 +266,16 @@ public class ActivitiesView extends VerticalLayout {
               nameField.setValue(item.getFullname());
               indexNumberField.setValue(item.getIndexNumber());
                 data.add(new ActivitiesEntity(
-                    item.getActivityType(), item.getmaximumScore(), item.getScore(), item.getPrograme()
+                    item.getActivityType(), item.getActivityTitle(), item.getActivityDate(), item.getmaximumScore(), item.getScore(), item.getPrograme()
                 )); 
                 totalScore += item.getScore(); 
                 maxScore += item.getmaximumScore();  
             }           
         }
-
-        
         grid.getColumnByKey("score").setFooter("Total Score: " + totalScore);
         grid.getColumnByKey("max").setFooter("Max Marks: " + maxScore);
         grid.setItems(data);
         dialog.open();
-        return dialog;
     }
 
 }// end of class...

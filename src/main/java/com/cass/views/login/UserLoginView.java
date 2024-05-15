@@ -1,5 +1,8 @@
 package com.cass.views.login;
 
+import com.cass.dialogs.UserConfirmDialogs;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.UI;
 
 import java.util.Map;
@@ -29,7 +32,7 @@ import com.vaadin.flow.router.RouteAlias;
 import jakarta.annotation.security.PermitAll;
 
 @PageTitle("login")
-@Route(value = "userlogin")
+@Route(value = "login")
 @RouteAlias(value = "")
 // @PermitAll
 public class UserLoginView extends VerticalLayout{
@@ -48,9 +51,11 @@ public class UserLoginView extends VerticalLayout{
         Paragraph paragraph = new Paragraph("Login to the attendance sheet");
         Button loginBtn = new Button("Login");
         Span errorText = new Span(" Invalid Username or password");
+        Span footerText = new Span("Powered by Mc's Republic");
+        footerText.addClassName("login-footer-text");
         
         Div div1 = new Div(title, paragraph);
-        Div div2 = new Div(usernameField, passwordField, new Hr(), loginBtn);
+        Div div2 = new Div(usernameField, passwordField, new Hr(), loginBtn, footerText);
         Div errorDiv = new Div(LineAwesomeIcon.EXCLAMATION_CIRCLE_SOLID.create(), errorText);
         Div mainDiv = new Div(div1, errorDiv, div2);
 
@@ -72,13 +77,14 @@ public class UserLoginView extends VerticalLayout{
         passwordField.setInvalid(passwordField.isEmpty());
         errorDiv.setVisible(isAttached());
 
-        usernameField.setErrorMessage("required field");
-        passwordField.setErrorMessage("required field");
+        // usernameField.setErrorMessage("required field");
+        // passwordField.setErrorMessage("required field");
 
         layout.setSizeFull();
-
+       
         layout.add(mainDiv);
 
+        loginBtn.addClickShortcut(Key.ENTER);
         loginBtn.addClickListener(click -> {
            boolean usernameAndPassEmpty = usernameField.isEmpty() || passwordField.isEmpty();
            if (usernameAndPassEmpty) {
@@ -99,12 +105,13 @@ public class UserLoginView extends VerticalLayout{
 
 
     /*********************************************************************
-     * AUTHENTICA USER TO GRANT OR DINY ACCESS
+     * AUTHENTICATE USER TO GRANT OR DINY ACCESS
      *********************************************************************/
     private boolean authenticateUser(String username, String password) {
         boolean resultStatus = false;
-        Map<String, String> userData = DAO_OBJECT.getUsersByUsername(username);
-        try {            
+        try {
+            Map<String, String> userData = DAO_OBJECT.getUsersByUsername(username);
+
             if(userData.isEmpty()) {
                 return resultStatus;
             }
@@ -121,7 +128,9 @@ public class UserLoginView extends VerticalLayout{
                     resultStatus = true;
                 }
             }
-        }catch(NullPointerException ignore){}
+        }catch(NullPointerException ignore){
+            new UserConfirmDialogs().showError("Database Connection Failed, please check connection..");
+        }
 
         return resultStatus;
 
