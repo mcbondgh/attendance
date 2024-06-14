@@ -6,7 +6,7 @@
     <groupId>com.cass</groupId>
     <artifactId>Attendance</artifactId>
     <name>Class Attendance</name>
-    <version>1.4</version>
+    <version>1.5</version>
     <packaging>jar</packaging>
     <properties>
         <java.version>17</java.version>
@@ -73,22 +73,34 @@
             <artifactId>line-awesome</artifactId>
             <version>2.0.0</version>
         </dependency>
-
-           <dependency>
+        <dependency>
             <groupId>org.vaadin.addons.flowingcode</groupId>
             <artifactId>grid-exporter-addon</artifactId>
             <version>2.2.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-security</artifactId>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/itext7-core -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>8.0.2</version>
+            <type>pom</type>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-csv -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.10.0</version>
         </dependency>
 
         <dependency>
@@ -117,6 +129,7 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>8.2.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -127,7 +140,11 @@
             <artifactId>vaadin-testbench-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-        
+<!--        <dependency>-->
+<!--            <groupId>com.byteowls</groupId>-->
+<!--            <artifactId>vaadin-chartjs</artifactId>-->
+<!--            <version>7.1.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.vaadin.reportui</groupId>
             <artifactId>report-ui</artifactId>
@@ -240,6 +257,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

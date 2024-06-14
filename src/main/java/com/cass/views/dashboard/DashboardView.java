@@ -25,7 +25,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
-// @RouteAlias(value = "dashboard", layout = MainLayout.class)
+ @RouteAlias(value = "dashboard")
 @AnonymousAllowed
 public class DashboardView extends VerticalLayout {
 

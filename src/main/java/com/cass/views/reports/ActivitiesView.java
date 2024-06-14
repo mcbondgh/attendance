@@ -1,15 +1,11 @@
-package com.cass.views.managecourse;
+package com.cass.views.reports;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Stream;
 
-import com.vaadin.flow.component.Unit;
+import com.cass.views.managecourse.ManageCourseView;
 import com.vaadin.flow.component.avatar.AvatarVariant;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.server.AbstractStreamResource;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.cass.data.ActivitiesEntity;
@@ -41,8 +37,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-import javax.imageio.stream.ImageInputStream;
-
 @PageTitle("View Activity")
 @Route(value = "view-activity", layout = MainLayout.class)
 // @RolesAllowed({ "ADMIN", "USERS" })
@@ -67,7 +61,7 @@ public class ActivitiesView extends VerticalLayout {
         layout.addClassNames("dashboard-header-container", "view-header-container");
         headerTitle.setClassName("dashboard-header-text");
         viewButton.addClassName("activity-button");
-        viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.MATERIAL_OUTLINED);
+        viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
 
         layout.add(headerTitle, viewButton);
 
@@ -85,15 +79,19 @@ public class ActivitiesView extends VerticalLayout {
         VerticalLayout layout = new VerticalLayout();
         ComboBox<String> classPicker = new ComboBox<>("Select Class");
         TextField filterField = new TextField();
+        ComboBox<String> semesterSelector = new ComboBox<>("Select Semester");
         ListBox<ActivitiesEntity> listView = new ListBox<>();
         Button loadButton = new Button("Load Students");
 
         SpecialMethods.setClasses(classPicker);
+        SpecialMethods.setSemester(semesterSelector);
         loadButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
         loadButton.setWidthFull();
         classPicker.setRequired(true);
         filterField.setWidthFull();
         classPicker.setWidthFull();
+        semesterSelector.setWidthFull();
+        semesterSelector.setRequired(true);
 
         // set component class names
         layout.setClassName("list-view-container");
@@ -106,7 +104,7 @@ public class ActivitiesView extends VerticalLayout {
         filterField.setPlaceholder("filter by index number");
 
         layout.setWidthFull();
-        layout.add(classPicker, loadButton, filterField);
+        layout.add(classPicker, semesterSelector, loadButton, filterField);
 
         // check and disable 'load button' if 'classPicker' is empty
         layout.getElement().addEventListener("mousemove", callBack -> {

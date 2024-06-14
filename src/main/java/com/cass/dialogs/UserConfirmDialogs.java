@@ -67,7 +67,7 @@ public class UserConfirmDialogs {
     public void showError(String message) {
         HorizontalLayout layout = new HorizontalLayout();
         Span span = new Span(message);
-        span.getStyle().setFontSize("12");
+        span.getStyle().setFontSize("13px");
         span.getStyle().setFont("poppins");
         String backgroundColor = "#ff0000";
         layout.add(VaadinIcon.EXCLAMATION_CIRCLE_O.create(), span);

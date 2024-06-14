@@ -32,8 +32,8 @@ import com.vaadin.flow.router.RouteAlias;
 import jakarta.annotation.security.PermitAll;
 
 @PageTitle("login")
-@Route(value = "login")
-@RouteAlias(value = "")
+@Route(value = "")
+@RouteAlias(value = "login")
 // @PermitAll
 public class UserLoginView extends VerticalLayout{
     DAO DAO_OBJECT = new DAO();
@@ -114,9 +114,7 @@ public class UserLoginView extends VerticalLayout{
 
             if(userData.isEmpty()) {
                 return resultStatus;
-            }
-
-            if(!userData.isEmpty()) {
+            } else {
                 String name = userData.get("username");
                 String passString = userData.get("password");
                 String roleId = userData.get("roleId");
@@ -131,7 +129,6 @@ public class UserLoginView extends VerticalLayout{
         }catch(NullPointerException ignore){
             new UserConfirmDialogs().showError("Database Connection Failed, please check connection..");
         }
-
         return resultStatus;
 
     }

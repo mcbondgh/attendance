@@ -83,7 +83,7 @@ public class TakeAttendanceView extends VerticalLayout {
 
         // LOAD SELECTORS.
         SpecialMethods.setPrograme(programSelector);
-        SpecialMethods.setJointClasses(classSelect);
+        SpecialMethods.setClasses(classSelect);
 
         // SET REQUIRED FIELDS
         datePicker.setRequired(true);
@@ -117,7 +117,7 @@ public class TakeAttendanceView extends VerticalLayout {
                     new UserConfirmDialogs().showError("You have empty fields, please fill all.");
                 } else if (SERVICE_OBJ.checkAttendanceByDate(date, programSelector.getValue(), classSelect.getValue())) {
                     new UserConfirmDialogs()
-                            .showError("Sorry Attendance for the specified date and Programe already recorded");
+                            .showError("Sorry Attendance for the specified date and Programme already recorded");
                 } else {
                     String studentClass = classSelect.getValue();
                     // loadTabelData(studentClass);

@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
  */
 @PWA(name = "Attendance", shortName = "AT", offlinePath = "offline.html")
 @SpringBootApplication
-@NpmPackage(value = "@fontsource/roboto", version = "4.5.0")
+//@NpmPackage(value = "@fontsource/poppins", version = "4.5.0")
 @Theme(value = "attendance")
 public class Application implements AppShellConfigurator {
 

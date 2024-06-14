@@ -10,11 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.cass.data.ActivitiesEntity;
-import com.cass.data.AttendanceEntity;
-import com.cass.data.AttendanceRecordsEntity;
-import com.cass.data.StudentEntity;
-import com.cass.data.UsersEntity;
+import com.cass.data.*;
 import com.cass.security.Config;
 
 public class DAO extends Config {
@@ -157,9 +153,9 @@ public class DAO extends Config {
             resultSet = prepare.executeQuery();
             if(resultSet.next()) {
                 int counter = resultSet.getInt(1);
-                result = counter > 0 ? true :false;
+                result = counter > 0;
             }
-            getCon().close();
+            prepare.close();
         }catch(SQLException ignore){ ignore.printStackTrace();}
         return result;
     }
@@ -173,7 +169,7 @@ public class DAO extends Config {
                     "                SUM(CASE WHEN attendanceValue = 'p' THEN 1 ELSE 0 END) AS present_count,\r\n" + //
                     "                SUM(CASE WHEN attendanceValue = 'a' THEN 1 ELSE 0 END) AS absent_count,\r\n" + //
                     "                SUM(CASE WHEN attendanceValue = 'excused' THEN 1 ELSE 0 END) AS excused_count,\r\n" + //
-                    "                COUNT(*) AS total_attendance\r\n" + //
+                    "                COUNT(*) AS total_attendance, attendanceDate\r\n" + //
                     "            FROM\r\n" + //
                     "                attendance_records AS ar\r\n" + //
                     "            INNER JOIN studentslist AS sl\r\n" + //
@@ -181,7 +177,7 @@ public class DAO extends Config {
                     "            WHERE\r\n" + //
                     "                attendanceDate BETWEEN ? AND ? AND programeName = ? AND className = ?\r\n" + //
                     "            GROUP BY\r\n" + //
-                    "                ar.indexNumber, fullName";
+                    "                ar.indexNumber, fullName, attendanceDate";
             prepare = getCon().prepareStatement(query);
             prepare.setDate(1, startDate);
             prepare.setDate(2, endDate);
@@ -197,7 +193,8 @@ public class DAO extends Config {
                 int absentCount = resultSet.getInt("absent_count");
                 int excusedCount = resultSet.getInt("excused_count");
                 int totalAttendance = resultSet.getInt("total_attendance");
-                data.add(new AttendanceRecordsEntity(index.incrementAndGet(), indexNumber, fullName, presentCount, absentCount, totalAttendance, excusedCount));
+                Date date = resultSet.getDate("attendanceDate");
+                data.add(new AttendanceRecordsEntity(index.incrementAndGet(), date, indexNumber, fullName, presentCount, absentCount, totalAttendance, excusedCount));
             }
             getCon().close();
         }catch(SQLException ignore) {}
@@ -279,6 +276,7 @@ public class DAO extends Config {
                 data.put("password", resultSet.getString("password"));
                 data.put("roleId", String.valueOf(resultSet.getInt("role_id")));
             }
+            getCon().close();
         }catch(SQLException ignore) {ignore.printStackTrace();}
 
 
@@ -298,11 +296,34 @@ public class DAO extends Config {
                 byte statusId = resultSet.getByte("status");
 
                 data.add(new UsersEntity(id, username, password, role, statusId));
-                getCon().close();
             }
-        }catch(SQLException ignore) {ignore.printStackTrace();}
+                getCon().close();
+        }catch(SQLException ignore) {
+            ignore.printStackTrace();
+        }
+        return data;
+    }
 
 
+    public Collection<StudentClassesEntity> getAllClasses() {
+        Collection<StudentClassesEntity> data = new ArrayList<>();
+        try {
+//            id, className, creditHours, department, dateCreated
+            String query = "SELECT * FROM student_classes;";
+            prepare = getCon().prepareStatement(query);
+            resultSet = prepare.executeQuery();
+            while(resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String className = resultSet.getString("className");
+                byte creditHours = resultSet.getByte("creditHours");
+                String dept = resultSet.getString("department");
+                boolean status = resultSet.getBoolean("status");
+                data.add(new StudentClassesEntity(id, className, creditHours, dept, status));
+            }
+            getCon().close();
+        }catch(SQLException ignore) {
+            ignore.printStackTrace();
+        }
         return data;
     }
 

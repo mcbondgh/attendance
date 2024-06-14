@@ -7,31 +7,26 @@ import com.cass.views.dashboard.DashboardView;
 import com.cass.views.login.UserLoginView;
 import com.cass.views.managecourse.ManageCourseView;
 import com.cass.views.manageusers.ManageUsersView;
-import com.cass.views.setup.SetUpView;
+import com.cass.views.reports.ReportsView;
 import com.cass.views.takeattendance.TakeAttendanceView;
-import com.cass.views.viewattendance.ViewAttendanceView;
-import com.vaadin.flow.component.UI;
+import com.cass.views.reports.viewattendance.ViewAttendanceView;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.io.ByteArrayInputStream;
-import java.util.Optional;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 /**
@@ -73,24 +68,38 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         addToDrawer(header, scroller, createFooter());
     }
 
-    private SideNav createNavigation() {
-        SideNav nav = new SideNav();
-            nav.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.MDB.create()));
-            nav.addItem(new SideNavItem("Take Attendance", TakeAttendanceView.class,
+    private Component createNavigation() {
+        SideNav nav1 = new SideNav();
+            nav1.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.MDB.create()));
+            nav1.addItem(new SideNavItem("Take Attendance", TakeAttendanceView.class,
                     LineAwesomeIcon.PENCIL_ALT_SOLID.create()));
-            nav.addItem(new SideNavItem("View Attendance", ViewAttendanceView.class,
-                    LineAwesomeIcon.FILTER_SOLID.create()));
-            nav.addItem(
+            nav1.addItem(
                     new SideNavItem("Manage Students", AddStudentView.class, LineAwesomeIcon.PLUS_CIRCLE_SOLID.create()));
-            nav.addItem(new SideNavItem("Manage Activities", ManageCourseView.class, LineAwesomeIcon.USER.create()));
-            nav.addItem(
+            nav1.addItem(new SideNavItem("Manage Activities", ManageCourseView.class, LineAwesomeIcon.USER.create()));
+            nav1.addItem(
                     new SideNavItem("Manage Users", ManageUsersView.class, LineAwesomeIcon.USERS_COG_SOLID.create()));
+
+        SideNav reportsNav = new SideNav("Reports");
+        reportsNav.setCollapsible(true);
+        reportsNav.setExpanded(false);
+
+        reportsNav.addItem( new SideNavItem("Reports", ReportsView.class, LineAwesomeIcon.RECEIPT_SOLID.create()));
+        reportsNav.addItem(new SideNavItem("View Attendance", ViewAttendanceView.class,
+                LineAwesomeIcon.FILTER_SOLID.create()));
         // if (accessChecker.hasAccess(SetUpView.class)) {
-        //     nav.addItem(new SideNavItem("Set Up", SetUpView.class, LineAwesomeIcon.LIST_SOLID.create()));
+        //     nav1.addItem(new SideNavItem("Set Up", SetUpView.class, LineAwesomeIcon.LIST_SOLID.create()));
 
         // }
 
-        return nav;
+        nav1.addClassNames("side-nav", "side-nav-one");
+        reportsNav.addClassNames("side-nav", "reports-nav");
+        VerticalLayout navLayout = new VerticalLayout(nav1, reportsNav);
+        navLayout.setSpacing(false);
+        navLayout.setSizeUndefined();
+
+        nav1.setWidthFull();
+        reportsNav.setWidthFull();
+        return navLayout;
     }
 
     @Override

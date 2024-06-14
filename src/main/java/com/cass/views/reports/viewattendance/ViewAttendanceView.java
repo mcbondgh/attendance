@@ -1,27 +1,28 @@
-package com.cass.views.viewattendance;
+package com.cass.views.reports.viewattendance;
 
-import com.cass.data.AttendanceEntity;
 import com.cass.data.AttendanceRecordsEntity;
 import com.cass.data.LoadTableGrid;
+import com.cass.dialogs.UserConfirmDialogs;
+import com.cass.documents.DocumentGenerator;
 import com.cass.services.DAO;
 import com.cass.special_methods.SpecialMethods;
 import com.cass.views.MainLayout;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.charts.model.Items;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,20 +30,23 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataCommunicator.Filter;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-import jakarta.annotation.security.PermitAll;
-
+import java.io.*;
 import java.sql.Date;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.springframework.scheduling.config.Task;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+import org.vaadin.reports.PrintPreviewReport;
+
+import javax.management.Notification;
 
 @PageTitle("View Attendance")
 @Route(value = "view-attendance", layout = MainLayout.class)
@@ -52,7 +56,7 @@ public class ViewAttendanceView extends VerticalLayout {
 
     DAO DAO_OBJECT = new DAO();
 
-    private Grid<AttendanceRecordsEntity> grid = new Grid<>();
+    private final Grid<AttendanceRecordsEntity> grid = new Grid<>();
     private Filter filterObj;
     private ComboBox<String> classPicker = new ComboBox<>("Select Class");
     private DatePicker startDatePicker = new DatePicker("Start Date");
@@ -60,6 +64,7 @@ public class ViewAttendanceView extends VerticalLayout {
     private ComboBox<String> programPicker = new ComboBox<>("Select Program");
     private Button generateButton = new Button("Generate");
     private TextField filterField = new TextField();
+    UserConfirmDialogs POPUP;
 
     public ViewAttendanceView() {
         // set component class names
@@ -159,9 +164,21 @@ public class ViewAttendanceView extends VerticalLayout {
 
     private Component renderTableContent() {
         VerticalLayout layout = new VerticalLayout();
+        MenuBar menuBar = new MenuBar();
+        Anchor pdfButton = new Anchor();
+        Anchor csvButton = new Anchor();
+        // MenuItem menuItem = menuBar.addItem("PDF FILE");
+
+        menuBar.addItem(pdfButton);
+//        menuBar.addItem(csvButton);
+        menuBar.setClassName("view-attendance-menuBar");
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_SMALL);
         layout.setClassName("container");
 
-        Div filterContainer = new Div(filterField);
+        pdfButton.addClassNames("menubar-item", "pdfButton");
+        csvButton.addClassNames("menubar-item", "csvButton");
+
+        Div filterContainer = new Div(filterField, menuBar);
         filterContainer.setClassName("view-attendance-filter-container");
         filterField.setPlaceholder("filter by index number or name");
         filterField.setPrefixComponent(LineAwesomeIcon.SEARCH_SOLID.create());
@@ -177,11 +194,18 @@ public class ViewAttendanceView extends VerticalLayout {
                 }
                 boolean matchesName = filter.getFullname().toLowerCase().contains(change.getValue().toLowerCase());
                 boolean matchesIndex = filter.getIndexNumber().toLowerCase().contains(change.getValue().toLowerCase());
-
                 return matchesName || matchesIndex;
             });
             grid.getListDataView().refreshAll();
         });
+
+        //IMPLEMENT ACTION EVENTS FOR DOWNLOADABLE LINKS
+        pdfButton.setText("Export Data");
+        pdfButton.setTarget("_blank");
+        csvButton.setText("CSV File");
+        csvButton.setTarget("_blank");
+
+        pdfButton.setHref(pdfStream());
 
         layout.add(filterContainer, createGrid());
         return layout;
@@ -192,7 +216,6 @@ public class ViewAttendanceView extends VerticalLayout {
      *************************************************************************************/
 
     private Grid<AttendanceRecordsEntity> createGrid() {
-
         grid.setClassName("view-attendance-grid");
 
         // SET GRID COLUMNS
@@ -217,7 +240,6 @@ public class ViewAttendanceView extends VerticalLayout {
     TimerTask task = new TimerTask() {
         ProgressBar progressBar = new ProgressBar();
         AtomicInteger counter = new AtomicInteger(3);
-        
 
         @Override
         public void run() {
@@ -231,5 +253,21 @@ public class ViewAttendanceView extends VerticalLayout {
             }
         }
     };
+
+    //GET THE STREAM DATA SOURCE FROM THE PDF GENERATED DOCUMENT.
+    private StreamResource pdfStream() {
+        return new StreamResource("Attendance Report.pdf", ()-> {
+            try {
+                return new ByteArrayInputStream(DocumentGenerator.generateAttendancePdf(classPicker.getValue(), programPicker.getValue(), grid).readAllBytes());
+            } catch (IOException e) {
+                POPUP = new UserConfirmDialogs();
+                POPUP.showError("Attendance table is empty, nothing to export.");
+                throw new RuntimeException(e);
+            }
+        });
+    }
+//   private StreamResource csvStream() {
+//       return new StreamResource("Attendance report.csv", ()-> DocumentGenerator.generateAttendancePdf(classPicker.getValue(), programPicker.getValue(), grid));
+//   }
 
 }// end of class...
