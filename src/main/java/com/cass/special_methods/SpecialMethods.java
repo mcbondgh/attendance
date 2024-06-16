@@ -5,9 +5,12 @@ import com.cass.services.DAO;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.select.Select;
 
+import java.time.Year;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SpecialMethods {
 
@@ -38,6 +41,10 @@ public class SpecialMethods {
     public static void setSemester(ComboBox<String> selector) {
         String classes[] = {"SEMESTER 1", "SEMESTER 2"};
         selector.setItems(classes);
+    }
+    public static void setYear(ComboBox<String> selector){
+        String[] years = {"2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"};
+        selector.setItems(years);
     }
     public static void setPrograme(ComboBox<String> selector) {
         String classes[] = {"SYSTEMS A. & DESIGN", "PROJECT MANAGEMENT"};

@@ -9,6 +9,7 @@
 @import url('./views/activity-view.css');
 @import url('./views/loginview.css');
 @import url('./views/users-view.css');
+@import url('./reports/reports-view.css');
 @import url('@fontsource/roboto/index.css');    html {
       --lumo-size-xl: 3rem;
       --lumo-size-l: 2.5rem;

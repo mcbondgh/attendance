@@ -17,7 +17,6 @@ public class UserService extends DAO{
         }catch(Exception e) {
             e.printStackTrace();
         }
-
         return status;
     }
 

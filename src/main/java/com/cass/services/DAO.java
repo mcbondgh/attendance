@@ -234,14 +234,53 @@ public class DAO extends Config {
 
         return data;
     }
-    public Collection<ActivitiesEntity> fetchStudentActivities() {
+
+    public Collection<ActivitiesEntity> getAggregatedStudentActivityRecords(Map<String, Object> parameters) {
+        Collection<ActivitiesEntity> data = new ArrayList<>();
+        try {
+            AtomicInteger counter = new AtomicInteger(0);
+            String query = """
+                    SELECT\s
+                    	indexNumber,\s
+                        fullname,
+                    	SUM(score) AS total_score,
+                        SUM(maximumScore) AS `max_score`,
+                        COUNT(activityType) AS 'activity_count'
+                    FROM activity_records AS ar\s
+                    	INNER JOIN studentslist AS sl
+                        ON ar.rowNumber = sl.id
+                    WHERE(title = ? AND className = ? AND\s
+                    	activityType = ? and ar.programe = ? AND year_group = ?)
+                    GROUP BY indexNumber, fullname ORDER BY indexNumber;
+                    """;
+            prepare = getCon().prepareStatement(query);
+            prepare.setString(1, parameters.get("semester").toString());
+            prepare.setString(2, parameters.get("className").toString());
+            prepare.setString(3, parameters.get("activityType").toString());
+            prepare.setString(4, parameters.get("program").toString());
+            prepare.setString(5, parameters.get("yearGroup").toString());
+            resultSet = prepare.executeQuery();
+            while(resultSet.next()) {
+                String index = resultSet.getString("indexNumber");
+                String name = resultSet.getString("fullname");
+                double score = resultSet.getDouble("total_score");
+                double maxScore = resultSet.getDouble("max_score");
+                int activities = resultSet.getInt("activity_count");
+                data.add(new ActivitiesEntity(counter.incrementAndGet(), name, index, score, maxScore, activities ));
+            }
+        }catch (Exception ignore){ignore.printStackTrace();}
+        return data;
+    }
+
+    public Collection<ActivitiesEntity> fetchStudentActivities(String semesterName) {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         try {
             String query = "SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, programe, className, maximumScore, score, activityDate, dateCreated \n" + //
                     "\tFROM class_attendance.activity_records AS ar\n" + //
                     "\tINNER JOIN studentslist AS sl\n" + //
-                    "\tON ar.rowNumber = sl.id WHERE(status = 1);";
+                    "\tON ar.rowNumber = sl.id WHERE(status = 1 AND title = ?);";
             prepare = getCon().prepareStatement(query);
+            prepare.setString(1, semesterName);
             resultSet = prepare.executeQuery();
             while (resultSet.next()) {
                 int id = resultSet.getInt("ar.id");

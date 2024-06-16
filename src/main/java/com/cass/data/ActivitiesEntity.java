@@ -8,7 +8,7 @@ import com.vaadin.flow.dom.Style.AlignItems;
 import com.vaadin.flow.dom.Style.TextAlign;
 
 public class ActivitiesEntity {
-    private int id;
+    private int id, activityCount;
     private String indexNumber, name, className, activityType;
     private String activityTitle;
     private Date activityDate;
@@ -43,6 +43,15 @@ public class ActivitiesEntity {
         this.programe = programe;
     }
 
+    public ActivitiesEntity(int id, String fullname, String indexNumber, double score, double maximumScore, int activityCount) {
+        this.id = id;
+        this.fullname = fullname;
+        this.indexNumber = indexNumber;
+        this.score = score;
+        this.maximumScore = maximumScore;
+        this.activityCount = activityCount;
+    }
+
     public ActivitiesEntity(int id, String fullname, String indexNumber,String className, String title, String activityType, Date activityDate, double maximumScore,
             double score, int rowNo, String programe) {
         this.id = id;
@@ -72,6 +81,13 @@ public class ActivitiesEntity {
         scoreField.setMax(scoreValue);
     }
 
+    public int getActivityCount() {
+        return activityCount;
+    }
+
+    public void setActivityCount(int activityCount) {
+        this.activityCount = activityCount;
+    }
 
     public Date getActivityDate() {
         return activityDate;

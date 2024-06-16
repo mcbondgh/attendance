@@ -75,11 +75,12 @@ public class ActivitiesView extends VerticalLayout {
     /****************************************************************************************************
      * CREATE FORM AND INPUT MINI LAYOUT
      ****************************************************************************************************/
+    ComboBox<String> semesterSelector = new ComboBox<>("Select Semester");
     private Component createMiniSideLayout() {
         VerticalLayout layout = new VerticalLayout();
         ComboBox<String> classPicker = new ComboBox<>("Select Class");
         TextField filterField = new TextField();
-        ComboBox<String> semesterSelector = new ComboBox<>("Select Semester");
+
         ListBox<ActivitiesEntity> listView = new ListBox<>();
         Button loadButton = new Button("Load Students");
 
@@ -95,11 +96,11 @@ public class ActivitiesView extends VerticalLayout {
 
         // set component class names
         layout.setClassName("list-view-container");
-        classPicker.setClassName("list-view-classpicker");
+        classPicker.addClassNames("list-view-picker", "class-picker");
         filterField.setClassName("filter-activity-field");
         listView.setClassName("activity-view-list-view");
         loadButton.setClassName("activity-view-load-button");
-
+        semesterSelector.addClassNames("list-view-picker", "semester-picker");
         // set filter-field placeHolder
         filterField.setPlaceholder("filter by index number");
 
@@ -107,9 +108,9 @@ public class ActivitiesView extends VerticalLayout {
         layout.add(classPicker, semesterSelector, loadButton, filterField);
 
         // check and disable 'load button' if 'classPicker' is empty
-        layout.getElement().addEventListener("mousemove", callBack -> {
+        layout.getElement().addEventListener("mouseover", callBack -> {
             UI.getCurrent().access(() -> {
-                if (classPicker.isEmpty()) {
+                if (classPicker.isEmpty() || semesterSelector.isEmpty()) {
                     loadButton.addClassName("disable-button");
                     loadButton.setEnabled(false);
                 } else {
@@ -141,8 +142,8 @@ public class ActivitiesView extends VerticalLayout {
                     return true;
                 }
                 boolean matchesName = filter.getFullName().toLowerCase().contains(event.getValue().toLowerCase());
-                boolean matchesindex = filter.getIndexNumber().toLowerCase().contains(event.getValue().toLowerCase());
-                return matchesName || matchesindex;
+                boolean matchesIndex = filter.getIndexNumber().toLowerCase().contains(event.getValue().toLowerCase());
+                return matchesName || matchesIndex;
                }).refreshAll();
             });
         });
@@ -162,8 +163,7 @@ public class ActivitiesView extends VerticalLayout {
         studentGrid.addColumn(StudentEntity::getFullName).setHeader("NAME");
         studentGrid.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER");
         studentGrid.addColumn(StudentEntity::getStudentClass).setHeader("CLASS").setFooter(new Span(""));
-        studentGrid.addComponentColumn(component -> {return renderViewButton(component.getId());
-        }).setHeader("ACTION");
+        studentGrid.addComponentColumn(component -> renderViewButton(component.getId())).setHeader("ACTION");
 
         studentGrid.getColumns().forEach(each -> each.setAutoWidth(true));
         studentGrid.getColumns().forEach(each -> each.setSortable(true));
@@ -202,7 +202,7 @@ public class ActivitiesView extends VerticalLayout {
 
     private Component renderAvatar() {
         Avatar avator = new Avatar();
-        avator.setImage("/icons/user-100.png");
+        avator.setImage("/icons/student-100.png");
         avator.addThemeVariants(AvatarVariant.LUMO_SMALL);
         avator.setClassName("activity-view-avator");
         return avator;
@@ -259,7 +259,7 @@ public class ActivitiesView extends VerticalLayout {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         double totalScore = 0;
         double maxScore = 0;
-        for(ActivitiesEntity item : SERVICE_OBJ.fetchStudentActivities()) {
+        for(ActivitiesEntity item : SERVICE_OBJ.fetchStudentActivities(semesterSelector.getValue())) {
             if (studentIndex == item.getRowNumber()) {
               nameField.setValue(item.getFullname());
               indexNumberField.setValue(item.getIndexNumber());

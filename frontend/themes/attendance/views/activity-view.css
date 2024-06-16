@@ -100,6 +100,10 @@
     margin-bottom: 10px;
     width:600px;
 }
+.semester-picker {
+    margin-top: -10px;
+}
+
 .activity-view-dialog-vlayout vaadin-text-field {
     width: 100%;
 }
@@ -130,7 +134,7 @@
 
 @media screen and (max-width:600px) {
     .dashboard-header-text {
-        font-size: ;
+        font: size 14px;
     }
     .activity-inner-formlayout {
         margin-bottom: 10px;

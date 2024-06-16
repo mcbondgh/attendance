@@ -64,6 +64,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         appName.setClassName("app-name-text");
 
         Scroller scroller = new Scroller(createNavigation());
+        //<theme-editor-local-classname>
+        scroller.addClassName("main-layout-scroller-1");
 
         addToDrawer(header, scroller, createFooter());
     }

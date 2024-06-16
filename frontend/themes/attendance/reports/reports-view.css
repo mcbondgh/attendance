@@ -1,0 +1,86 @@
+body {
+    /* background-color: rgb(255, 246, 246); */
+
+}
+
+.activity-report-view {
+    box-sizing: border-box;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
+    height: 100vh;
+}
+
+.reports-view-horizontal-layout {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns:20% 80%; /* Adjust as needed */
+    gap: 5px; /* Optional spacing between elements */
+}
+.reports-view-horizontal-layout vaadin-grid {
+    height: 100%;
+}
+
+
+.reports-div{
+    box-sizing: border-box;
+    padding:0 0 20 5px;
+    border-radius: 5px;    
+}
+
+.container-one{
+    border: 1px solid #ededed;
+}
+.item-picker {
+    width: 100%;
+    margin-top: -20px;}
+
+.generate-report-button {
+    min-width: 100%;
+    margin-top: -15px;
+    
+}
+
+.container-two {
+    border: 1px solid #ededed;
+}
+
+.filter-field-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.reports-menu-bar {
+    background-color:rgb(243, 243, 243);
+    align-items: center;
+    justify-content:space-evenly;
+    width: 20%;
+    padding: 5px;
+    border-radius: 2px;
+    font-size: smaller;
+    font-weight: 600;
+}
+
+.anchor-link:hover {
+    transition: 0.3s ease;
+}
+
+.pdf-button:hover {
+    color:rgb(7, 155, 7)
+}
+.csv-button:hover {
+    color:orange;
+}
+
+
+
+@media (max-width: 768px) {
+    .reports-view-horizontal-layout {
+      grid-template-columns: 1fr; /* One column for mobile */
+    }
+    .reports-menu-bar {
+        flex-direction: column;
+    }
+  }
