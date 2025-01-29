@@ -5,12 +5,8 @@ import com.cass.services.DAO;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.select.Select;
 
-import java.time.Year;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SpecialMethods {
 
@@ -34,43 +30,44 @@ public class SpecialMethods {
 //        String classes[] = {"BTECH Computer Sci","Computer Sci 2", "Computer Sci 3",  "Network 2A", "Network 2B","Network 3A", "Network 3B"};
     //    selector.setItems(classes);
     }
-    public static void setPrograme(Select<String> selector) {
-        String classes[] = {"SYSTEMS ANALYSIS & DESIGN", "PROJECT MANAGEMENT"};
-        selector.setItems(classes);
-    }
+
     public static void setSemester(ComboBox<String> selector) {
         String classes[] = {"SEMESTER 1", "SEMESTER 2"};
         selector.setItems(classes);
     }
     public static void setYear(ComboBox<String> selector){
-        String[] years = {"2023", "2024", "2025", "2026", "2027", "2028", "2029", "2030"};
+        String[] years = {"2024", "2025", "2026", "2027", "2028", "2029", "2030"};
         selector.setItems(years);
     }
-    public static void setPrograme(ComboBox<String> selector) {
-        String classes[] = {"SYSTEMS A. & DESIGN", "PROJECT MANAGEMENT"};
-        selector.setItems(classes);
+    public static void setCourses(ComboBox<String> selector) {
+        List<String> items = new ArrayList<>();
+        new DAO().getAllCourses().forEach(ex -> items.add(ex.name()));
+        selector.setItems(items);
     }
-    public static void setDepartment(Select<String> selector) {
-        String classes[] = {"COMPUTER SCIENCE DPT"};
-        selector.setItems(classes);
+    public static void setProgramme(ComboBox<String> selector) {
+        List<String> values = List.of("HND NETWORK MANAGEMENT", "HND COMPUTER SCIENCE", "BTECH COMPUTER SCIENCE");
+        selector.setItems(values);
+    }
+
+    public static void setLevel(ComboBox<String> comboBox) {
+        comboBox.setItems(List.of("100", "200", "300", "400"));
     }
     public static void setJointClasses(Select<String> selector) {
-        String classes[] = {"BTECH Computer Sci", "Computer Sci 2", "Computer Sci 3","Network 2A", "Network 2B","Network 3A", "Network 3B"};
-        
+        String classes[] = {"BTECH Computer Sci", "BTECH Computer Sci 1",  "HND Computer Sci 1", "Computer Sci 2", "Computer Sci 3", "Network 1A", "Network 1B", "Network 2A", "Network 2B","Network 3A", "Network 3B"};
         selector.setItems(loadClasses());
     }
     public static void setJointClasses(ComboBox<String> selector) {
-        String classes[] = {"All Classes", "BTECH Computer Sci", "Computer Sci 2", "Computer Sci 3", "Network 2A", "Network 2B","Network 3A", "Network 3B"};
+        String classes[] = {"BTECH Computer Sci", "BTECH Computer Sci 1",  "HND Computer Sci 1", "Computer Sci 2", "Computer Sci 3", "Network 1A", "Network 1B", "Network 2A", "Network 2B","Network 3A", "Network 3B"};
         selector.setItems(loadClasses());
     }
+
     public static void setActivityTypes(ComboBox<String> selector) {
         String[] classes = {"Assignment", "Quiz", "Midsem", "Presentation"};
         selector.setItems(classes);
     }
 
     public static void setUserRoles(ComboBox<String> selector) {
-        String classes[] = {"Admin", "Class Rep"};
-        selector.setItems(classes);
+        selector.setItems(List.of("Admin", "Teaching Assistant"));
     }
 
 }//end of class...

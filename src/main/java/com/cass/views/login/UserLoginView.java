@@ -7,6 +7,7 @@ import com.vaadin.flow.component.UI;
 
 import java.util.Map;
 
+import com.vaadin.flow.data.value.ValueChangeMode;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.cass.security.Encryption;
@@ -30,6 +31,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
 import jakarta.annotation.security.PermitAll;
+
+import javax.mail.Session;
 
 @PageTitle("login")
 @Route(value = "")
@@ -71,6 +74,8 @@ public class UserLoginView extends VerticalLayout{
                                 ButtonVariant.MATERIAL_CONTAINED, 
                                 ButtonVariant.LUMO_PRIMARY);
 
+        usernameField.setValueChangeMode(ValueChangeMode.EAGER);
+        passwordField.setValueChangeMode(ValueChangeMode.EAGER);
         usernameField.setRequired(true);
         passwordField.setRequired(true);
         usernameField.setInvalid(usernameField.isEmpty());
@@ -88,7 +93,7 @@ public class UserLoginView extends VerticalLayout{
         loginBtn.addClickListener(click -> {
            boolean usernameAndPassEmpty = usernameField.isEmpty() || passwordField.isEmpty();
            if (usernameAndPassEmpty) {
-               usernameField.setErrorMessage("enter usernme");
+               usernameField.setErrorMessage("enter username");
                passwordField.setErrorMessage("enter password");
            } else {
                 if(!authenticateUser(usernameField.getValue(), passwordField.getValue())) {
@@ -117,7 +122,8 @@ public class UserLoginView extends VerticalLayout{
             } else {
                 String name = userData.get("username");
                 String passString = userData.get("password");
-                String roleId = userData.get("roleId");
+                int roleId = Integer.parseInt(userData.get("roleId"));
+                SessionManager.setAttribute("roleId", roleId);
 
                 //DECIPHER USERS PASSWORD 
                 boolean passwordMatch = Encryption.getOriginalText(passString).equals(password);

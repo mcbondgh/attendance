@@ -58,7 +58,7 @@ public class ReportsView extends VerticalLayout {
 
     void populateFields() {
         SpecialMethods.setClasses(classPicker);
-        SpecialMethods.setPrograme(coursePicker);
+        SpecialMethods.setCourses(coursePicker);
         SpecialMethods.setYear(yearGroup);
         SpecialMethods.setSemester(semesterPicker);
         SpecialMethods.setActivityTypes(typePicker);

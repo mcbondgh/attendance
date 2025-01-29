@@ -13,7 +13,7 @@ box-sizing: border-box;
 }
 .header-filter-container {
   display: flex;
-  width: 100%;
+  /* width: 100%; */
   margin: 0;
   align-items: baseline;
   justify-content: flex-start;

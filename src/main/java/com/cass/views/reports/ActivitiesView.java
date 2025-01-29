@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.cass.views.managecourse.ManageCourseView;
+import com.cass.views.classActivities.ManageClassActivityView;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -67,7 +67,7 @@ public class ActivitiesView extends VerticalLayout {
 
         // navigate to 'ActivitiesView.class' on button click.
         viewButton.getElement().addEventListener("click", callBack -> {
-            UI.getCurrent().navigate(ManageCourseView.class);
+            UI.getCurrent().navigate(ManageClassActivityView.class);
         });
         return layout;
     }
@@ -80,18 +80,22 @@ public class ActivitiesView extends VerticalLayout {
         VerticalLayout layout = new VerticalLayout();
         ComboBox<String> classPicker = new ComboBox<>("Select Class");
         TextField filterField = new TextField();
+        ComboBox<String> yearGroup = new ComboBox<>("Year Group");
 
         ListBox<ActivitiesEntity> listView = new ListBox<>();
         Button loadButton = new Button("Load Students");
 
         SpecialMethods.setClasses(classPicker);
         SpecialMethods.setSemester(semesterSelector);
+        SpecialMethods.setYear(yearGroup);
         loadButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
         loadButton.setWidthFull();
         classPicker.setRequired(true);
         filterField.setWidthFull();
         classPicker.setWidthFull();
         semesterSelector.setWidthFull();
+        yearGroup.setWidthFull();
+        yearGroup.setRequired(true);
         semesterSelector.setRequired(true);
 
         // set component class names
@@ -105,7 +109,7 @@ public class ActivitiesView extends VerticalLayout {
         filterField.setPlaceholder("filter by index number");
 
         layout.setWidthFull();
-        layout.add(classPicker, semesterSelector, loadButton, filterField);
+        layout.add(classPicker, semesterSelector, yearGroup, loadButton, filterField);
 
         // check and disable 'load button' if 'classPicker' is empty
         layout.getElement().addEventListener("mouseover", callBack -> {
@@ -123,7 +127,7 @@ public class ActivitiesView extends VerticalLayout {
         // Add Click Listener to 'load button'
         loadButton.addClickListener(event -> {
             UI.getCurrent().access(() -> {
-                Collection<StudentEntity> data = SERVICE_OBJ.getStudentByClass(classPicker.getValue());
+                Collection<StudentEntity> data = SERVICE_OBJ.getStudentByClass(classPicker.getValue(), yearGroup.getValue(), "", "");
                 if (data.isEmpty()) {
                     studentGrid.setItems(Collections.emptyList());
                     new UserConfirmDialogs().showError("Class list is empty");

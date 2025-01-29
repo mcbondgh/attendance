@@ -9,42 +9,34 @@ import com.cass.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.HasText.WhiteSpace;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.H6;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.dom.Style.AlignItems;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import jakarta.annotation.security.RolesAllowed;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.vaadin.lineawesome.LineAwesomeIcon;
@@ -58,16 +50,20 @@ public class AddStudentView extends Composite<VerticalLayout> {
     StudentEntity STUDENT_ENTITY_OBJ = new StudentEntity();
     StudentService STUDENT_SERVICE_OBJ = new StudentService();
 
+    private ComboBox<String> sectionPicker = new ComboBox<>("Select Section", "A", "B");
     private VerticalLayout pageLayout = new VerticalLayout();
     private FormLayout formLayout = new FormLayout();
     private TextField studentNumberField = new TextField("Student Number");
     private TextField fullnameField = new TextField("Student Name");
-    private Select<String> classSelector = new Select<String>();
-    private Select<String> programSelector = new Select<>();
-    private Select<String> departmentSelector = new Select<>();
-    private Button addNewStudentBtn = new Button("Add Student");
-    private Grid<StudentEntity> studentsTable = new Grid<>();
-    
+    private Select<String> programmeSelector = new Select<>();
+    private final ComboBox<String> courseSelector = new ComboBox<>("Select Course");
+    private final ComboBox<String> levelSelector = new ComboBox<>("Select Level");
+    private final Button addNewStudentBtn = new Button("Add Student");
+    private final Grid<StudentEntity> studentsTable = new Grid<>();
+    private final ComboBox<String> yearGroup = new ComboBox<>();
+    private final ComboBox<String> yearSelector = new ComboBox<>("Year Group");
+    ComboBox<String> studentSearchLevel = new ComboBox<>();
+    ComboBox<String> sectionSelector = new ComboBox<>();
 
     public AddStudentView() {
         pageLayout.setClassName("container");
@@ -80,7 +76,8 @@ public class AddStudentView extends Composite<VerticalLayout> {
         getContent().add(pageLayout);
     }
 
-    private Select<String> filterSelector = new Select<>();
+    private final Select<String> filterSelector = new Select<>();
+
     private Component renderPageHeader() {
         HorizontalLayout layout = new HorizontalLayout();
         //<theme-editor-local-classname>
@@ -89,16 +86,29 @@ public class AddStudentView extends Composite<VerticalLayout> {
         filterSelector.setOverlayClassName("add-student-view-select-1");
         //<theme-editor-local-classname>
         filterSelector.addClassName("add-student-view-select-1");
-        Button filterButton = new Button("Get Students"); 
+        yearGroup.addClassName("add-student-view-select-1");
+        Button getStudentButton = new Button("Get Students");
 
         SpecialMethods.setClasses(filterSelector);
+        SpecialMethods.setYear(yearGroup);
 
-        Div filterDiv = new Div(filterSelector, filterButton);
+        studentSearchLevel.setPlaceholder("Select Level");
+
+        studentSearchLevel.setRequired(true);
+        sectionSelector.setRequired(true);
+        studentSearchLevel.addClassNames("item-selector");
+        sectionSelector.addClassNames("item-selector");
+
+        SpecialMethods.setLevel(studentSearchLevel);
+        sectionSelector.setItems(List.of("A", "B"));
+        sectionSelector.setValue("A");
+
+        yearGroup.setPlaceholder("Select Year");
+        Div filterDiv = new Div(filterSelector, studentSearchLevel, sectionSelector, yearGroup, getStudentButton);
 
         layout.add(filterDiv, addNewStudentBtn);
 
-        addNewStudentBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        addNewStudentBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        addNewStudentBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
 
         addNewStudentBtn.setClassName("add-button");
         layout.setClassName("header-container");
@@ -106,23 +116,26 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
         filterSelector.setClassName("filter-selector");
 
-        // filterButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        filterButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        // getStudentButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        getStudentButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         filterSelector.setPlaceholder("Select Class");
-        
+
 
         //ACTION EVENTS IMPLEMENTATION
         addNewStudentBtn.addClickListener(event -> {
             studentDialog();
         });
 
-        filterButton.addClickListener(event -> {
-            if(filterSelector.isEmpty()) {
+        getStudentButton.addClickListener(event -> {
+            if (filterSelector.isEmpty() || yearGroup.isEmpty() || studentSearchLevel.isEmpty()) {
                 filterSelector.setInvalid(true);
-                filterSelector.setErrorMessage("Select Program");
-                
+                filterSelector.setErrorMessage("Select a class");
+                yearGroup.setInvalid(true);
+                yearGroup.setErrorMessage("Select a year");
+                studentSearchLevel.setInvalid(true);
+                studentSearchLevel.setErrorMessage("Select Level");
             } else {
-                tableData(filterSelector.getValue());
+                tableData(filterSelector.getValue(), yearGroup.getValue(), studentSearchLevel.getValue(), sectionPicker.getValue());
                 int tableSize = studentsTable.getListDataView().getItemCount();
                 H6 tableLabel = new H6("TOTAL STUDENTS " + tableSize);
                 tableLabel.setClassName("table-counter");
@@ -132,18 +145,21 @@ public class AddStudentView extends Composite<VerticalLayout> {
         return layout;
     }
 
+
     private Component studentGrid() {
         TextField filterField = new TextField();
         filterField.setClassName("filter-field");
         filterField.setClearButtonVisible(true);
-       
+
         filterField.setPlaceholder("Filter by Index Number or name");
-        
+
         // studentsTable.addColumn(StudentEntity::getId).setHeader("ID").setFooter("TOTAL STUDENTS");
         studentsTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER").setKey("indexNumberColumn");
         studentsTable.addColumn(StudentEntity::getFullName).setHeader("FULL NAME");
         studentsTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
-        studentsTable.addComponentColumn(item -> {return studentStatus(item.getStatus());}).setHeader("STATUS");
+        studentsTable.addComponentColumn(item -> {
+            return studentStatus(item.getStatus());
+        }).setHeader("STATUS");
 
         // studentsTable.addColumn(StudentEntity::getPrograme).setHeader("PROGRAM");
         // studentsTable.addComponentColumn(item -> {return editButton(item.getId());}).setHeader("ACTION");
@@ -158,12 +174,12 @@ public class AddStudentView extends Composite<VerticalLayout> {
         //filter table values 
         filterField.setValueChangeMode(ValueChangeMode.EAGER);
         filterField.addValueChangeListener(action -> {
-            tableData(filterSelector.getValue()).addFilter(filter ->{
+            tableData(filterSelector.getValue(), yearGroup.getValue(), studentSearchLevel.getValue(), sectionPicker.getValue()).addFilter(filter -> {
                 String filterText = filterField.getValue().toLowerCase();
-               boolean matchesIndexNo = filter.getIndexNumber().toLowerCase().contains(filterText);
-               boolean matchesName = filter.getFullName().toLowerCase().contains(filterText);
+                boolean matchesIndexNo = filter.getIndexNumber().toLowerCase().contains(filterText);
+                boolean matchesName = filter.getFullName().toLowerCase().contains(filterText);
 
-               return matchesIndexNo || matchesName;
+                return matchesIndexNo || matchesName;
             }).refreshAll();
         });
 
@@ -171,21 +187,22 @@ public class AddStudentView extends Composite<VerticalLayout> {
     }
 
     //STUDENT STABLE DATA PROVIDER.
-    protected GridListDataView<StudentEntity> tableData(String searchParameter) {
-        GridListDataView<StudentEntity> data = studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(searchParameter));
+    protected GridListDataView<StudentEntity> tableData(String programme, String yearGroup, String level, String section) {
+        GridListDataView<StudentEntity> data = studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(programme, yearGroup, level, section));
         return data;
     }
-        
+
     //TABLE BUTTON IMPLEMEMTATION.
     protected Span editButton(int studentId) {
         Span span = new Span(LineAwesomeIcon.PEN_SOLID.create());
         span.setClassName("action-button");
 
-        span.addClickListener(action-> {
-            
+        span.addClickListener(action -> {
+
         });
         return span;
     }
+
     protected Span studentStatus(byte status) {
         Span badge = new Span();
         badge.setText(status == 1 ? "active" : "inactive");
@@ -195,15 +212,24 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
     //CREATE TABLE DETAILED CONTENT VIA A COMPONENT RENDERER
     private ComponentRenderer<FormLayout, StudentEntity> showStudentDetails() {
-        return new ComponentRenderer<>(student-> {
-            FormLayout form = new FormLayout();
+        return new ComponentRenderer<>(student -> {
+            FormLayout updateFormLayout = new FormLayout();
             TextField nameField = new TextField("Name");
             TextField studentNumberField = new TextField("Index Number");
-            RadioButtonGroup<String> checkbox = new RadioButtonGroup<>("Student Status", "active","inactive");
+            RadioButtonGroup<String> checkbox = new RadioButtonGroup<>("Student Status", "active", "inactive");
             TextField rowNumber = new TextField("Roll Number");
             Select<String> studentClass = new Select<>();
             Div div1 = new Div(new H5("Update Student Data"));
+            ComboBox<String> studentLevelSelector = new ComboBox<>("Level");
+            SpecialMethods.setLevel(studentLevelSelector);
+            ComboBox<String> studentYearSelector = new ComboBox<>("Year");
+            SpecialMethods.setYear(studentYearSelector);
+            ComboBox<String> studentSectionSelector = new ComboBox<>("Section", "A", "B");
 
+            studentLevelSelector.setClassName("item-selector");
+            studentLevelSelector.setPlaceholder("Select Level");
+            studentYearSelector.setClassName("item-selector");
+            studentSectionSelector.setClassName("item-selector");
 
             //<theme-editor-local-classname>
             rowNumber.addClassName("add-student-view-select-2");
@@ -214,17 +240,16 @@ public class AddStudentView extends Composite<VerticalLayout> {
             Button updateButton = new Button("Update");
             Button removeButton = new Button("Remove");
 
-
             //set component class names
-            div1.setClassName("form-header-div");
-            form.setClassName("form-layout");
+            div1.setClassName("updateFormLayout-header-div");
+            updateFormLayout.setClassName("updateFormLayout-layout");
 
             checkbox.setValue(student.getStatus() == 1 ? "active" : "inactive");
             studentClass.setLabel("Class");
             checkbox.setLabel("Student Status");
             updateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
             removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
-            
+
             SpecialMethods.setClasses(studentClass);
 
             nameField.setValue(student.getFullName());
@@ -236,82 +261,94 @@ public class AddStudentView extends Composite<VerticalLayout> {
             //set all fields as required
             nameField.setRequired(true);
             studentNumberField.setRequired(true);
-        
-            form.setResponsiveSteps(
+
+            updateFormLayout.setResponsiveSteps(
                     new FormLayout.ResponsiveStep("0", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP),
                     new FormLayout.ResponsiveStep("600px", 4, FormLayout.ResponsiveStep.LabelsPosition.TOP)
             );
 
-            form.setColspan(div1, 4);
-            form.setColspan(nameField, 2);
-            form.add(div1, nameField, studentNumberField, rowNumber, studentClass,  checkbox, updateButton, removeButton);
+            FlexLayout buttonsContainer = new FlexLayout(updateButton, removeButton);
+            buttonsContainer.addClassNames("update-buttons-container");
+            buttonsContainer.getStyle().set("gap", "10px");
+
+            updateFormLayout.setColspan(div1, 4);
+//            updateFormLayout.setColspan(nameField, 2);
+            updateFormLayout.add(div1, nameField, studentNumberField, rowNumber, studentClass, studentYearSelector,
+                    studentLevelSelector, studentSectionSelector, checkbox, buttonsContainer);
 
             //ACTION EVENTS 
             updateButton.addClickListener(event -> {
-                                
+
                 if (studentNumberField.isEmpty() || nameField.isEmpty()) {
-                   studentNumberField.setErrorMessage("required field");
-                   nameField.setErrorMessage("required field");
-                }else {
+                    studentNumberField.setErrorMessage("required field");
+                    nameField.setErrorMessage("required field");
+                } else {
                     STUDENT_ENTITY_OBJ.setId(student.getId());
                     STUDENT_ENTITY_OBJ.setFullName(nameField.getValue());
                     STUDENT_ENTITY_OBJ.setIndexNumber(studentNumberField.getValue());
                     STUDENT_ENTITY_OBJ.setStudentClass(studentClass.getValue());
-                    STUDENT_ENTITY_OBJ.setStatus((byte) (checkbox.getValue().equals("active")? 1 : 0));
+                    STUDENT_ENTITY_OBJ.setStatus((byte) (checkbox.getValue().equals("active") ? 1 : 0));
                     STUDENT_ENTITY_OBJ.setDateUpdated(Timestamp.valueOf(LocalDateTime.now()));
-                    
+                    STUDENT_ENTITY_OBJ.setYearGroup(studentYearSelector.getValue());
+                    STUDENT_ENTITY_OBJ.setLevel(studentLevelSelector.getValue());
+                    STUDENT_ENTITY_OBJ.setSection(studentSectionSelector.getValue());
+                    STUDENT_ENTITY_OBJ.setProgramme(studentClass.getValue());
+
                     new UserConfirmDialogs("UPDATE STUDENT DATA", "Do you wish to updated student data to current values").
-                    saveDialog().addConfirmListener(evet -> {
-                        if(STUDENT_SERVICE_OBJ.updateStudentData(STUDENT_ENTITY_OBJ) > 0) {
-                            UI.getCurrent().access(()-> {
-                                new UserConfirmDialogs().showSuccess("Nice, Student data successfully updated.");
-                                studentsTable.getListDataView().refreshAll();
-                                LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue()));
+                            saveDialog().addConfirmListener(ev -> {
+                                if (STUDENT_SERVICE_OBJ.updateStudentData(STUDENT_ENTITY_OBJ) > 0) {
+                                    UI.getCurrent().access(() -> {
+                                        new UserConfirmDialogs().showSuccess("Nice, Student data successfully updated.");
+                                        studentsTable.getListDataView().refreshAll();
+                                        LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue(),
+                                                yearGroup.getValue(),
+                                                studentSearchLevel.getValue(),
+                                                sectionPicker.getValue()));
+                                    });
+                                }
                             });
-                        }
-                    });
                 }
             });
 
             //REMOVE STUDENT BUTTON CLICKED
             removeButton.addClickListener(event -> {
                 UserConfirmDialogs confirmDialogs = new UserConfirmDialogs();
-               new UserConfirmDialogs("REMOVE STUDENT", "By confirming, this student shall be permanently removed from the class list. Do you wish to continue?").saveDialog().addConfirmListener(confirmEvent -> {
-                int responseStatus = STUDENT_SERVICE_OBJ.removeStudent(Integer.parseInt(rowNumber.getValue()));
-                if (responseStatus > 0) {
-                    confirmDialogs.showSuccess("NICE, Student successfully removed from class list.");
-                    LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue()));
-                }
-               });
+                new UserConfirmDialogs("REMOVE STUDENT", "By confirming, this student shall be permanently removed from the class list. Do you wish to continue?").saveDialog().addConfirmListener(confirmEvent -> {
+                    int responseStatus = STUDENT_SERVICE_OBJ.removeStudent(Integer.parseInt(rowNumber.getValue()));
+                    if (responseStatus > 0) {
+                        confirmDialogs.showSuccess("NICE, Student successfully removed from class list.");
+                        LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
+                                studentSearchLevel.getValue(), sectionPicker.getValue()));
+                    }
+                });
             });
-            return form;
+            return updateFormLayout;
         });
-        
     }
-    
+
     /*----------------------------------------*/
 
     private void setRequiredFields() {
         studentNumberField.setRequired(true);
         fullnameField.setRequired(true);
-        classSelector.setEmptySelectionAllowed(false);
-        classSelector.setRequiredIndicatorVisible(true);
-        programSelector.setEmptySelectionAllowed(false);
-        departmentSelector.setEmptySelectionAllowed(false);
+        programmeSelector.setEmptySelectionAllowed(false);
+        programmeSelector.setRequiredIndicatorVisible(true);
+        studentSearchLevel.setRequired(true);
+//        programSelector.setEmptySelectionAllowed(false);
+//        departmentSelector.setEmptySelectionAllowed(false);
         studentNumberField.setInvalid(studentNumberField.isEmpty());
         fullnameField.setInvalid(fullnameField.isEmpty());
-    
+        programmeSelector.setLabel("Select Programme");
 
-        departmentSelector.setItems("Computer Science");
-
-        SpecialMethods.setClasses(classSelector);
-        SpecialMethods.setPrograme(programSelector);
-        SpecialMethods.setDepartment(departmentSelector);
+        SpecialMethods.setClasses(programmeSelector);
+        SpecialMethods.setCourses(courseSelector);
+        SpecialMethods.setLevel(studentSearchLevel);
 
     }
 
     private boolean validateInputs() {
-        return (studentNumberField.isInvalid() || fullnameField.isInvalid() || classSelector.isEmpty());
+        return (studentNumberField.isInvalid() || fullnameField.isInvalid() || programmeSelector.isEmpty() || yearSelector.isEmpty() ||
+                studentSearchLevel.isInvalid());
     }
 
     void resetFields() {
@@ -328,16 +365,27 @@ public class AddStudentView extends Composite<VerticalLayout> {
     private FormLayout formDesign() {
         formLayout.setClassName("student-form-layout");
         // saveStudentButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
-
-        classSelector.setLabel("Select Class");
-        programSelector.setLabel("Select Program");
-        departmentSelector.setLabel("Select Department");
+        studentSearchLevel.setLabel("Select Level");
 
         // earaseButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         studentNumberField.setRequired(true);
 
-        formLayout.add(studentNumberField, fullnameField,
-                classSelector);
+        sectionPicker.setValue("A");
+        sectionPicker.setWidthFull();
+//        sectionPicker.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
+
+        FlexLayout classAndLevelContainer = new FlexLayout(studentSearchLevel, sectionPicker);
+        classAndLevelContainer.getStyle().set("gap", "10px");
+        classAndLevelContainer.getStyle().setAlignItems(Style.AlignItems.CENTER);
+        classAndLevelContainer.getStyle().setJustifyContent(Style.JustifyContent.SPACE_BETWEEN);
+        classAndLevelContainer.setWidthFull();
+        studentSearchLevel.setWidthFull();
+
+        formLayout.add(
+                studentNumberField, fullnameField,
+                programmeSelector, yearSelector,
+                classAndLevelContainer
+        );
 
         return formLayout;
     }
@@ -351,6 +399,9 @@ public class AddStudentView extends Composite<VerticalLayout> {
         H5 dialogTitle = new H5("ADD NEW STUDENT");
         Span close = new Span(LineAwesomeIcon.WINDOW_CLOSE.create());
         HorizontalLayout hLayout = new HorizontalLayout(dialogTitle, close);
+
+        SpecialMethods.setYear(yearSelector);
+        yearSelector.setRequired(true);
 
         studentFormDialog.setClassName("student-dialog");
         dialogTitle.setClassName("dialog-title");
@@ -371,7 +422,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
             studentFormDialog.close();
         });
 
-        earaseButton.addClickListener(event ->{
+        earaseButton.addClickListener(event -> {
             resetFields();
         });
 
@@ -379,33 +430,37 @@ public class AddStudentView extends Composite<VerticalLayout> {
         saveStudentButton.addClickListener(event -> {
             UserConfirmDialogs dialogs = new UserConfirmDialogs("Save New Student", "Confirm to add student to selected class list.");
             boolean matchesIndexNo = false;
-                String indexNumber = studentNumberField.getValue();
-                for(StudentEntity item : STUDENT_SERVICE_OBJ.getStudentByStudentIdex(indexNumber)) {
-                    if(item.getIndexNumber().equalsIgnoreCase(indexNumber)) {
-                        matchesIndexNo = true;
-                    }
+            String indexNumber = studentNumberField.getValue();
+            for (StudentEntity item : STUDENT_SERVICE_OBJ.getStudentByStudentIndex(indexNumber)) {
+                if (item.getIndexNumber().trim().equalsIgnoreCase(indexNumber.trim())) {
+                    matchesIndexNo = true;
                 }
+            }
             if (validateInputs()) {
                 dialogs.showError("Fill out all required fields");
             } else if (matchesIndexNo) {
                 System.out.println(matchesIndexNo);
                 new UserConfirmDialogs().showError("Index Number already exists, enter a unique index number");
                 studentNumberField.setErrorMessage("Duplicate Index Number");
-            }else {
+            } else {
                 dialogs.saveDialog().addConfirmListener(click -> {
 
                     //feed entity instance with collected data.
                     STUDENT_ENTITY_OBJ.setIndexNumber(studentNumberField.getValue());
                     STUDENT_ENTITY_OBJ.setFullName(fullnameField.getValue());
-                    // STUDENT_ENTITY_OBJ.setDepartment(departmentSelector.getValue());
-                    STUDENT_ENTITY_OBJ.setStudentClass(classSelector.getValue());
-                    // STUDENT_ENTITY_OBJ.setPrograme(programSelector.getValue());
+                    STUDENT_ENTITY_OBJ.setLevel(studentSearchLevel.getValue());
+                    STUDENT_ENTITY_OBJ.setStudentClass(programmeSelector.getValue());
+                    STUDENT_ENTITY_OBJ.setYearGroup(yearSelector.getValue());
+                    STUDENT_ENTITY_OBJ.setProgramme(programmeSelector.getValue());
+                    STUDENT_ENTITY_OBJ.setSection(sectionPicker.getValue());
 
                     if (STUDENT_SERVICE_OBJ.saveNewStudent(STUDENT_ENTITY_OBJ) > 0) {
-                        getUI().get().access(()-> {
+                        getUI().get().access(() -> {
                             dialogs.showSuccess("Nice, student successfully added to class list");
                             resetFields();
                         });
+                    } else {
+                        dialogs.showError("Oops! failed to save student, retry");
                     }
                 });
             }

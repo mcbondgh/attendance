@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,25 +25,17 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H6;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-
-import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Take Attendance")
 @Route(value = "view/take_attendance", layout = MainLayout.class)
@@ -54,10 +45,11 @@ public class TakeAttendanceView extends VerticalLayout {
     StudentService SERVICE_OBJ = new StudentService();
 
     private DatePicker datePicker = new DatePicker("Attendance Date");
-    private ComboBox<String> programSelector = new ComboBox<>();
-    private ComboBox<String> classSelect = new ComboBox<>();
-    private Grid<StudentEntity> attendanceTable = new Grid<>();
-    private Button button = new Button("Generate Sheet");
+    private ComboBox<String> courseSelector = new ComboBox<>("Select Course");
+    private final ComboBox<String> classSelect = new ComboBox<>("Select Class");
+    private final Grid<StudentEntity> attendanceTable = new Grid<>();
+    private final ComboBox<String> yearSelector = new ComboBox<>("Select Year");
+    private final Button generateSheetButton = new Button("Generate Sheet");
 
     public TakeAttendanceView() {
         setSpacing(false);
@@ -68,54 +60,53 @@ public class TakeAttendanceView extends VerticalLayout {
     boolean isFieldEmpty() {
         String error = "fill field";
         datePicker.setErrorMessage(error);
-        programSelector.setErrorMessage(error);
+        courseSelector.setErrorMessage(error);
         classSelect.setErrorMessage(error);
-        return datePicker.isInvalid() || programSelector.isInvalid() || classSelect.isInvalid();
+        return datePicker.isInvalid() || courseSelector.isInvalid() || classSelect.isInvalid();
     }
 
     private Component renderPageView() {
         VerticalLayout layout = new VerticalLayout();
-        programSelector.setLabel("Select Program");
-        classSelect.setLabel("Select Class");
 
-        programSelector.addClassName("take-attendance-combobox");
+        courseSelector.addClassName("take-attendance-combobox");
         classSelect.addClassName("take-attendance-combobox");
 
         // LOAD SELECTORS.
-        SpecialMethods.setPrograme(programSelector);
+        SpecialMethods.setCourses(courseSelector);
         SpecialMethods.setClasses(classSelect);
+        SpecialMethods.setYear(yearSelector);
 
         // SET REQUIRED FIELDS
         datePicker.setRequired(true);
         datePicker.setInvalid(datePicker.isEmpty());
-        programSelector.setRequired(true);
-        programSelector.setInvalid(programSelector.isEmpty());
+        courseSelector.setRequired(true);
+        courseSelector.setInvalid(courseSelector.isEmpty());
         classSelect.setRequired(true);
         classSelect.setInvalid(classSelect.isEmpty());
-
+        yearSelector.setRequired(true);
+        yearSelector.setInvalid(yearSelector.isEmpty());
         // restrict date picker to today.
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
         datePicker.setMin(today);
 
-        HorizontalLayout headerLayout = new HorizontalLayout(datePicker, programSelector, classSelect, button);
+        HorizontalLayout headerLayout = new HorizontalLayout(datePicker, courseSelector, classSelect, yearSelector, generateSheetButton);
 
         layout.setSizeFull();
         layout.setClassName("main-container");
         headerLayout.setWidthFull();
         headerLayout.setClassName("header-layout");
-        button.setClassName("filter-button");
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
-        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        generateSheetButton.setClassName("filter-button");
+        generateSheetButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
 
         layout.add(headerLayout, createTable());
 
         // ADD EVENT LISTENERS
-        button.addClickListener(event -> {
+        generateSheetButton.addClickListener(event -> {
             try {
                 Date date = Date.valueOf(datePicker.getValue());
                 if (isFieldEmpty()) {
                     new UserConfirmDialogs().showError("You have empty fields, please fill all.");
-                } else if (SERVICE_OBJ.checkAttendanceByDate(date, programSelector.getValue(), classSelect.getValue())) {
+                } else if (SERVICE_OBJ.checkAttendanceByDate(date, courseSelector.getValue(), classSelect.getValue(), yearSelector.getValue())) {
                     new UserConfirmDialogs()
                             .showError("Sorry Attendance for the specified date and Programme already recorded");
                 } else {
@@ -123,7 +114,7 @@ public class TakeAttendanceView extends VerticalLayout {
                     // loadTabelData(studentClass);
                     UI.getCurrent().access(()-> {
                         LoadTableGrid.loadTable(attendanceTable,
-                                SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(studentClass));
+                                SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(studentClass, yearSelector.getValue()));
                         int tableSize = attendanceTable.getListDataView().getItemCount();
                         H6 counterText = new H6(tableSize + " Students");
                         counterText.setClassName("table-counter");
@@ -142,7 +133,7 @@ public class TakeAttendanceView extends VerticalLayout {
     // Load Data into a GridList
     protected GridListDataView<StudentEntity> loadTabelData(String searchString) {
         GridListDataView<StudentEntity> data = attendanceTable
-                .setItems(SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(searchString));
+                .setItems(SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(searchString, yearSelector.getValue()));
         return data;
     }
 
@@ -201,7 +192,7 @@ public class TakeAttendanceView extends VerticalLayout {
                 return;
             } else {
                 new UserConfirmDialogs("SAVE ATTENDANCE",
-                    "Please confirm to save attendace. NOTE: once confirmed, attendance for current date cannot be taken again.")
+                    "Please confirm to save attendance. NOTE: once confirmed, attendance for current date cannot be taken again.")
                     .saveDialog().addConfirmListener(confirm -> {
                         AttendanceEntity entity = new AttendanceEntity();
                         AtomicInteger responseStatus = new AtomicInteger(0);
@@ -212,9 +203,10 @@ public class TakeAttendanceView extends VerticalLayout {
                             entity.setRowNumber(each.getId());
                             entity.setIndexNumber(each.getIndexNumber());
                             entity.setclassName(each.getStudentClass());
-                            entity.setprogrameName(programSelector.getValue());
+                            entity.setprogrameName(courseSelector.getValue());
                             entity.setAttendanceValue(attendanceValue);
                             entity.setAttendanceDate(date);
+                            entity.setYearGroup(yearSelector.getValue());
                             responseStatus.addAndGet(SERVICE_OBJ.saveAttendance(entity));
                         });
                         if (responseStatus.get() > 0) {

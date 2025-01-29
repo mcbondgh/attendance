@@ -26,9 +26,13 @@ public class Config extends ConfigProperties{
     
     protected Connection getCon(){
         try {
-            String URL = loadProps().getProperty("database.url");
-            String USERNAME = loadProps().getProperty("username");
-            String PASSWORD = loadProps().getProperty("password");
+//            String URL = loadProps().getProperty("database.url");
+//            String USERNAME = loadProps().getProperty("username");
+//            String PASSWORD = loadProps().getProperty("password");
+
+            String URL = "jdbc:mysql://127.0.0.1:3308/class_attendance";
+            String USERNAME = "attendance";
+            String PASSWORD = "1244656800";
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             // connection.setAutoCommit(false);
         } catch (SQLException e) {

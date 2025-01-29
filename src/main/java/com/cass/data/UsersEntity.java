@@ -22,7 +22,7 @@ public class UsersEntity {
     }
 
     private void setParameters(){
-        roleName = roleId == 1 ? "Admin" : "User";
+        roleName = roleId == 1 ? "Admin" : roleId == 2 ? "Teaching Assistant" : "Class Rep";
        
         if (statusId == 1) {
             statusValue.setText( "Active");

@@ -7,14 +7,23 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 public class StudentEntity {
     private int id;
-    private String indexNumber, fullName, programe;
+    private String indexNumber, fullName, programme;
     private String studentClass, department;
     private byte status;
     private Timestamp dateAdded, dateUpdated;
     private RadioButtonGroup<String> attendanceButton = new RadioButtonGroup<>();
     private ComboBox<String> attendanceSelector = new ComboBox<>();
+    private String yearGroup;
+    private String level, section;
 
-    
+    public String getSection() {
+        return section;
+    }
+
+    public void setSection(String section) {
+        this.section = section;
+    }
+
     public StudentEntity() {
     }
     
@@ -36,7 +45,7 @@ public class StudentEntity {
         this.id = id;
         this.indexNumber = indexNumber;
         this.fullName = fullName;
-        this.programe = programe;
+        this.programme = programe;
         this.studentClass = studentClass;
         this.department = department;
         this.status = status;
@@ -62,11 +71,11 @@ public class StudentEntity {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
-    public String getPrograme() {
-        return programe;
+    public String getProgramme() {
+        return programme;
     }
-    public void setPrograme(String programe) {
-        this.programe = programe;
+    public void setProgramme(String programme) {
+        this.programme = programme;
     }
     public String getStudentClass() {
         return studentClass;
@@ -74,6 +83,15 @@ public class StudentEntity {
     public void setStudentClass(String studentClass) {
         this.studentClass = studentClass;
     }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
     public String getDepartment() {
         return department;
     }
@@ -103,7 +121,15 @@ public class StudentEntity {
 		return attendanceButton;
 	}
 
-	public void setAttendanceButton(RadioButtonGroup<String> attendanceButton) {
+    public String getYearGroup() {
+        return yearGroup;
+    }
+
+    public void setYearGroup(String yearGroup) {
+        this.yearGroup = yearGroup;
+    }
+
+    public void setAttendanceButton(RadioButtonGroup<String> attendanceButton) {
 		this.attendanceButton = attendanceButton;
 	}
 

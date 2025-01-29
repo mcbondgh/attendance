@@ -10,10 +10,7 @@ import com.cass.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.charts.model.Items;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -30,9 +27,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataCommunicator.Filter;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
@@ -44,9 +39,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.vaadin.lineawesome.LineAwesomeIcon;
-import org.vaadin.reports.PrintPreviewReport;
-
-import javax.management.Notification;
 
 @PageTitle("View Attendance")
 @Route(value = "view-attendance", layout = MainLayout.class)
@@ -64,6 +56,7 @@ public class ViewAttendanceView extends VerticalLayout {
     private ComboBox<String> programPicker = new ComboBox<>("Select Program");
     private Button generateButton = new Button("Generate");
     private TextField filterField = new TextField();
+    private final ComboBox<String> yearGroup = new ComboBox<>("Year Group");
     UserConfirmDialogs POPUP;
 
     public ViewAttendanceView() {
@@ -71,10 +64,8 @@ public class ViewAttendanceView extends VerticalLayout {
         generateButton.setClassName("generate-attendance-view-button");
         generateButton.setEnabled(false);
         filterField.addClassName("filter-field");
-
         requiredFields();
         add(renderViewHeader(), renderTableContent());
-
     }
 
     /*************************************************************************************
@@ -89,6 +80,8 @@ public class ViewAttendanceView extends VerticalLayout {
         programPicker.setInvalid(programPicker.isEmpty());
         programPicker.setRequired(true);
         classPicker.setRequired(true);
+        yearGroup.setRequired(true);
+        yearGroup.setInvalid(yearGroup.isEmpty());
     }
 
     private void isFieldEmpty(Button button) {
@@ -110,17 +103,19 @@ public class ViewAttendanceView extends VerticalLayout {
 
         generateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
         SpecialMethods.setClasses(classPicker);
-        SpecialMethods.setPrograme(programPicker);
+        SpecialMethods.setCourses(programPicker);
+        SpecialMethods.setYear(yearGroup);
 
         classPicker.setClassName("take-attendance-combobox");
+        yearGroup.setClassName("take-attendance-combobox");
         programPicker.setClassName("take-attendance-combobox");
         generateButton.setClassName("generate-button");
         // add components to layout
-        layout.add(hLayout, classPicker, programPicker, generateButton);
+        layout.add(hLayout, classPicker, programPicker, yearGroup, generateButton);
         layout.setAlignSelf(Alignment.END, generateButton);
 
         // add eventlistner to layout to check if field is empty and enable button same.
-        layout.getElement().addEventListener("mousemove", callBack -> {
+        layout.getElement().addEventListener("mouseover", callBack -> {
             isFieldEmpty(generateButton);
         });
 
@@ -133,7 +128,7 @@ public class ViewAttendanceView extends VerticalLayout {
             Date end = Date.valueOf(endDatePicker.getValue());
             LoadTableGrid.loadTable(
                     grid,
-                    DAO_OBJECT.fetchAttendanceRecords(start, end, classPicker.getValue(), programPicker.getValue()));
+                    DAO_OBJECT.fetchAttendanceRecords(start, end, classPicker.getValue(), programPicker.getValue(), yearGroup.getValue()));
             AtomicInteger presentCounter = new AtomicInteger(0);
             AtomicInteger abscentCounter = new AtomicInteger(0);
             AtomicInteger excusedCounter = new AtomicInteger(0);
@@ -256,6 +251,8 @@ public class ViewAttendanceView extends VerticalLayout {
 
     //GET THE STREAM DATA SOURCE FROM THE PDF GENERATED DOCUMENT.
     private StreamResource pdfStream() {
+//        InputStream stream = DocumentGenerator.generateAttendancePdf(classPicker.getValue(), programPicker.getValue(),grid);
+//        return DocumentStreams.createFileResource("Attendance Report.pdf",stream);
         return new StreamResource("Attendance Report.pdf", ()-> {
             try {
                 return new ByteArrayInputStream(DocumentGenerator.generateAttendancePdf(classPicker.getValue(), programPicker.getValue(), grid).readAllBytes());

@@ -1,4 +1,4 @@
-package com.cass.views.managecourse;
+package com.cass.views.classActivities;
 
 import java.sql.Date;
 import java.util.Collection;
@@ -41,12 +41,12 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-@PageTitle("Manage Course")
+@PageTitle("Class Activity")
 @Route(value = "activities", layout = MainLayout.class)
 // @RolesAllowed({ "ADMIN", "USERS" })
 @AnonymousAllowed
 @Uses(Icon.class)
-public class ManageCourseView extends Composite<VerticalLayout> {
+public class ManageClassActivityView extends Composite<VerticalLayout> {
 
     private VerticalLayout tableLayout = new VerticalLayout();
     private Grid<ActivitiesEntity> activityTable = new Grid<>();
@@ -60,7 +60,7 @@ public class ManageCourseView extends Composite<VerticalLayout> {
     private NumberField maxScoreField = new NumberField("Maximum Score");
     private Button toggleButton = new Button(" Add Activity");
 
-    public ManageCourseView() {
+    public ManageClassActivityView() {
         getContent().add(renderPageHeader(), renderPageView());
         setRequiredFields();
         loadFields();
@@ -99,7 +99,7 @@ public class ManageCourseView extends Composite<VerticalLayout> {
     private void loadFields() {
         SpecialMethods.setClasses(classSelector);
         SpecialMethods.setActivityTypes(activitySelector);
-        SpecialMethods.setPrograme(programeSelector);
+        SpecialMethods.setCourses(programeSelector);
     }
 
     /****************************************************************************************************

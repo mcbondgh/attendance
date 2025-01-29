@@ -1,16 +1,19 @@
 package com.cass.views;
 
+import com.cass.dialogs.UpdatePasswordDialog;
 import com.cass.security.SessionManager;
 //import com.cass.security.AuthenticatedUser;
 import com.cass.views.addstudent.AddStudentView;
+import com.cass.views.courses.ManageCoursesView;
 import com.cass.views.dashboard.DashboardView;
 import com.cass.views.login.UserLoginView;
-import com.cass.views.managecourse.ManageCourseView;
+import com.cass.views.classActivities.ManageClassActivityView;
 import com.cass.views.manageusers.ManageUsersView;
 import com.cass.views.reports.ReportsView;
 import com.cass.views.takeattendance.TakeAttendanceView;
 import com.cass.views.reports.viewattendance.ViewAttendanceView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -26,6 +29,7 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -34,16 +38,23 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
  */
 public class MainLayout extends AppLayout implements BeforeEnterObserver {
     private H2 viewTitle;
-    private H6 userNameLabel = new H6();
+    private final H6 userNameLabel = new H6();
+    int roleId;
 
 //    private AuthenticatedUser authenticatedUser;
 //    private AccessAnnotationChecker accessChecker;
 
     public MainLayout() {
+        try {
+            roleId = Integer.parseInt(SessionManager.getAttribute("roleId").toString());
+            setPrimarySection(Section.DRAWER);
+            addDrawerContent();
+            addHeaderContent();
+        }catch (Exception e) {
+            SessionManager.destroySession();
+            UI.getCurrent().getPage().setLocation(UserLoginView.class.getAnnotation(Route.class).value());
+        }
 
-        setPrimarySection(Section.DRAWER);
-        addDrawerContent();
-        addHeaderContent();
     }
 
     private void addHeaderContent() {
@@ -60,7 +71,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         H3 appName = new H3("ATTENDANCE SHEET");
         appName.addClassNames(LumoUtility.FontSize.MEDIUM, LumoUtility.Margin.NONE);
         Header header = new Header(appName);
-        
+
         appName.setClassName("app-name-text");
 
         Scroller scroller = new Scroller(createNavigation());
@@ -71,35 +82,42 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     }
 
     private Component createNavigation() {
-        SideNav nav1 = new SideNav();
-            nav1.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.MDB.create()));
-            nav1.addItem(new SideNavItem("Take Attendance", TakeAttendanceView.class,
-                    LineAwesomeIcon.PENCIL_ALT_SOLID.create()));
-            nav1.addItem(
-                    new SideNavItem("Manage Students", AddStudentView.class, LineAwesomeIcon.PLUS_CIRCLE_SOLID.create()));
-            nav1.addItem(new SideNavItem("Manage Activities", ManageCourseView.class, LineAwesomeIcon.USER.create()));
-            nav1.addItem(
-                    new SideNavItem("Manage Users", ManageUsersView.class, LineAwesomeIcon.USERS_COG_SOLID.create()));
+
+        SideNav navItem = new SideNav();
+        navItem.addItem(new SideNavItem("Dashboard", DashboardView.class, LineAwesomeIcon.MDB.create()));
+        navItem.addItem(new SideNavItem("Take Attendance", TakeAttendanceView.class,
+                LineAwesomeIcon.PENCIL_ALT_SOLID.create()));
+        navItem.addItem(
+                new SideNavItem("Manage Students", AddStudentView.class, LineAwesomeIcon.PLUS_CIRCLE_SOLID.create()));
+        navItem.addItem(
+                new SideNavItem("Manage Courses", ManageCoursesView.class, LineAwesomeIcon.BOOK_OPEN_SOLID.create()));
+        navItem.addItem(new SideNavItem("Manage Activities", ManageClassActivityView.class, LineAwesomeIcon.USER.create()));
+
+        SideNavItem usersNav = new SideNavItem("Manage Users", ManageUsersView.class, LineAwesomeIcon.USERS_COG_SOLID.create());
+
+        if (roleId == 1) {
+            navItem.addItem(usersNav);
+        }
 
         SideNav reportsNav = new SideNav("Reports");
         reportsNav.setCollapsible(true);
         reportsNav.setExpanded(false);
 
-        reportsNav.addItem( new SideNavItem("Reports", ReportsView.class, LineAwesomeIcon.RECEIPT_SOLID.create()));
+        reportsNav.addItem(new SideNavItem("Reports", ReportsView.class, LineAwesomeIcon.RECEIPT_SOLID.create()));
         reportsNav.addItem(new SideNavItem("View Attendance", ViewAttendanceView.class,
                 LineAwesomeIcon.FILTER_SOLID.create()));
         // if (accessChecker.hasAccess(SetUpView.class)) {
-        //     nav1.addItem(new SideNavItem("Set Up", SetUpView.class, LineAwesomeIcon.LIST_SOLID.create()));
+        //     navItem.addItem(new SideNavItem("Set Up", SetUpView.class, LineAwesomeIcon.LIST_SOLID.create()));
 
         // }
 
-        nav1.addClassNames("side-nav", "side-nav-one");
+        navItem.addClassNames("side-nav", "side-nav-one");
         reportsNav.addClassNames("side-nav", "reports-nav");
-        VerticalLayout navLayout = new VerticalLayout(nav1, reportsNav);
+        VerticalLayout navLayout = new VerticalLayout(navItem, reportsNav);
         navLayout.setSpacing(false);
         navLayout.setSizeUndefined();
 
-        nav1.setWidthFull();
+        navItem.setWidthFull();
         reportsNav.setWidthFull();
         return navLayout;
     }
@@ -109,30 +127,34 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         try {
             String activeUser = SessionManager.getAttribute("activeUser").toString();
             userNameLabel.setText(activeUser);
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             beforeEvent.forwardTo(UserLoginView.class);
         }
     }
-    
+
     private Footer createFooter() {
         Footer layout = new Footer();
         layout.setClassName("footer-container");
 
         MenuBar menuBar = new MenuBar();
         MenuItem menuItem = menuBar.addItem(userNameLabel);
+
         Avatar avatar = new Avatar();
         avatar.setImage("icons/user-100.png");
         avatar.setClassName("avatar");
         menuItem.addComponentAsFirst(avatar);
-        Anchor signoutLink = new Anchor("javascript:void(0)", "sign out");
+        String redirectUrl = UserLoginView.class.getAnnotation(Route.class).value();//"javascript:void(0)"
+        Anchor signoutLink = new Anchor(redirectUrl, "sign out");
         signoutLink.setWidthFull();
 
         //logout user...
         signoutLink.getElement().addEventListener("click", callBack -> {
             SessionManager.destroySession();
+            UI.getCurrent().getPage().setLocation("/");
         });
 
         SubMenu subMenu = menuItem.getSubMenu();
+        subMenu.addItem("Update Password", e -> new UpdatePasswordDialog().openDialog());
         subMenu.addItem(signoutLink);
 
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
@@ -154,6 +176,5 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         return title == null ? "" : title.value();
     }
 
-   
 
 }

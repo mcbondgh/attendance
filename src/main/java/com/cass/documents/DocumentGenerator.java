@@ -20,6 +20,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.plutext.jaxb.xslfo.TableHeader;
 
 import java.io.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -36,11 +37,10 @@ public class DocumentGenerator {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
             String date = LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL));
-            AtomicReference<String> attendanceDate = new AtomicReference<>();
-            dataTable.getListDataView().getItems().forEach(item -> {
-                String format = item.getAttendanceDate().toLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
-                attendanceDate.set(format);
-            });
+//            dataTable.getListDataView().getItems().forEach(item -> {
+//                String format = item.getAttendanceDate().toLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
+//                attendanceDate.set(format);
+//            });
             PdfWriter pdfWriter = new PdfWriter(outputStream);
             PdfDocument pdfDocument = new PdfDocument(pdfWriter);
             Document document = new Document(pdfDocument);
@@ -57,10 +57,10 @@ public class DocumentGenerator {
             table.addHeaderCell(new Cell(0,5).add(heading));
             table.addHeaderCell(new Cell(0, 2).add(new Paragraph("CLASS")).setFontSize(12).setBold());
             table.addHeaderCell(new Cell(0, 3).add(new Paragraph(className)).setFontSize(12).setBold());
-            table.addHeaderCell(new Cell(0,1).add(new Paragraph("DATE")));
-            table.addHeaderCell(new Cell(0,1).add(new Paragraph(attendanceDate.get())).setBold());
-            table.addHeaderCell(new Cell(0,1).add(new Paragraph("PROGRAMME")));
-            table.addHeaderCell(new Cell(0,2).add(new Paragraph(programme)).setBold());
+//            table.addHeaderCell(new Cell(0,1).add(new Paragraph("DATE")));
+//            table.addHeaderCell(new Cell(0,1).add(new Paragraph(attendanceDate.get())).setBold());
+            table.addHeaderCell(new Cell(0,2).add(new Paragraph("PROGRAMME")).setBold());
+            table.addHeaderCell(new Cell(0,3).add(new Paragraph(programme)).setBold());
 
             //set table content headers
             table.addHeaderCell(new Cell(0, 1).add(new Paragraph("NO.")).setFontSize(10).setBold());

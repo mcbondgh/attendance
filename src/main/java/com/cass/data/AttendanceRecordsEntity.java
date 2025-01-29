@@ -21,9 +21,8 @@ public class AttendanceRecordsEntity {
     public AttendanceRecordsEntity() {
     }
 
-    public AttendanceRecordsEntity(int id, Date attendanceDate, String indexNumber, String fullname, int present, int abscent, int totalAttendance, int excused) {
+    public AttendanceRecordsEntity(int id, String indexNumber, String fullname, int present, int abscent, int totalAttendance, int excused) {
         this.id = id;
-        this.attendanceDate = attendanceDate;
         this.indexNumber = indexNumber;
         this.fullname = fullname;
         this.present = present;

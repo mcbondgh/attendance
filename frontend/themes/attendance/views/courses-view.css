@@ -1,0 +1,10 @@
+.dialog-inner-container {
+    max-width: 330px;
+    width:500px;
+}
+
+.page-content-container {
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}

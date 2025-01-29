@@ -11,6 +11,7 @@ public class AttendanceEntity {
     String attendanceValue;
     Date attendanceDate;
     Timestamp dateRecorded;
+	private String yearGroup;
 
     
 	public AttendanceEntity() {
@@ -50,6 +51,29 @@ public class AttendanceEntity {
 		this.rowNumber = rowNumber;
 	}
 
+	public String getYearGroup() {
+		return yearGroup;
+	}
+
+	public void setYearGroup(String yearGroup) {
+		this.yearGroup = yearGroup;
+	}
+
+	public String getProgrameName() {
+		return programeName;
+	}
+
+	public void setProgrameName(String programeName) {
+		this.programeName = programeName;
+	}
+
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
 	public String getIndexNumber() {
 		return indexNumber;
