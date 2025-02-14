@@ -46,21 +46,22 @@ public class ReportsView extends VerticalLayout {
     DAO DAO = new DAO();
 
     private final Grid<ActivitiesEntity> reportsTable = new Grid<>();
-    private final ComboBox<String> classPicker = new ComboBox<>("Select Class");
+    private final ComboBox<String> programmePicker = new ComboBox<>("Select Programme");
     private final ComboBox<String> coursePicker = new ComboBox<>("Select Course");
     private final ComboBox<String> yearGroup = new ComboBox<>("Select Year Group");
     private final Button generateReportButton = new Button("Generate");
     private final ComboBox<String> typePicker = new ComboBox<>("Select Activity");
-    private final ComboBox<String> semesterPicker = new ComboBox<>("Select Semester");
+    private final ComboBox<String> classPicker = new ComboBox<>("Select Class", "A", "B");
+
     private final TextField filterField = new TextField();
-    private final Anchor pdfLink = new Anchor("#", "PDF File");
-    private final Anchor csvLink = new Anchor("#", "CSV File");
+    private final Anchor pdfLink = new Anchor("#", "PDF");
+    private final Anchor csvLink = new Anchor("#", "CSV");
 
     void populateFields() {
-        SpecialMethods.setClasses(classPicker);
+        SpecialMethods.loadProgrammes(programmePicker);
         SpecialMethods.setCourses(coursePicker);
         SpecialMethods.setYear(yearGroup);
-        SpecialMethods.setSemester(semesterPicker);
+//        SpecialMethods.setSemester(classPicker);
         SpecialMethods.setActivityTypes(typePicker);
     }
 
@@ -104,30 +105,30 @@ public class ReportsView extends VerticalLayout {
         generateReportButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
 
         generateReportButton.setClassName("generate-report-button");
-        classPicker.addClassNames("item-picker","class-picker");
+        programmePicker.addClassNames("item-picker","class-picker");
         coursePicker.addClassNames("item-picker", "course-picker");
         typePicker.addClassNames("item-picker", "type-picker");
         yearGroup.addClassNames("item-picker", "year-group-picker");
-        semesterPicker.addClassNames("item-picker", "semester-picker");
+        classPicker.addClassNames("item-picker", "semester-picker");
         pdfLink.addClassNames("anchor-link", "pdf-button");
         csvLink.addClassNames("anchor-link", "csv-button");
 
-        classPicker.setRequired(true);
+        programmePicker.setRequired(true);
         coursePicker.setRequired(true);
         typePicker.setRequired(true);
         yearGroup.setRequired(true);
-        semesterPicker.setRequired(true);
+        classPicker.setRequired(true);
 
-        classPicker.setInvalid(classPicker.isEmpty());
+        programmePicker.setInvalid(programmePicker.isEmpty());
         coursePicker.setInvalid(coursePicker.isEmpty());
         typePicker.setInvalid(typePicker.isEmpty());
         yearGroup.setInvalid(yearGroup.isEmpty());
-        semesterPicker.setInvalid(semesterPicker.isEmpty());
+        classPicker.setInvalid(classPicker.isEmpty());
 
         //Disable button if either of the selectors are empty
         layout.getElement().addEventListener("mouseover", event -> {
            generateReportButton.setEnabled(
-                   !(classPicker.isInvalid() || coursePicker.isInvalid() || typePicker.isInvalid() || yearGroup.isInvalid())
+                   !(programmePicker.isInvalid() || coursePicker.isInvalid() || typePicker.isInvalid() || yearGroup.isInvalid())
            );
         });
 
@@ -142,7 +143,7 @@ public class ReportsView extends VerticalLayout {
             this.downloadReport();
         });
 
-        layout.add(classPicker, coursePicker, semesterPicker, typePicker, yearGroup, new Hr(), generateReportButton );
+        layout.add(programmePicker, coursePicker, classPicker, typePicker, yearGroup, new Hr(), generateReportButton );
         return layout;
     }
 
@@ -194,10 +195,10 @@ public class ReportsView extends VerticalLayout {
      ******************************************************************************************************************/
     private @NotNull Map<String, Object> getParameters() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("semester", semesterPicker.getValue());
         parameters.put("className", classPicker.getValue());
+        parameters.put("programme", programmePicker.getValue());
         parameters.put("activityType", typePicker.getValue());
-        parameters.put("program", coursePicker.getValue());
+        parameters.put("course", coursePicker.getValue());
         parameters.put("yearGroup", yearGroup.getValue());
         return parameters;
     }
@@ -230,7 +231,7 @@ public class ReportsView extends VerticalLayout {
 //        });
 //        pdfLink.setHref(resource);
 //        pdfLink.setTarget("_blank");
-            String className = classPicker.getValue();
+            String className = programmePicker.getValue();
             String course = coursePicker.getValue();
 
             //create pdf downloadable file.

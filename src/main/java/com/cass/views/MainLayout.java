@@ -9,6 +9,7 @@ import com.cass.views.dashboard.DashboardView;
 import com.cass.views.login.UserLoginView;
 import com.cass.views.classActivities.ManageClassActivityView;
 import com.cass.views.manageusers.ManageUsersView;
+import com.cass.views.manageusers.UserLogsView;
 import com.cass.views.reports.ReportsView;
 import com.cass.views.takeattendance.TakeAttendanceView;
 import com.cass.views.reports.viewattendance.ViewAttendanceView;
@@ -94,9 +95,11 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         navItem.addItem(new SideNavItem("Manage Activities", ManageClassActivityView.class, LineAwesomeIcon.USER.create()));
 
         SideNavItem usersNav = new SideNavItem("Manage Users", ManageUsersView.class, LineAwesomeIcon.USERS_COG_SOLID.create());
+        SideNavItem userLogsNav = new SideNavItem("User Logs", UserLogsView.class, LineAwesomeIcon.USERS_COG_SOLID.create());
 
         if (roleId == 1) {
             navItem.addItem(usersNav);
+            navItem.addItem(userLogsNav);
         }
 
         SideNav reportsNav = new SideNav("Reports");
@@ -144,7 +147,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         avatar.setClassName("avatar");
         menuItem.addComponentAsFirst(avatar);
         String redirectUrl = UserLoginView.class.getAnnotation(Route.class).value();//"javascript:void(0)"
-        Anchor signoutLink = new Anchor(redirectUrl, "sign out");
+        Anchor signoutLink = new Anchor("", "sign out");
         signoutLink.setWidthFull();
 
         //logout user...

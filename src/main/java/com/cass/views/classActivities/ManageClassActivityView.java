@@ -7,6 +7,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cass.views.reports.ActivitiesView;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.dom.Style;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.cass.data.ActivitiesEntity;
@@ -54,11 +58,13 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
     private Button createActivityButton = new Button("Generate");
     private ComboBox<String> activitySelector = new ComboBox<>("Activity Type");
     private DatePicker datePicker = new DatePicker("Activity Date");
-    private ComboBox<String> classSelector = new ComboBox<>("Calss");
+    private ComboBox<String> programmeSelector = new ComboBox<>("Programme");
     private TextField titleField = new TextField("Title");
-    private ComboBox<String> programeSelector = new ComboBox<>("Programe");
+    private ComboBox<String> courseSelector = new ComboBox<>("Course");
     private NumberField maxScoreField = new NumberField("Maximum Score");
     private Button toggleButton = new Button(" Add Activity");
+    private final ComboBox<String> sectionSelector = new ComboBox<>("Class", "A", "B");
+    private final ComboBox<String> levelSelector = new ComboBox<>("Level");
 
     public ManageClassActivityView() {
         getContent().add(renderPageHeader(), renderPageView());
@@ -71,35 +77,41 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
      ****************************************************************************************************/
     private void setRequiredFields() {
         createActivityButton.setEnabled(false);
+        createActivityButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        createActivityButton.addClassNames("default-button");
         datePicker.setRequired(true);
         datePicker.setInvalid(datePicker.isEmpty());
         maxScoreField.setRequired(true);
         maxScoreField.setAllowedCharPattern("[0-9.]");
         maxScoreField.setInvalid(maxScoreField.isEmpty());
-        classSelector.setInvalid(classSelector.isEmpty());
-        classSelector.setRequired(true);
-        programeSelector.setRequired(true);
-        programeSelector.setInvalid(programeSelector.isEmpty());
+        programmeSelector.setInvalid(programmeSelector.isEmpty());
+        programmeSelector.setRequired(true);
+        sectionSelector.setRequired(true);
+        sectionSelector.setInvalid(sectionSelector.isEmpty());
+        courseSelector.setRequired(true);
+        courseSelector.setInvalid(courseSelector.isEmpty());
         activitySelector.setRequired(true);
         activitySelector.setInvalid(activitySelector.isEmpty());
-        titleField.setInvalid(titleField.isEmpty());
+        levelSelector.setRequired(true);
+        levelSelector.setInvalid(levelSelector.isEmpty());
     }
 
     private void checkForEmptyFields(Component component) {
-        component.getElement().addEventListener("mousemove", callBack -> {
+        component.getElement().addEventListener("mouseover", callBack -> {
             UI.getCurrent().access(() -> {
                 createActivityButton.setEnabled(
-                        !(datePicker.isInvalid() || titleField.isInvalid() || maxScoreField.isEmpty() || activitySelector.isInvalid() ||
-                                classSelector.isInvalid() || programeSelector.isInvalid()));
+                        !(datePicker.isInvalid() || levelSelector.isInvalid() || maxScoreField.isEmpty() || activitySelector.isInvalid() ||
+                                programmeSelector.isInvalid() || courseSelector.isInvalid()));
             });
         });
 
     }
 
     private void loadFields() {
-        SpecialMethods.setClasses(classSelector);
+        SpecialMethods.loadProgrammes(programmeSelector);
         SpecialMethods.setActivityTypes(activitySelector);
-        SpecialMethods.setCourses(programeSelector);
+        SpecialMethods.setCourses(courseSelector);
+        SpecialMethods.setLevel(levelSelector);
     }
 
     /****************************************************************************************************
@@ -113,7 +125,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         layout.addClassNames("dashboard-header-container", "view-header-container");
         headerTitle.setClassName("dashboard-header-text");
         viewButton.addClassName("activity-button");
-        viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
+        viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
 
         layout.add(headerTitle, viewButton);
 
@@ -157,7 +169,25 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         // }
         // });
 
-        formlayout.add(datePicker, titleField, activitySelector, classSelector, programeSelector, maxScoreField, new Hr(),
+        var dateAndActivityContainer = new FlexLayout(activitySelector, datePicker);
+        dateAndActivityContainer.setAlignItems(Alignment.BASELINE);
+        dateAndActivityContainer.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        dateAndActivityContainer.setFlexGrow(1);
+        dateAndActivityContainer.getStyle().set("gap", "5px");
+        dateAndActivityContainer.addClassNames("date-activity-container");
+
+        Div classAndCourseContainer = new Div(courseSelector, sectionSelector);
+        classAndCourseContainer.addClassNames("date-activity-container");
+        sectionSelector.getStyle().setWidth("50px");
+        classAndCourseContainer.getStyle().setAlignItems(Style.AlignItems.CENTER);
+
+        activitySelector.addClassNames("item-selector", "activity-selector");
+        datePicker.addClassNames("item-selector", "date-picker");
+        programmeSelector.addClassNames("item-selector", "programme-selector");
+        courseSelector.addClassNames("item-selector", "course-selector");
+        sectionSelector.addClassNames("item-selector", "course-selector");
+        levelSelector.addClassNames("item-selector", "level-selector");
+        formlayout.add(programmeSelector, classAndCourseContainer, levelSelector, dateAndActivityContainer, maxScoreField, new Hr(),
                 createActivityButton);
 
         layout.add(headerText, formlayout);
@@ -168,13 +198,12 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         // ADD CLICK LISTENER TO THE generateButton TO FETCH AND FILL TABLE RECORDS.
         createActivityButton.addClickListener(clickEvent -> {
             UI.getCurrent().access(() -> {
-                Collection<ActivitiesEntity> x = new DAO().fetchClassListByClassName(classSelector.getValue());
-                if (x.isEmpty()) {
+                Collection<ActivitiesEntity> data = new DAO().fetchClassListByClassName(programmeSelector.getValue(), sectionSelector.getValue(), levelSelector.getValue());
+                if (data.isEmpty()) {
                     new UserConfirmDialogs().showError("Empty class list");
                     activityTable.setItems(Collections.emptyList());
-                    return;
                 } else {
-                    LoadTableGrid.loadTable(activityTable, x);
+                    LoadTableGrid.loadTable(activityTable, data);
                 }
             });
         });
@@ -200,13 +229,13 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         activityTable.addColumn(ActivitiesEntity::getIndexNumber).setHeader("INDEX NUMBER");
         activityTable.addColumn(ActivitiesEntity::getName).setHeader("FULL NAME");
         activityTable.addComponentColumn(conponent -> {
-            conponent.getScoreField().setMax(maxScoreField.getValue()); 
+            conponent.getScoreField().setMax(maxScoreField.getValue());
             return conponent.getScoreField();
         }).setHeader("SCORE");
 
         activityTable.getColumns().forEach(each -> each.setAutoWidth(true));
         activityTable.getColumns().forEach(each -> each.setSortable(true));
-        
+
         tableLayout.add(filterField, activityTable, saveActivityButton);
         tableLayout.setAlignSelf(Alignment.END, saveActivityButton);
 
@@ -225,9 +254,9 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         });
 
         //ENABLE OR DISABLE SAVE BUTTON ON HOVER.
-        tableLayout.getElement().addEventListener("mousemove", callBack-> {
+        tableLayout.getElement().addEventListener("mousemove", callBack -> {
             boolean isEmpty = activityTable.getListDataView().getItemCount() == 0;
-            if(isEmpty) {
+            if (isEmpty) {
                 saveActivityButton.setEnabled(false);
                 saveActivityButton.addClassName("disable-button");
             } else {
@@ -237,42 +266,46 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         });
 
         //ADD CLICK EVENT TO SAVE BUTTON 
-        saveActivityButton.addClickListener(event -> { 
+        saveActivityButton.addClickListener(event -> {
             ActivitiesEntity entity = new ActivitiesEntity();
-            
+
             AtomicBoolean isFieldInvalid = new AtomicBoolean(false);
             activityTable.getListDataView().getItems().forEach(item -> {
-                if(item.getScoreField().isInvalid()) {
+                if (item.getScoreField().isInvalid()) {
                     isFieldInvalid.set(true);
                 }
             });
 
             if (isFieldInvalid.getAcquire()) {
                 new UserConfirmDialogs().showError("You have one or more invalid score inputs, check fields");
-                return;
             } else {
                 new UserConfirmDialogs("SAVE ACADEMIC ACTIVITY", "Confirm to save scores for specified activity.")
-                .saveDialog().addConfirmListener(confirm -> {
-                    AtomicInteger counter = new AtomicInteger();
-                        activityTable.getListDataView().getItems().forEach(item -> {
-                        entity.setRowNumber(item.getId());
-                        entity.setActivityType(activitySelector.getValue());
-                        entity.setPrograme(programeSelector.getValue());
-                        entity.setClassName(classSelector.getValue());
-                        entity.setMaximumScore(maxScoreField.getValue());
-                        entity.setActivityDate(Date.valueOf(datePicker.getValue()));
-                        entity.setScore(item.getScoreField().getValue());
-                        entity.setActivityTitle(titleField.getValue());
-                        counter.addAndGet(new ActivityService().saveAcademicActivity(entity));
-                    });
-                    if(counter.get() > 1) {
-                        UI.getCurrent().access(()-> {
-                            new UserConfirmDialogs().showSuccess("Nice, activity has successfully been saved.");
-                            activityTable.setItems(Collections.emptyList());
+                        .saveDialog().addConfirmListener(confirm -> {
+                            AtomicInteger counter = new AtomicInteger(0);
+                            UI.getCurrent().access(() -> {
+                                activityTable.getListDataView().getItems().forEach(item -> {
+                                    entity.setRowNumber(item.getId());
+                                    entity.setActivityType(activitySelector.getValue());
+                                    entity.setCourse(courseSelector.getValue());
+                                    entity.setClassName(sectionSelector.getValue());
+                                    entity.setPrograme(programmeSelector.getValue());
+                                    entity.setMaximumScore(maxScoreField.getValue());
+                                    entity.setActivityDate(Date.valueOf(datePicker.getValue()));
+                                    entity.setScore(item.getScoreField().getValue());
+                                    entity.setLevel(levelSelector.getValue());
+                                    counter.getAndAdd(new ActivityService().saveAcademicActivity(entity));
+                                });
+                                if (counter.get() > 0) {
+                                    new UserConfirmDialogs().showSuccess("Nice, activity has successfully been saved.");
+                                    activityTable.setItems(Collections.emptyList());
+                                    levelSelector.clear();
+                                    programmeSelector.clear();
+                                    courseSelector.clear();
+                                    maxScoreField.clear();
+                                }
+                            });
                         });
-                    }
-                });
-            }            
+            }
         });
         return tableLayout;
     }

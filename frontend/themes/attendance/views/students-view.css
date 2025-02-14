@@ -9,6 +9,7 @@ box-sizing: border-box;
   padding: 10px;
   width: 100%;
   align-items: center;
+  box-sizing: border-box;
   justify-content: space-between;
 }
 .header-filter-container {
@@ -95,7 +96,31 @@ box-sizing: border-box;
 
 }
 
+.default-button {
+  font-size: 12px !important;
+  /* padding:5px; */
+}
 
+.items-layout {
+  box-sizing: border-box;
+  display: flex;
+}
+.item-picker {
+  box-sizing: border-box;
+}
+
+.updateFormLayout-layout {
+  border:1px solid rgb(201, 201, 201) !important;
+  border-radius: 5px !important;
+  padding: 15px;
+}
+
+.updateFormLayout-header-div {
+  background-color:#e4e4e45a;
+  padding:10px;
+  box-sizing: border-box;
+  border-radius: 2px;
+}
 
 
 @media screen and (max-width: 600px) {
@@ -131,5 +156,15 @@ box-sizing: border-box;
     width: 100%;
   }
 
+  .items-layout, .leve-and-section-container {
+    flex-direction: column;
+    width: 100%;
+  }
+  .item-picker {
+    width: 100%;
+  }
+  .default-button {
+    width: 100%;
+  }
 
 }

@@ -2,29 +2,28 @@ package com.cass.data;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.Objects;
 
 public class AttendanceEntity {
     int id,rowNumber;
     String indexNumber;
-    String className, programeName;
+    String className, programme, course;
     String attendanceValue;
     Date attendanceDate;
     Timestamp dateRecorded;
-	private String yearGroup;
+	private String yearGroup, level;
 
     
 	public AttendanceEntity() {
 	}
 
 
-	public AttendanceEntity(int id, int rowNumber, String indexNumber, String className, String programeName,
+	public AttendanceEntity(int id, int rowNumber, String indexNumber, String className, String programme,
 			String attendanceValue, Date attendanceDate, Timestamp dateRecorded) {
 		this.id = id;
 		this.rowNumber   = rowNumber  ;
 		this.indexNumber = indexNumber;
 		this.className = className;
-		this.programeName = programeName;
+		this.programme = programme;
 		this.attendanceValue = attendanceValue;
 		this.attendanceDate = attendanceDate;
 		this.dateRecorded = dateRecorded;
@@ -59,12 +58,12 @@ public class AttendanceEntity {
 		this.yearGroup = yearGroup;
 	}
 
-	public String getProgrameName() {
-		return programeName;
+	public String getProgramme() {
+		return programme;
 	}
 
-	public void setProgrameName(String programeName) {
-		this.programeName = programeName;
+	public void setProgramme(String programme) {
+		this.programme = programme;
 	}
 
 	public String getClassName() {
@@ -84,6 +83,13 @@ public class AttendanceEntity {
 		this.indexNumber = indexNumber;
 	}
 
+	public String getCourse() {
+		return course;
+	}
+
+	public void setCourse(String course) {
+		this.course = course;
+	}
 
 	public String getclassName() {
 		return className;
@@ -94,21 +100,17 @@ public class AttendanceEntity {
 		this.className = className;
 	}
 
-
-	public String getprogrameName() {
-		return programeName;
-	}
-
-
-	public void setprogrameName(String programeName) {
-		this.programeName = programeName;
-	}
-
-
 	public String getAttendanceValue() {
 		return attendanceValue;
 	}
 
+	public String getLevel() {
+		return level;
+	}
+
+	public void setLevel(String level) {
+		this.level = level;
+	}
 
 	public void setAttendanceValue(String attendanceValue) {
 		this.attendanceValue = attendanceValue;

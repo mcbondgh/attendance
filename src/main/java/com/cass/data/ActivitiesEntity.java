@@ -18,6 +18,7 @@ public class ActivitiesEntity {
     private String programe;
     private Timestamp dateCreated;
     private NumberField scoreField = new NumberField();
+    private String course, level;
 
     public ActivitiesEntity() {
     
@@ -32,15 +33,13 @@ public class ActivitiesEntity {
         indicators();
     }
 
-    
-
-    public ActivitiesEntity(String activityType, String activityTitle, Date activityDate, double maximumScore, double score, String programe) {
+    public ActivitiesEntity(String activityType, String course, Date activityDate, double maximumScore, double score, String programme) {
         this.activityType = activityType;
-        this.activityTitle = activityTitle;
+        this.activityTitle = course;
         this.activityDate = activityDate;
         this.maximumScore = maximumScore;
         this.score = score;
-        this.programe = programe;
+        this.programe = programme;
     }
 
     public ActivitiesEntity(int id, String fullname, String indexNumber, double score, double maximumScore, int activityCount) {
@@ -53,7 +52,7 @@ public class ActivitiesEntity {
     }
 
     public ActivitiesEntity(int id, String fullname, String indexNumber,String className, String title, String activityType, Date activityDate, double maximumScore,
-            double score, int rowNo, String programe) {
+            double score, int rowNo, String course) {
         this.id = id;
         this.className = className;
         this.fullname = fullname;
@@ -64,7 +63,7 @@ public class ActivitiesEntity {
         this.maximumScore = maximumScore;
         this.score = score;
         this.rowNumber = rowNo;
-        this.programe = programe;
+        this.course = course;
     }
 
 
@@ -98,6 +97,13 @@ public class ActivitiesEntity {
         this.activityDate = activityDate;
     }
 
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
 
     public double getmaximumScore() {
         return maximumScore;
@@ -153,6 +159,13 @@ public class ActivitiesEntity {
         return dateCreated;
     }
 
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
 
     public void setDateCreated(Timestamp dateCreated) {
         this.dateCreated = dateCreated;

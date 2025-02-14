@@ -36,8 +36,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -63,7 +63,6 @@ public class AddStudentView extends Composite<VerticalLayout> {
     private final ComboBox<String> yearGroup = new ComboBox<>();
     private final ComboBox<String> yearSelector = new ComboBox<>("Year Group");
     ComboBox<String> studentSearchLevel = new ComboBox<>();
-    ComboBox<String> sectionSelector = new ComboBox<>();
 
     public AddStudentView() {
         pageLayout.setClassName("container");
@@ -79,69 +78,68 @@ public class AddStudentView extends Composite<VerticalLayout> {
     private final Select<String> filterSelector = new Select<>();
 
     private Component renderPageHeader() {
-        HorizontalLayout layout = new HorizontalLayout();
-        //<theme-editor-local-classname>
-        layout.addClassName("add-student-view-horizontal-layout-1");
-        //<theme-editor-local-classname>
-        filterSelector.setOverlayClassName("add-student-view-select-1");
-        //<theme-editor-local-classname>
-        filterSelector.addClassName("add-student-view-select-1");
-        yearGroup.addClassName("add-student-view-select-1");
-        Button getStudentButton = new Button("Get Students");
+        FlexLayout layout = new FlexLayout();
+        layout.setWidthFull();
+        layout.setAlignItems(Alignment.CENTER);
+        layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        layout.addClassName("header-container");
 
-        SpecialMethods.setClasses(filterSelector);
-        SpecialMethods.setYear(yearGroup);
+        //declare needed components
+        Button getStudentButton = new Button("Load Students");
+        getStudentButton.addClassNames("default-button", "load-students-button");
+        getStudentButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
+        addNewStudentBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+        addNewStudentBtn.addClassNames("default-button");
 
-        studentSearchLevel.setPlaceholder("Select Level");
+        ComboBox<String> programmePicker = new ComboBox<>();
+        ComboBox<String> yearPicker = new ComboBox<>();
+        ComboBox<String> sectionPicker = new ComboBox<>("", "A", "B");
+        ComboBox<String> levelPicker = new ComboBox<>();
 
-        studentSearchLevel.setRequired(true);
-        sectionSelector.setRequired(true);
-        studentSearchLevel.addClassNames("item-selector");
-        sectionSelector.addClassNames("item-selector");
+        programmePicker.addClassNames("item-picker");
+        yearPicker.addClassNames("item-picker");
+        sectionPicker.addClassNames("item-picker");
+        levelPicker.addClassNames("item-picker");
 
-        SpecialMethods.setLevel(studentSearchLevel);
-        sectionSelector.setItems(List.of("A", "B"));
-        sectionSelector.setValue("A");
+        programmePicker.setPlaceholder("Select Programme");
+        yearPicker.setPlaceholder("Select Year");
+        sectionPicker.setPlaceholder("Select Section");
 
-        yearGroup.setPlaceholder("Select Year");
-        Div filterDiv = new Div(filterSelector, studentSearchLevel, sectionSelector, yearGroup, getStudentButton);
+        SpecialMethods.setLevel(levelPicker);
+        SpecialMethods.setYear(yearPicker);
+        SpecialMethods.loadProgrammes(programmePicker);
 
-        layout.add(filterDiv, addNewStudentBtn);
+        sectionPicker.setValue("A");
+        levelPicker.setValue("100");
+        yearPicker.setValue(String.valueOf(LocalDate.now().getYear()));
 
-        addNewStudentBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
+        programmePicker.setRequired(true);
+        yearPicker.setRequired(true);
 
-        addNewStudentBtn.setClassName("add-button");
-        layout.setClassName("header-container");
-        filterDiv.setClassName("header-filter-container");
+        HorizontalLayout itemsLayout = new HorizontalLayout(programmePicker, levelPicker, yearPicker, sectionPicker, getStudentButton);
+        itemsLayout.addClassName("items-layout");
+        itemsLayout.setAlignItems(Alignment.BASELINE);
+        itemsLayout.setJustifyContentMode(JustifyContentMode.START);
 
-        filterSelector.setClassName("filter-selector");
+        layout.add(itemsLayout, addNewStudentBtn);
 
-        // getStudentButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        getStudentButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
-        filterSelector.setPlaceholder("Select Class");
-
-
-        //ACTION EVENTS IMPLEMENTATION
-        addNewStudentBtn.addClickListener(event -> {
-            studentDialog();
-        });
-
+        //ACTION EVENT LISTENERS
         getStudentButton.addClickListener(event -> {
-            if (filterSelector.isEmpty() || yearGroup.isEmpty() || studentSearchLevel.isEmpty()) {
-                filterSelector.setInvalid(true);
-                filterSelector.setErrorMessage("Select a class");
-                yearGroup.setInvalid(true);
-                yearGroup.setErrorMessage("Select a year");
-                studentSearchLevel.setInvalid(true);
-                studentSearchLevel.setErrorMessage("Select Level");
-            } else {
-                tableData(filterSelector.getValue(), yearGroup.getValue(), studentSearchLevel.getValue(), sectionPicker.getValue());
+            boolean checkFields = programmePicker.isEmpty() || yearPicker.isEmpty() || sectionPicker.isEmpty() || levelPicker.isEmpty();
+            String errormsg = "Please make a selection";
+            programmePicker.setErrorMessage(programmePicker.isInvalid() ? errormsg : null);
+            yearPicker.setErrorMessage(yearPicker.isInvalid() ? errormsg : null);
+            sectionPicker.setErrorMessage(sectionPicker.isInvalid() ? errormsg : null);
+
+            if (!checkFields) {
+                tableData(programmePicker.getValue(), yearPicker.getValue(), levelPicker.getValue(), sectionPicker.getValue());
                 int tableSize = studentsTable.getListDataView().getItemCount();
                 H6 tableLabel = new H6("TOTAL STUDENTS " + tableSize);
                 tableLabel.setClassName("table-counter");
                 studentsTable.getColumnByKey("indexNumberColumn").setFooter(tableLabel);
             }
         });
+        addNewStudentBtn.addClickListener(event -> studentDialog());
         return layout;
     }
 
@@ -157,9 +155,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         studentsTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER").setKey("indexNumberColumn");
         studentsTable.addColumn(StudentEntity::getFullName).setHeader("FULL NAME");
         studentsTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
-        studentsTable.addComponentColumn(item -> {
-            return studentStatus(item.getStatus());
-        }).setHeader("STATUS");
+        studentsTable.addComponentColumn(item -> studentStatus(item.getStatus())).setHeader("STATUS");
 
         // studentsTable.addColumn(StudentEntity::getPrograme).setHeader("PROGRAM");
         // studentsTable.addComponentColumn(item -> {return editButton(item.getId());}).setHeader("ACTION");
@@ -174,13 +170,13 @@ public class AddStudentView extends Composite<VerticalLayout> {
         //filter table values 
         filterField.setValueChangeMode(ValueChangeMode.EAGER);
         filterField.addValueChangeListener(action -> {
-            tableData(filterSelector.getValue(), yearGroup.getValue(), studentSearchLevel.getValue(), sectionPicker.getValue()).addFilter(filter -> {
+            studentsTable.getListDataView().addFilter(filter -> {
                 String filterText = filterField.getValue().toLowerCase();
                 boolean matchesIndexNo = filter.getIndexNumber().toLowerCase().contains(filterText);
                 boolean matchesName = filter.getFullName().toLowerCase().contains(filterText);
-
                 return matchesIndexNo || matchesName;
-            }).refreshAll();
+            });
+            studentsTable.getListDataView().refreshAll();
         });
 
         return layout;
@@ -250,13 +246,16 @@ public class AddStudentView extends Composite<VerticalLayout> {
             updateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
             removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
 
-            SpecialMethods.setClasses(studentClass);
+            SpecialMethods.loadProgrammes(studentClass);
 
             nameField.setValue(student.getFullName());
             studentNumberField.setValue(student.getIndexNumber());
             rowNumber.setValue(String.valueOf(student.getId()));
             rowNumber.setReadOnly(true);
             studentClass.setValue(student.getStudentClass());
+            studentYearSelector.setValue(student.getYearGroup());
+            studentLevelSelector.setValue(student.getLevel());
+            studentSectionSelector.setValue(student.getSection());
 
             //set all fields as required
             nameField.setRequired(true);
@@ -299,7 +298,6 @@ public class AddStudentView extends Composite<VerticalLayout> {
                                 if (STUDENT_SERVICE_OBJ.updateStudentData(STUDENT_ENTITY_OBJ) > 0) {
                                     UI.getCurrent().access(() -> {
                                         new UserConfirmDialogs().showSuccess("Nice, Student data successfully updated.");
-                                        studentsTable.getListDataView().refreshAll();
                                         LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue(),
                                                 yearGroup.getValue(),
                                                 studentSearchLevel.getValue(),
@@ -340,9 +338,10 @@ public class AddStudentView extends Composite<VerticalLayout> {
         fullnameField.setInvalid(fullnameField.isEmpty());
         programmeSelector.setLabel("Select Programme");
 
-        SpecialMethods.setClasses(programmeSelector);
+        SpecialMethods.loadProgrammes(programmeSelector);
         SpecialMethods.setCourses(courseSelector);
         SpecialMethods.setLevel(studentSearchLevel);
+        SpecialMethods.setLevel(levelSelector);
 
     }
 
@@ -372,9 +371,12 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
         sectionPicker.setValue("A");
         sectionPicker.setWidthFull();
+        levelSelector.addClassNames("item-picker");
+        sectionPicker.addClassNames("item-picker");
 //        sectionPicker.addThemeVariants(ComboBoxVariant.LUMO_SMALL);
 
-        FlexLayout classAndLevelContainer = new FlexLayout(studentSearchLevel, sectionPicker);
+        FlexLayout classAndLevelContainer = new FlexLayout(levelSelector, sectionPicker);
+        classAndLevelContainer.addClassNames("leve-and-section-container");
         classAndLevelContainer.getStyle().set("gap", "10px");
         classAndLevelContainer.getStyle().setAlignItems(Style.AlignItems.CENTER);
         classAndLevelContainer.getStyle().setJustifyContent(Style.JustifyContent.SPACE_BETWEEN);
@@ -448,7 +450,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                     //feed entity instance with collected data.
                     STUDENT_ENTITY_OBJ.setIndexNumber(studentNumberField.getValue());
                     STUDENT_ENTITY_OBJ.setFullName(fullnameField.getValue());
-                    STUDENT_ENTITY_OBJ.setLevel(studentSearchLevel.getValue());
+                    STUDENT_ENTITY_OBJ.setLevel(levelSelector.getValue());
                     STUDENT_ENTITY_OBJ.setStudentClass(programmeSelector.getValue());
                     STUDENT_ENTITY_OBJ.setYearGroup(yearSelector.getValue());
                     STUDENT_ENTITY_OBJ.setProgramme(programmeSelector.getValue());

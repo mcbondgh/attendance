@@ -56,10 +56,10 @@ public class UserConfirmDialogs {
         layout.setBoxSizing(BoxSizing.BORDER_BOX);
         layout.setAlignItems(Alignment.CENTER);
         layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
-
+        layout.setWidthFull();
         notify.setPosition(Position.TOP_END);
         notify.setDuration(3000);
-        layout.getStyle().setColor("green");
+        layout.getStyle().setFontSize("12px").setColor("black");
         notify.add(layout);
         notify.open();
     }

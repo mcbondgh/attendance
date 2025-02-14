@@ -62,17 +62,20 @@ public class StudentService extends DAO {
         int status = 0;
         try {
             String query = """
-                    INSERT INTO attendance_records(rowNumber, indexNumber, className, programeName, attendanceValue, attendanceDate, year_group)
-                    VALUES(?, ?, ?, ?, ?, ?, ?);
-                    """;
+                    INSERT INTO attendance_records(rowNumber, indexNumber, programme, course, level,\s
+                    className, year_group, attendanceValue, attendanceDate)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
+                   \s""";
             prepare = getCon().prepareStatement(query);
             prepare.setInt(1, entity.getRowNumber());
             prepare.setString(2, entity.getIndexNumber());
-            prepare.setString(3, entity.getclassName());
-            prepare.setString(4, entity.getprogrameName());
-            prepare.setString(5, entity.getAttendanceValue());
-            prepare.setDate(6, entity.getAttendanceDate());
+            prepare.setString(3, entity.getProgramme());
+            prepare.setString(4, entity.getCourse());
+            prepare.setString(5, entity.getLevel());
+            prepare.setString(6, entity.getClassName());
             prepare.setString(7, entity.getYearGroup());
+            prepare.setString(8, entity.getAttendanceValue());
+            prepare.setDate(9, entity.getAttendanceDate());
             status = prepare.executeUpdate();
             getCon().close();
         } catch (SQLException ignore) {

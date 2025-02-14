@@ -1,6 +1,7 @@
 package com.cass.views.login;
 
 import com.cass.dialogs.UserConfirmDialogs;
+import com.cass.services.UserService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.UI;
@@ -124,7 +125,8 @@ public class UserLoginView extends VerticalLayout{
                 String passString = userData.get("password");
                 int roleId = Integer.parseInt(userData.get("roleId"));
                 SessionManager.setAttribute("roleId", roleId);
-
+                String role = roleId == 1 ? "Admin" : "Teaching Assistant";
+                new UserService().logUser(name, role);
                 //DECIPHER USERS PASSWORD 
                 boolean passwordMatch = Encryption.getOriginalText(passString).equals(password);
             
@@ -132,8 +134,8 @@ public class UserLoginView extends VerticalLayout{
                     resultStatus = true;
                 }
             }
-        }catch(NullPointerException ignore){
-            new UserConfirmDialogs().showError("Database Connection Failed, please check connection..");
+        }catch(NullPointerException e){
+            new UserConfirmDialogs().showError(e.getMessage());
         }
         return resultStatus;
 

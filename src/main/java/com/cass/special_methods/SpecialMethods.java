@@ -22,19 +22,19 @@ public class SpecialMethods {
         return list;
     }
 
-    public static void setClasses(Select<String> selector) {
+    public static void loadProgrammes(Select<String> selector) {
         selector.setItems(loadClasses());
     }
-    public static void setClasses(ComboBox<String> selector) {
+    public static void loadProgrammes(ComboBox<String> selector) {
         selector.setItems(loadClasses());
 //        String classes[] = {"BTECH Computer Sci","Computer Sci 2", "Computer Sci 3",  "Network 2A", "Network 2B","Network 3A", "Network 3B"};
     //    selector.setItems(classes);
     }
 
-    public static void setSemester(ComboBox<String> selector) {
-        String classes[] = {"SEMESTER 1", "SEMESTER 2"};
-        selector.setItems(classes);
-    }
+//    public static void setSemester(ComboBox<String> selector) {
+//        String classes[] = {"SEMESTER 1", "SEMESTER 2"};
+//        selector.setItems(classes);
+//    }
     public static void setYear(ComboBox<String> selector){
         String[] years = {"2024", "2025", "2026", "2027", "2028", "2029", "2030"};
         selector.setItems(years);

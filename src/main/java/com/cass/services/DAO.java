@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cass.data.*;
 import com.cass.security.Config;
+import org.apache.fop.pdf.ObjectStream;
 
 public class DAO extends Config {
     public Collection<StudentEntity> getStudentByClass(String programme, String yearGroup, String level, String section) {
@@ -27,10 +28,13 @@ public class DAO extends Config {
                 String program = resultSet.getString("programme");
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
+                String stuSection = resultSet.getString("section");
+                String year = resultSet.getString("year_group");
+                String stuLevel = resultSet.getString("level");
                 byte status = resultSet.getByte("status");
                 Timestamp dateAdded = resultSet.getTimestamp("dateAdded");
                 Timestamp dateUpdated = resultSet.getTimestamp("dateUpdated");
-                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, dateAdded, dateUpdated));
+                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, year, stuSection, stuLevel, dateAdded, dateUpdated));
             }
             getCon().close();
         } catch (Exception e) {
@@ -40,19 +44,21 @@ public class DAO extends Config {
         return data;
     }
 
-    public Collection<ActivitiesEntity> fetchClassListByClassName(String searchItem) {
+    public Collection<ActivitiesEntity> fetchClassListByClassName(String programme, String sectionOrClass, String level) {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         try {
-            String query = "SELECT * FROM studentsList WHERE(class = ?)";
+            String query = "SELECT * FROM studentsList WHERE(class = ? AND year_group = YEAR(CURRENT_DATE()) AND section = ? AND level = ?)";
             prepare = getCon().prepareStatement(query);
-            prepare.setString(1, searchItem);
+            prepare.setString(1, programme);
+            prepare.setString(2, sectionOrClass);
+            prepare.setString(3, level);
             resultSet = prepare.executeQuery();
             AtomicInteger counter = new AtomicInteger();
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String indexNo = resultSet.getString("indexNumber");
                 String fullName = resultSet.getString("fullName");
-                String program = resultSet.getString("program");
+                String program = resultSet.getString("programme");
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
                 byte status = resultSet.getByte("status");
@@ -82,9 +88,12 @@ public class DAO extends Config {
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
                 byte status = resultSet.getByte("status");
+                String year = resultSet.getString("year_group");
+                String section = resultSet.getString("section");
+                String level = resultSet.getString("level");
                 Timestamp dateAdded = resultSet.getTimestamp("dateAdded");
                 Timestamp dateUpdated = resultSet.getTimestamp("dateUpdated");
-                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, dateAdded, dateUpdated));
+                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, year, section, level, dateAdded, dateUpdated));
             }
             getCon().close();
         } catch (Exception e) {
@@ -109,9 +118,12 @@ public class DAO extends Config {
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
                 byte status = resultSet.getByte("status");
+                String year = resultSet.getString("year_group");
+                String section = resultSet.getString("section");
+                String level = resultSet.getString("level");
                 Timestamp dateAdded = resultSet.getTimestamp("dateAdded");
                 Timestamp dateUpdated = resultSet.getTimestamp("dateUpdated");
-                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, dateAdded, dateUpdated));
+                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, year, section, level, dateAdded, dateUpdated));
             }
             getCon().close();
         } catch (Exception e) {
@@ -121,11 +133,12 @@ public class DAO extends Config {
         return data;
     }
 
-    public Collection<StudentEntity> fetchActiveStudentsForAttendanceTable(String studentClass, String year) {
+    public Collection<StudentEntity> fetchActiveStudentsForAttendanceTable(String studentClass, String level, String programme, String section) {
         Collection<StudentEntity> data = new ArrayList<>();
         try {
-            String query = "SELECT * FROM studentslist WHERE (status = 1 AND year_group = '" + year + "')";
-            String query1 = "SELECT * FROM studentslist WHERE(status = 1 AND class = '" + studentClass + "' AND year_group = '" + year + "');";
+            String query = "SELECT * FROM studentslist WHERE (status = 1 AND level = '" + level + "' AND programme = '" + programme + "')";
+            String query1 = "SELECT * FROM studentslist WHERE(status = 1 AND class = '" + studentClass + "' AND level = '" + level + "' " +
+                    "AND programme = '" + programme + "' AND section = '" + section + "');";
             String preferredQuery = Objects.equals(studentClass, "All Classes") ? query : query1;
             prepare = getCon().prepareStatement(preferredQuery);
             resultSet = prepare.executeQuery();
@@ -142,15 +155,19 @@ public class DAO extends Config {
         return data;
     }
 
-    public boolean checkAttendanceByDate(Date dateToCheck, String programmeName, String className, String year) {
+    public boolean checkAttendanceByDate(Date dateToCheck, String course, String programme, String level, String className) {
         boolean result = false;
         try {
-            String query = "SELECT COUNT(id) AS result FROM attendance_records WHERE (attendanceDate = ? AND programeName = ? AND className = ? AND year_group = ?);";
+            String query = """
+                    SELECT COUNT(id) AS result FROM attendance_records\s
+                    WHERE (attendanceDate = ? AND course = ? AND programme = ? AND level = ? AND className = ?);
+                    """;
             prepare = getCon().prepareStatement(query);
             prepare.setDate(1, dateToCheck);
-            prepare.setString(2, programmeName);
-            prepare.setString(3, className);
-            prepare.setString(4, year);
+            prepare.setString(2, course);
+            prepare.setString(3, programme);
+            prepare.setString(4, level);
+            prepare.setString(5, className);
             resultSet = prepare.executeQuery();
             if (resultSet.next()) {
                 int counter = resultSet.getInt(1);
@@ -163,30 +180,26 @@ public class DAO extends Config {
         return result;
     }
 
-    public Collection<AttendanceRecordsEntity> fetchAttendanceRecords(Date startDate, Date endDate, String className, String programe, String yearGroup) {
+    public Collection<AttendanceRecordsEntity> fetchAttendanceRecords(Date startDate, Date endDate, String className, String programme, String yearGroup, String course) {
         Collection<AttendanceRecordsEntity> data = new ArrayList<>();
         try {
-            String query = " SELECT\r\n" + //
-                    "                ar.indexNumber,\r\n" + //
-                    "                fullName,\r\n" + //
-                    "                SUM(CASE WHEN attendanceValue = 'p' THEN 1 ELSE 0 END) AS present_count,\r\n" + //
-                    "                SUM(CASE WHEN attendanceValue = 'a' THEN 1 ELSE 0 END) AS absent_count,\r\n" + //
-                    "                SUM(CASE WHEN attendanceValue = 'excused' THEN 1 ELSE 0 END) AS excused_count,\r\n" + //
-                    "                COUNT(*) AS total_attendance\r\n" + //
-                    "            FROM\r\n" + //
-                    "                attendance_records AS ar\r\n" + //
-                    "            INNER JOIN studentslist AS sl\r\n" + //
-                    "                ON ar.rowNumber = sl.id\r\n" + //
-                    "            WHERE\r\n" + //
-                    "                attendanceDate BETWEEN ? AND ? AND programeName = ? AND className = ? AND year_group = ?\r\n" + //
-                    "            GROUP BY\r\n" + //
-                    "                ar.indexNumber, fullName";
+            String query = """
+                    SELECT ar.indexNumber, fullName,
+                           SUM(CASE WHEN attendanceValue = 'p' THEN 1 ELSE 0 END) AS present_count,
+                           SUM(CASE WHEN attendanceValue = 'a' THEN 1 ELSE 0 END) AS absent_count,
+                           SUM(CASE WHEN attendanceValue = 'excused' THEN 1 ELSE 0 END) AS excused_count,
+                           COUNT(*) AS total_attendance FROM attendance_records AS ar
+                           INNER JOIN studentslist AS sl ON ar.rowNumber = sl.id
+                           WHERE(attendanceDate BETWEEN ? AND ? AND ar.programme = ? AND className = ? AND ar.year_group = ? AND course = ?)
+                           GROUP BY ar.indexNumber, fullName
+                    """;
             prepare = getCon().prepareStatement(query);
             prepare.setDate(1, startDate);
             prepare.setDate(2, endDate);
-            prepare.setString(3, programe);
+            prepare.setString(3, programme);
             prepare.setString(4, className);
             prepare.setString(5, yearGroup);
+            prepare.setString(6, course);
 
             resultSet = prepare.executeQuery();
             AtomicInteger index = new AtomicInteger();
@@ -201,7 +214,7 @@ public class DAO extends Config {
                 data.add(new AttendanceRecordsEntity(index.incrementAndGet(), indexNumber, fullName, presentCount, absentCount, totalAttendance, excusedCount));
             }
             getCon().close();
-        } catch (SQLException ignore) {
+        } catch (SQLException ignore) { ignore.printStackTrace();
         }
         return data;
     }
@@ -254,16 +267,16 @@ public class DAO extends Config {
                     FROM activity_records AS ar\s
                     	INNER JOIN studentslist AS sl
                         ON ar.rowNumber = sl.id
-                    WHERE(title = ? AND className = ? AND\s
-                    	activityType = ? and ar.programe = ? AND year_group = ?)
+                    WHERE(className = ? AND\s
+                    	activityType = ? and ar.programme = ? AND year_group = ? AND ar.course = ? )
                     GROUP BY indexNumber, fullname ORDER BY indexNumber;
                     """;
             prepare = getCon().prepareStatement(query);
-            prepare.setString(1, parameters.get("semester").toString());
-            prepare.setString(2, parameters.get("className").toString());
-            prepare.setString(3, parameters.get("activityType").toString());
-            prepare.setString(4, parameters.get("program").toString());
-            prepare.setString(5, parameters.get("yearGroup").toString());
+            prepare.setString(1, parameters.get("className").toString());
+            prepare.setString(2, parameters.get("activityType").toString());
+            prepare.setString(3, parameters.get("programme").toString());
+            prepare.setString(4, parameters.get("yearGroup").toString());
+            prepare.setString(5, parameters.get("course").toString());
             resultSet = prepare.executeQuery();
             while (resultSet.next()) {
                 String index = resultSet.getString("indexNumber");
@@ -273,20 +286,22 @@ public class DAO extends Config {
                 int activities = resultSet.getInt("activity_count");
                 data.add(new ActivitiesEntity(counter.incrementAndGet(), name, index, score, maxScore, activities));
             }
-        } catch (Exception ignore) {
+        } catch (Exception ignore) { ignore.printStackTrace();
         }
         return data;
     }
 
-    public Collection<ActivitiesEntity> fetchStudentActivities(String semesterName) {
+    public Collection<ActivitiesEntity> fetchStudentActivities(String yearGroup) {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         try {
-            String query = "SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, programe, className, maximumScore, score, activityDate, dateCreated \n" + //
-                    "\tFROM class_attendance.activity_records AS ar\n" + //
-                    "\tINNER JOIN studentslist AS sl\n" + //
-                    "\tON ar.rowNumber = sl.id WHERE(status = 1 AND title = ?);";
+            String query = """
+                    SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, course, className, maximumScore, score, activityDate, dateCreated
+                    FROM class_attendance.activity_records AS ar\s
+                    INNER JOIN studentslist AS sl\s
+                    ON ar.rowNumber = sl.id WHERE(status = 1 AND year_group = ?);
+                   \s""";
             prepare = getCon().prepareStatement(query);
-            prepare.setString(1, semesterName);
+            prepare.setString(1, yearGroup);
             resultSet = prepare.executeQuery();
             while (resultSet.next()) {
                 int id = resultSet.getInt("ar.id");
@@ -295,12 +310,12 @@ public class DAO extends Config {
                 int rowNo = resultSet.getInt("rowNumber");
                 String title = resultSet.getString("title");
                 String activityType = resultSet.getString("activityType");
-                String programe = resultSet.getString("programe");
+                String course = resultSet.getString("course");
                 String studentClass = resultSet.getString("className");
                 double maxScore = resultSet.getDouble("maximumScore");
                 double score = resultSet.getDouble("score");
                 Date activityDate = resultSet.getDate("activityDate");
-                data.add(new ActivitiesEntity(id, fullname, indexNumber, studentClass, title, activityType, activityDate, maxScore, score, rowNo, programe));
+                data.add(new ActivitiesEntity(id, fullname, indexNumber, studentClass, title, activityType, activityDate, maxScore, score, rowNo, course));
             }
             getCon().close();
         } catch (Exception e) {
@@ -394,6 +409,26 @@ public class DAO extends Config {
             ex.printStackTrace();
         }
 
+        return data;
+    }
+
+    public List<UserLogsRecord> getSignLogs() {
+       List<UserLogsRecord> data = new ArrayList<>();
+        try {
+            String query = "SELECT * FROM signin ORDER BY id DESC LIMIT 20;";
+            resultSet = getCon().prepareStatement(query).executeQuery();
+            while (resultSet.next()) {
+                int userId = resultSet.getInt(1);
+               String username = resultSet.getString("user_id");
+               String role = resultSet.getString("position");
+               Timestamp date = resultSet.getTimestamp("signedin_at");
+               data.add(new UserLogsRecord(userId, username, role, date));
+            }
+            resultSet.close();
+            getCon().close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return data;
     }
 }//end of class

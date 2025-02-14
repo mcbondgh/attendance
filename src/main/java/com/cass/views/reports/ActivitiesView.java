@@ -1,11 +1,15 @@
 package com.cass.views.reports;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
 import com.cass.views.classActivities.ManageClassActivityView;
 import com.vaadin.flow.component.avatar.AvatarVariant;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.dom.Style;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.cass.data.ActivitiesEntity;
@@ -61,7 +65,7 @@ public class ActivitiesView extends VerticalLayout {
         layout.addClassNames("dashboard-header-container", "view-header-container");
         headerTitle.setClassName("dashboard-header-text");
         viewButton.addClassName("activity-button");
-        viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
+        viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
 
         layout.add(headerTitle, viewButton);
 
@@ -75,46 +79,64 @@ public class ActivitiesView extends VerticalLayout {
     /****************************************************************************************************
      * CREATE FORM AND INPUT MINI LAYOUT
      ****************************************************************************************************/
-    ComboBox<String> semesterSelector = new ComboBox<>("Select Semester");
+    ComboBox<String> yearGroup = new ComboBox<>("Year Group");
+
     private Component createMiniSideLayout() {
         VerticalLayout layout = new VerticalLayout();
-        ComboBox<String> classPicker = new ComboBox<>("Select Class");
+        ComboBox<String> programmeSelector = new ComboBox<>("Select Programme");
+        ComboBox<String> courseSelector = new ComboBox<>("Select Course");
         TextField filterField = new TextField();
-        ComboBox<String> yearGroup = new ComboBox<>("Year Group");
+        final ComboBox<String> classSelector = new ComboBox<>("Class", "A", "B");
+        ComboBox<String> levelSelector = new ComboBox<>("Level");
 
         ListBox<ActivitiesEntity> listView = new ListBox<>();
         Button loadButton = new Button("Load Students");
 
-        SpecialMethods.setClasses(classPicker);
-        SpecialMethods.setSemester(semesterSelector);
+        SpecialMethods.loadProgrammes(programmeSelector);
+        SpecialMethods.setLevel(levelSelector);
         SpecialMethods.setYear(yearGroup);
+        SpecialMethods.setCourses(courseSelector);
+
+        levelSelector.setValue("100");
         loadButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
         loadButton.setWidthFull();
-        classPicker.setRequired(true);
+        courseSelector.setRequired(true);
+        levelSelector.setWidthFull();
+        levelSelector.setRequired(true);
         filterField.setWidthFull();
-        classPicker.setWidthFull();
-        semesterSelector.setWidthFull();
+        courseSelector.setWidthFull();
+        programmeSelector.setWidthFull();
         yearGroup.setWidthFull();
         yearGroup.setRequired(true);
-        semesterSelector.setRequired(true);
+        programmeSelector.setRequired(true);
+        classSelector.setRequired(true);
+        classSelector.setValue("A");
+        classSelector.setWidthFull();
+        classSelector.setInvalid(classSelector.isEmpty());
 
         // set component class names
         layout.setClassName("list-view-container");
-        classPicker.addClassNames("list-view-picker", "class-picker");
+        courseSelector.addClassNames("list-view-picker", "class-picker");
         filterField.setClassName("filter-activity-field");
         listView.setClassName("activity-view-list-view");
         loadButton.setClassName("activity-view-load-button");
-        semesterSelector.addClassNames("list-view-picker", "semester-picker");
+        programmeSelector.addClassNames("list-view-picker", "semester-picker");
         // set filter-field placeHolder
         filterField.setPlaceholder("filter by index number");
 
-        layout.setWidthFull();
-        layout.add(classPicker, semesterSelector, yearGroup, loadButton, filterField);
+        Div classAndLeveContainer = new Div(levelSelector, classSelector);
+        classAndLeveContainer.addClassNames("class-level-container");
+        classSelector.setClassName("item-selector");
+        levelSelector.addClassNames("item-selector");
 
-        // check and disable 'load button' if 'classPicker' is empty
+        layout.setWidthFull();
+        layout.setSpacing(false);
+        layout.add(filterField, new Hr(), programmeSelector, classAndLeveContainer, yearGroup, loadButton);
+
+        // check and disable 'load button' if 'courseSelector' is empty
         layout.getElement().addEventListener("mouseover", callBack -> {
             UI.getCurrent().access(() -> {
-                if (classPicker.isEmpty() || semesterSelector.isEmpty()) {
+                if (yearGroup.isEmpty() || programmeSelector.isEmpty() || levelSelector.isEmpty()) {
                     loadButton.addClassName("disable-button");
                     loadButton.setEnabled(false);
                 } else {
@@ -127,7 +149,7 @@ public class ActivitiesView extends VerticalLayout {
         // Add Click Listener to 'load button'
         loadButton.addClickListener(event -> {
             UI.getCurrent().access(() -> {
-                Collection<StudentEntity> data = SERVICE_OBJ.getStudentByClass(classPicker.getValue(), yearGroup.getValue(), "", "");
+                Collection<StudentEntity> data = SERVICE_OBJ.getStudentByClass(programmeSelector.getValue(), yearGroup.getValue(), levelSelector.getValue(), classSelector.getValue());
                 if (data.isEmpty()) {
                     studentGrid.setItems(Collections.emptyList());
                     new UserConfirmDialogs().showError("Class list is empty");
@@ -141,14 +163,14 @@ public class ActivitiesView extends VerticalLayout {
         filterField.setValueChangeMode(ValueChangeMode.EAGER);
         filterField.addValueChangeListener(event -> {
             UI.getCurrent().access(() -> {
-               studentGrid.getListDataView().setFilter(filter -> {
-                if (filterField.isEmpty()) {
-                    return true;
-                }
-                boolean matchesName = filter.getFullName().toLowerCase().contains(event.getValue().toLowerCase());
-                boolean matchesIndex = filter.getIndexNumber().toLowerCase().contains(event.getValue().toLowerCase());
-                return matchesName || matchesIndex;
-               }).refreshAll();
+                studentGrid.getListDataView().setFilter(filter -> {
+                    if (filterField.isEmpty()) {
+                        return true;
+                    }
+                    boolean matchesName = filter.getFullName().toLowerCase().contains(event.getValue().toLowerCase());
+                    boolean matchesIndex = filter.getIndexNumber().toLowerCase().contains(event.getValue().toLowerCase());
+                    return matchesName || matchesIndex;
+                }).refreshAll();
             });
         });
 
@@ -189,13 +211,13 @@ public class ActivitiesView extends VerticalLayout {
         layout.setPadding(true);
 
         formLayout.setResponsiveSteps(
-            new FormLayout.ResponsiveStep("0", 1),
-            new FormLayout.ResponsiveStep("600px", 4)
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("600px", 4)
         );
 
         formLayout.setColspan(studentGrid, 3);
         formLayout.add(createMiniSideLayout(), createTable());
-        
+
         layout.add(formLayout);
         return layout;
     }
@@ -224,26 +246,30 @@ public class ActivitiesView extends VerticalLayout {
         return button;
     }
 
+    //create a record to display data...
+    private record activityRecord(String activityType, String course, Date activityDate, double maxScore, double score,
+                          String programme) {
+    }
+
     private void renderDialogView(int studentIndex) {
         Dialog dialog = new Dialog();
-        Grid<ActivitiesEntity> grid = new Grid<>();
+        Grid<activityRecord> grid = new Grid<>();
         dialog.setHeaderTitle("STUDENT RECORD");
         TextField nameField = new TextField("Name");
         TextField indexNumberField = new TextField("Index Number");
 
         nameField.getStyle().setFontSize("small");
         indexNumberField.getStyle().setFontSize("small");
-        
+
         nameField.setReadOnly(isAttached());
         indexNumberField.setReadOnly(isAttached());
-        
-        
-        grid.addColumn(ActivitiesEntity::getPrograme).setHeader("PROGRAM");
-        grid.addColumn(ActivitiesEntity::getActivityTitle).setHeader("TITLE");
-        grid.addColumn(ActivitiesEntity::getActivityType).setHeader("ACTIVITY TYPE");
-        grid.addColumn(ActivitiesEntity::getActivityDate).setHeader("ENTRY DATE");
-        grid.addColumn(ActivitiesEntity::getScore).setHeader("SCORE").setKey("score");
-        grid.addColumn(ActivitiesEntity::getmaximumScore).setHeader("MAX SCORE").setKey("max");
+
+        grid.addColumn(activityRecord::course).setHeader("COURSE");
+//        grid.addColumn(ActivitiesEntity::getActivityTitle).setHeader("TITLE");
+        grid.addColumn(activityRecord::activityType).setHeader("ACTIVITY TYPE");
+        grid.addColumn(activityRecord::activityDate).setHeader("ENTRY DATE");
+        grid.addColumn(activityRecord::score).setHeader("SCORE").setKey("score");
+        grid.addColumn(activityRecord::score).setHeader("MAX SCORE").setKey("max");
         grid.getColumns().forEach(each -> each.setAutoWidth(true));
 
         FlexLayout vLayout = new FlexLayout(nameField, indexNumberField);
@@ -252,27 +278,25 @@ public class ActivitiesView extends VerticalLayout {
         grid.addClassName("activity-view-dialog-grid");
         vLayout.setClassName("activity-view-dialog-vlayout");
         dialog.setClassName("activity-view-dialog");
-        
-                
+
         dialog.add(vLayout, grid);
         dialog.setResizable(isAttached());
         dialog.setWidth("900px");
         dialog.setDraggable(true);
-        
+
         //load grid based on selected student
-        Collection<ActivitiesEntity> data = new ArrayList<>();
+        Collection<activityRecord> data = new ArrayList<>();
         double totalScore = 0;
         double maxScore = 0;
-        for(ActivitiesEntity item : SERVICE_OBJ.fetchStudentActivities(semesterSelector.getValue())) {
+        for (ActivitiesEntity item : SERVICE_OBJ.fetchStudentActivities(yearGroup.getValue())) {
             if (studentIndex == item.getRowNumber()) {
-              nameField.setValue(item.getFullname());
-              indexNumberField.setValue(item.getIndexNumber());
-                data.add(new ActivitiesEntity(
-                    item.getActivityType(), item.getActivityTitle(), item.getActivityDate(), item.getmaximumScore(), item.getScore(), item.getPrograme()
-                )); 
-                totalScore += item.getScore(); 
-                maxScore += item.getmaximumScore();  
-            }           
+                nameField.setValue(item.getFullname());
+                indexNumberField.setValue(item.getIndexNumber());
+                data.add(new activityRecord(item.getActivityType(), item.getCourse(), item.getActivityDate(), item.getMaximumSocre(), item.getScore(), item.getPrograme()
+                ));
+                totalScore += item.getScore();
+                maxScore += item.getmaximumScore();
+            }
         }
         grid.getColumnByKey("score").setFooter("Total Score: " + totalScore);
         grid.getColumnByKey("max").setFooter("Max Marks: " + maxScore);

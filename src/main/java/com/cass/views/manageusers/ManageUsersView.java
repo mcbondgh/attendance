@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -54,14 +55,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.RolesAllowed;
 
-@PageTitle("Manage Users")
-@Route(value = "manage-users", layout = MainLayout.class)
+@PageTitle("User Logs")
+@Route(value = "user-logs", layout = MainLayout.class)
 // @RolesAllowed({"ADMIN","USERS"})
 @AnonymousAllowed
 public class ManageUsersView extends VerticalLayout implements HasComponents, HasStyle {
 
     private OrderedList imageContainer;
-    private Grid<UsersEntity> usersTable = new Grid<UsersEntity>();
+    private final Grid<UsersEntity> usersTable = new Grid<>(UsersEntity.class, false);
     UserService SERVICE_OBJ = new UserService();
 
     public ManageUsersView() {
@@ -111,9 +112,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
         usersTable.addColumn(UsersEntity::getUsername).setHeader("USERNAME");
         usersTable.addColumn(UsersEntity::getRoleName).setHeader("ROLE");
         usersTable.addComponentColumn(UsersEntity::getStatusValue).setHeader("STATUS");
-
         LoadTableGrid.loadTable(usersTable, SERVICE_OBJ.getAllUsers());
-
         usersTable.setClassName("users-table");
 
         usersTable.setItemDetailsRenderer(createUserUpdateComponentRenderer());
@@ -137,7 +136,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
             SpecialMethods.setUserRoles(roleSelector);
             usernameTextField.setValue(users.getUsername());
             roleSelector.setValue(users.getRoleName());
-            statusRadioGroup.setValue(users.getStatusValue().getText());
+//            statusRadioGroup.setValue(users.getStatusValue().getText());
 
             usernameTextField.setRequired(true);
             passwordTextField.setRequired(true);
@@ -156,7 +155,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
             updateButton.addClickListener(e -> {
                 UsersEntity USERS_ENTITY = new UsersEntity();
                 USERS_ENTITY.setId(users.getId());
-                USERS_ENTITY.setUsername(users.getUsername());
+                USERS_ENTITY.setUsername(usernameTextField.getValue());
                 String pwdValue = passwordTextField.isEmpty() ? users.getPassword() : Encryption.generateCipherText(passwordTextField.getValue());
                 USERS_ENTITY.setPassword(pwdValue);
                 byte roleId = (byte) (roleSelector.getValue().equals("Admin") ? 1 : 2);
@@ -164,12 +163,11 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
                 USERS_ENTITY.setStatus(statusId);
                 USERS_ENTITY.setRoleId(roleId);
 
-                new UserConfirmDialogs("UPDATE USER",
-                        "Please confirm to update user's data else cancel to abort process")
+                new UserConfirmDialogs("UPDATE USER", "Please confirm to update user's data else cancel to abort process")
                         .saveDialog().addConfirmListener(ex -> {
                             int responseStatus = SERVICE_OBJ.updateUser(USERS_ENTITY);
                             if (responseStatus > 0) {
-                                getUI().get().getPage().reload();
+                                Notification.show("User data successfully updated", 3000, Notification.Position.TOP_END);
                             }
                         });
             });

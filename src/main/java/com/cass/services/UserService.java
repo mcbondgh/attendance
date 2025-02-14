@@ -22,7 +22,7 @@ public class UserService extends DAO{
 
     public int updateUser(UsersEntity entity) {
         String query = """
-                UPDATE users SET username = ?, `password` = ?, role_id = ?, `status` = ?  WHERE user_id = ?
+                UPDATE users SET username = ?, `password` = ?, role_id = ?, `status` = ?  WHERE id = ?
                 """;
         try {
             prepare = getCon().prepareStatement(query);
@@ -50,6 +50,24 @@ public class UserService extends DAO{
         }
         return 0;
     }
+
+    public int logUser(String username, String role) {
+        String query = """
+                INSERT INTO `class_attendance`.`signin` (`user_id`, `position`) VALUES (?, ?);
+                
+                """;
+        try {
+            prepare = getCon().prepareStatement(query);
+            prepare.setString(1, username);
+            prepare.setString(2, role);
+            return prepare.executeUpdate();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
 
 
 

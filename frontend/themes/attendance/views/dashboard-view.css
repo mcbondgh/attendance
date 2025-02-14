@@ -38,3 +38,62 @@
     color: #0151AC;
     font-size: 23px;
 }
+
+.dashboard-container {
+    text-align: center;
+    box-sizing: border-box;
+    background-color:rgb(255, 255, 255);
+    border-radius:5px;
+    padding:20px;
+}
+
+.dashboard-hlayout {
+    border: 1px solid #ddd;
+    margin:auto;
+    padding:30px;
+    text-align: center;
+    height: 100vh;
+}
+
+.dashboard-div {
+    text-align: center;
+    box-sizing: border-box;
+    /* border: 2px solid #ddd; */
+    width: 100%;
+    
+}
+.dashboard-div h1 {
+    color: #066f7f;
+    font-weight: 700;
+    text-align: center;
+    font-size: 80px;
+    padding: 20px 0;
+}
+
+.dashboard-div h6 {
+    text-transform: lowercase;
+    font-style: italic;
+    color: #456289;
+    font-size: 16px;
+    width:100%;
+    /* background-color:#456289; */
+    padding:10px;
+    border-radius: 5px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+    .dashboard-div h1 {
+        font-size: 40px;
+         box-sizing: border-box;
+    }
+    .dashboard-div h6 {
+        font-size: 12px;
+        /* padding: 7px; */
+    }
+    .dashboard-container {
+        height:100vheight;
+    }
+    
+}

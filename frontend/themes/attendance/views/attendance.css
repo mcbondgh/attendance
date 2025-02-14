@@ -21,6 +21,11 @@
 
 .attendance-date-picker-container {
     align-items: baseline;
+    justify-content: center;
+}
+.attendance-date-picker-container vaadin-date-picker{
+    font-size:12px;
+    width:120px;
 }
 
 
@@ -36,6 +41,7 @@
     }
     .filter-button {
         width: 100%;
+        font-size: 11px;
     }
     .attendance-date-picker-container {
         width: 100%;

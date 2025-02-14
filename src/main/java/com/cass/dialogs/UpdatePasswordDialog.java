@@ -45,8 +45,8 @@ public class UpdatePasswordDialog extends UserService {
 
         passwordField1.setValueChangeMode(ValueChangeMode.EAGER);
         passwordField2.setValueChangeMode(ValueChangeMode.EAGER);
-
-        boolean passwordsMatch = Objects.equals(passwordField1.getValue(), passwordField2.getValue());
+        passwordField2.setInvalid(passwordField2.isEmpty());
+        passwordField1.setInvalid(passwordField1.isEmpty());
 
         int roleId = Integer.parseInt(SessionManager.getAttribute("roleId").toString());
         String role = roleId == 1 ? "Admin" : roleId == 2 ? "Teaching Assistant" : "Class Rep";
@@ -56,7 +56,9 @@ public class UpdatePasswordDialog extends UserService {
         roleField.setValue(role);
 
         updateButton.addClickListener(e -> {
-            if (passwordField2.isEmpty() || passwordField1.isEmpty()) {
+            boolean passwordsMatch = Objects.equals(passwordField1.getValue(), passwordField2.getValue());
+
+            if (passwordField1.isInvalid() || passwordField2.isInvalid()) {
                 String errorMsg = "Password field cannot be empty";
                 passwordField1.setErrorMessage(errorMsg);
                 passwordField2.setErrorMessage(errorMsg);

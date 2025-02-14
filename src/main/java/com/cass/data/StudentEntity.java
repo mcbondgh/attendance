@@ -41,7 +41,7 @@ public class StudentEntity {
 
 
     public StudentEntity(int id, String indexNumber, String fullName, String programe, String studentClass,
-            String department, byte status, Timestamp dateAdded, Timestamp dateUpdated) {
+            String department, byte status, String yearGroup, String section, String level, Timestamp dateAdded, Timestamp dateUpdated) {
         this.id = id;
         this.indexNumber = indexNumber;
         this.fullName = fullName;
@@ -51,6 +51,9 @@ public class StudentEntity {
         this.status = status;
         this.dateAdded = dateAdded;
         this.dateUpdated = dateUpdated;
+        this.yearGroup = yearGroup;
+        this.level = level;
+        this.section = section;
     }
     public int getId() {
         return id;

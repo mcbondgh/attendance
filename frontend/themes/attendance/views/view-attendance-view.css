@@ -122,7 +122,7 @@ font-size: small;
   color: rgb(8, 185, 150);
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 760px) {
   .view-attendance-view .filter-layout {
     display: none;
     gap: var(--lumo-space-m);
@@ -163,8 +163,11 @@ font-size: small;
 
   .header-layout {
     flex-direction: column;
-  }
-  .header-layout vaadin-select, vaadin-date-picker, .filter-field{
+    gap:0;
     width: 100%;
   }
+  .header-layout vaadin-combo-box, vaadin-date-picker, .filter-field{
+    width: 100%; 
+  }
+
 }

@@ -46,10 +46,12 @@ public class TakeAttendanceView extends VerticalLayout {
 
     private DatePicker datePicker = new DatePicker("Attendance Date");
     private ComboBox<String> courseSelector = new ComboBox<>("Select Course");
-    private final ComboBox<String> classSelect = new ComboBox<>("Select Class");
+    private final ComboBox<String> programmeSelector = new ComboBox<>("Select Programme");
     private final Grid<StudentEntity> attendanceTable = new Grid<>();
-    private final ComboBox<String> yearSelector = new ComboBox<>("Select Year");
+    private final ComboBox<String> levelSelector = new ComboBox<>("Select Level");
+    private final ComboBox<String> yearGroup = new ComboBox<>("Select Year");
     private final Button generateSheetButton = new Button("Generate Sheet");
+    private final ComboBox<String> sectionSelector = new ComboBox<>("Section", "A", "B");
 
     public TakeAttendanceView() {
         setSpacing(false);
@@ -61,60 +63,65 @@ public class TakeAttendanceView extends VerticalLayout {
         String error = "fill field";
         datePicker.setErrorMessage(error);
         courseSelector.setErrorMessage(error);
-        classSelect.setErrorMessage(error);
-        return datePicker.isInvalid() || courseSelector.isInvalid() || classSelect.isInvalid();
+        programmeSelector.setErrorMessage(error);
+        return courseSelector.isInvalid() || programmeSelector.isInvalid() || levelSelector.isInvalid();
     }
 
     private Component renderPageView() {
         VerticalLayout layout = new VerticalLayout();
 
         courseSelector.addClassName("take-attendance-combobox");
-        classSelect.addClassName("take-attendance-combobox");
+        programmeSelector.addClassName("take-attendance-combobox");
+        yearGroup.addClassNames("take-attendance-combobox");
+
 
         // LOAD SELECTORS.
         SpecialMethods.setCourses(courseSelector);
-        SpecialMethods.setClasses(classSelect);
-        SpecialMethods.setYear(yearSelector);
+        SpecialMethods.loadProgrammes(programmeSelector);
+        SpecialMethods.setLevel(levelSelector);
+        SpecialMethods.setYear(yearGroup);
+        sectionSelector.setValue("A");
+        levelSelector.setValue("100");
 
         // SET REQUIRED FIELDS
         datePicker.setRequired(true);
         datePicker.setInvalid(datePicker.isEmpty());
         courseSelector.setRequired(true);
         courseSelector.setInvalid(courseSelector.isEmpty());
-        classSelect.setRequired(true);
-        classSelect.setInvalid(classSelect.isEmpty());
-        yearSelector.setRequired(true);
-        yearSelector.setInvalid(yearSelector.isEmpty());
+        programmeSelector.setRequired(true);
+        programmeSelector.setInvalid(programmeSelector.isEmpty());
+        levelSelector.setRequired(true);
+        levelSelector.setInvalid(levelSelector.isEmpty());
         // restrict date picker to today.
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
         datePicker.setMin(today);
 
-        HorizontalLayout headerLayout = new HorizontalLayout(datePicker, courseSelector, classSelect, yearSelector, generateSheetButton);
+        HorizontalLayout headerLayout = new HorizontalLayout(courseSelector, programmeSelector, levelSelector, sectionSelector, generateSheetButton);
 
         layout.setSizeFull();
         layout.setClassName("main-container");
         headerLayout.setWidthFull();
         headerLayout.setClassName("header-layout");
         generateSheetButton.setClassName("filter-button");
-        generateSheetButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+        generateSheetButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
 
         layout.add(headerLayout, createTable());
 
         // ADD EVENT LISTENERS
         generateSheetButton.addClickListener(event -> {
             try {
-                Date date = Date.valueOf(datePicker.getValue());
+                Date date = Date.valueOf(LocalDate.now());
                 if (isFieldEmpty()) {
                     new UserConfirmDialogs().showError("You have empty fields, please fill all.");
-                } else if (SERVICE_OBJ.checkAttendanceByDate(date, courseSelector.getValue(), classSelect.getValue(), yearSelector.getValue())) {
+                } else if (SERVICE_OBJ.checkAttendanceByDate(date, courseSelector.getValue(), programmeSelector.getValue(), levelSelector.getValue(), sectionSelector.getValue())) {
                     new UserConfirmDialogs()
                             .showError("Sorry Attendance for the specified date and Programme already recorded");
                 } else {
-                    String studentClass = classSelect.getValue();
+                    String studentClass = programmeSelector.getValue();
                     // loadTabelData(studentClass);
                     UI.getCurrent().access(()-> {
                         LoadTableGrid.loadTable(attendanceTable,
-                                SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(studentClass, yearSelector.getValue()));
+                                SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(studentClass, levelSelector.getValue(), programmeSelector.getValue(), sectionSelector.getValue()));
                         int tableSize = attendanceTable.getListDataView().getItemCount();
                         H6 counterText = new H6(tableSize + " Students");
                         counterText.setClassName("table-counter");
@@ -131,10 +138,9 @@ public class TakeAttendanceView extends VerticalLayout {
     // --------------------------------------
 
     // Load Data into a GridList
-    protected GridListDataView<StudentEntity> loadTabelData(String searchString) {
-        GridListDataView<StudentEntity> data = attendanceTable
-                .setItems(SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(searchString, yearSelector.getValue()));
-        return data;
+    protected GridListDataView<StudentEntity> loadTaleData(String searchString) {
+        return attendanceTable
+                .setItems(SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(searchString, levelSelector.getValue(), programmeSelector.getValue(), sectionSelector.getValue()));
     }
 
     private Component createTable() {
@@ -158,11 +164,8 @@ public class TakeAttendanceView extends VerticalLayout {
         attendanceTable.addColumn(StudentEntity::getId).setHeader("ROLL NO.").setKey("rollNoColumn");
         attendanceTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER");
         attendanceTable.addColumn(StudentEntity::getFullName).setHeader("NAME");
-        attendanceTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
-
-        attendanceTable.addComponentColumn(student -> {
-            return student.getAttendanceButton();
-        }).setHeader("OPTION").setFrozenToEnd(true);
+//        attendanceTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
+        attendanceTable.addComponentColumn(StudentEntity::getAttendanceButton).setHeader("OPTION").setFrozenToEnd(true);
 
         attendanceTable.getColumns().forEach(each -> each.setAutoWidth(true));
         attendanceTable.getColumns().forEach(each -> each.setSortable(true));
@@ -180,8 +183,8 @@ public class TakeAttendanceView extends VerticalLayout {
                 boolean matchesIndex = filter.getIndexNumber().toLowerCase().contains(value.getValue().toLowerCase());
                 boolean matchesRowNo = String.valueOf(filter.getId()).contains(value.getValue());
                 return matchesName || matchesIndex || matchesRowNo;
-            });
-            attendanceTable.getListDataView().refreshAll();
+            }).refreshAll();
+//            attendanceTable.getListDataView().refreshAll();
         });
 
         // ADD EVENT LISTENER TO SAVE BUTTON TO ITERATE THROUGH TABLE AND GET ALL VALUES
@@ -189,7 +192,6 @@ public class TakeAttendanceView extends VerticalLayout {
             boolean isTableEmpty = attendanceTable.getListDataView().getItemCount() == 0;
             if (isTableEmpty) {
                 new UserConfirmDialogs().showError("Please generate attendance sheet first.");
-                return;
             } else {
                 new UserConfirmDialogs("SAVE ATTENDANCE",
                     "Please confirm to save attendance. NOTE: once confirmed, attendance for current date cannot be taken again.")
@@ -197,16 +199,19 @@ public class TakeAttendanceView extends VerticalLayout {
                         AttendanceEntity entity = new AttendanceEntity();
                         AtomicInteger responseStatus = new AtomicInteger(0);
                         attendanceTable.getListDataView().getItems().forEach(each -> {
-
-                            Date date = Date.valueOf(datePicker.getValue());
+//                            rowNumber, indexNumber, programme, course, level,s
+//                            className, year_group, attendanceValue, attendanceDate
+                            Date date = Date.valueOf(LocalDate.now());
                             String attendanceValue = each.getAttendanceButton().isEmpty() ? "A" : each.getAttendanceButton().getValue();
                             entity.setRowNumber(each.getId());
                             entity.setIndexNumber(each.getIndexNumber());
-                            entity.setclassName(each.getStudentClass());
-                            entity.setprogrameName(courseSelector.getValue());
+                            entity.setProgramme(programmeSelector.getValue());
+                            entity.setCourse(courseSelector.getValue());
+                            entity.setLevel(levelSelector.getValue());
+                            entity.setclassName(sectionSelector.getValue());
+                            entity.setYearGroup(String.valueOf(LocalDate.now().getYear()));
                             entity.setAttendanceValue(attendanceValue);
                             entity.setAttendanceDate(date);
-                            entity.setYearGroup(yearSelector.getValue());
                             responseStatus.addAndGet(SERVICE_OBJ.saveAttendance(entity));
                         });
                         if (responseStatus.get() > 0) {
@@ -214,7 +219,7 @@ public class TakeAttendanceView extends VerticalLayout {
                                 attendanceTable.setItems(Collections.emptyList());
                                 attendanceTable.getColumnByKey("rollNoColumn").setFooter("Empty Table");
                                 new UserConfirmDialogs()
-                                        .showSuccess("NICE, attendance for ".concat(datePicker.getValue().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                                        .showSuccess("NICE, attendance for ".concat(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                                                 + " successfully saved.");
                             });
                         } else {

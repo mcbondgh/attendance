@@ -130,6 +130,40 @@
     border: 1px solid rgb(222, 222, 222);
     border-radius: 5px;
     padding-top: 0;
+    box-sizing:border-box;
+}
+
+.date-activity-container {
+    gap:5px;
+    box-sizing: border-box;
+}
+.class-level-container {
+    display:flex;
+    align-items:center;
+    justify-content: flex-start;
+    /* border: 1px solid red; */
+    gap:5px;
+    box-sizing: border-box;
+}
+
+.class-level-container .item-selector {
+    /* border:1px solid orange; */
+    max-width:31%;
+}
+
+
+.date-picker::part(label) { 
+    font-size: smaller;
+}
+
+.date-picker, .activity-selector {
+    width: 46%;
+    /* margin-bottom: 10px; */
+}
+
+.course-selector{
+    width:75%;
+    margin-right: 5px;
 }
 
 @media screen and (max-width:600px) {
@@ -148,8 +182,22 @@
     .activity-view-dialog {
         max-width: 100%;
     }
-    .activity-view-dialog-vlayout {
+    .date-activity-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    .activity-view-dialog-vlayout, .class-level-container{
         flex-direction: column;
         max-width: 100%;
+        width:100%;
+    }
+
+    .date-picker, .activity-selector, .course-selector, .section-selector, 
+    .class-level-container .item-selector {
+        min-width: 100%;
+        /* margin-bottom: 10px; */
     }
 }

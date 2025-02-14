@@ -35,6 +35,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import java.io.*;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,10 +51,11 @@ public class ViewAttendanceView extends VerticalLayout {
 
     private final Grid<AttendanceRecordsEntity> grid = new Grid<>();
     private Filter filterObj;
-    private ComboBox<String> classPicker = new ComboBox<>("Select Class");
+    private ComboBox<String> classPicker = new ComboBox<>("Select Class", "A", "B");
     private DatePicker startDatePicker = new DatePicker("Start Date");
     private DatePicker endDatePicker = new DatePicker("End Date");
     private ComboBox<String> programPicker = new ComboBox<>("Select Program");
+    private ComboBox<String> coursePicker = new ComboBox<>("Select Course");
     private Button generateButton = new Button("Generate");
     private TextField filterField = new TextField();
     private final ComboBox<String> yearGroup = new ComboBox<>("Year Group");
@@ -80,13 +82,15 @@ public class ViewAttendanceView extends VerticalLayout {
         programPicker.setInvalid(programPicker.isEmpty());
         programPicker.setRequired(true);
         classPicker.setRequired(true);
+        coursePicker.setRequired(true);
+        coursePicker.setInvalid(coursePicker.isEmpty());
         yearGroup.setRequired(true);
         yearGroup.setInvalid(yearGroup.isEmpty());
     }
 
     private void isFieldEmpty(Button button) {
         button.setEnabled(!(startDatePicker.isInvalid() || endDatePicker.isInvalid() ||
-                classPicker.isInvalid() || programPicker.isInvalid()));
+                classPicker.isInvalid() || coursePicker.isInvalid() || programPicker.isInvalid()));
     }
 
     /*************************************************************************************
@@ -102,16 +106,19 @@ public class ViewAttendanceView extends VerticalLayout {
         hLayout.setSpacing(false);
 
         generateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
-        SpecialMethods.setClasses(classPicker);
-        SpecialMethods.setCourses(programPicker);
+        SpecialMethods.loadProgrammes(programPicker);
+        SpecialMethods.setCourses(coursePicker);
         SpecialMethods.setYear(yearGroup);
+        classPicker.setValue("A");
+        yearGroup.setValue(String.valueOf(LocalDate.now().getYear()));
 
         classPicker.setClassName("take-attendance-combobox");
         yearGroup.setClassName("take-attendance-combobox");
         programPicker.setClassName("take-attendance-combobox");
+        coursePicker.addClassNames("take-attendance-combobox");
         generateButton.setClassName("generate-button");
         // add components to layout
-        layout.add(hLayout, classPicker, programPicker, yearGroup, generateButton);
+        layout.add(hLayout, classPicker, coursePicker, programPicker, yearGroup, generateButton);
         layout.setAlignSelf(Alignment.END, generateButton);
 
         // add eventlistner to layout to check if field is empty and enable button same.
@@ -121,14 +128,13 @@ public class ViewAttendanceView extends VerticalLayout {
 
         // LOAD TABLE DATA
         generateButton.addClickListener(click -> {
-
             // Timer timer = new Timer();
             // timer.scheduleAtFixedRate(task, 1000, 1000);
             Date start = Date.valueOf(startDatePicker.getValue());
             Date end = Date.valueOf(endDatePicker.getValue());
             LoadTableGrid.loadTable(
                     grid,
-                    DAO_OBJECT.fetchAttendanceRecords(start, end, classPicker.getValue(), programPicker.getValue(), yearGroup.getValue()));
+                    DAO_OBJECT.fetchAttendanceRecords(start, end, classPicker.getValue(), programPicker.getValue(), yearGroup.getValue(), coursePicker.getValue()));
             AtomicInteger presentCounter = new AtomicInteger(0);
             AtomicInteger abscentCounter = new AtomicInteger(0);
             AtomicInteger excusedCounter = new AtomicInteger(0);
@@ -217,10 +223,10 @@ public class ViewAttendanceView extends VerticalLayout {
         grid.addColumn(AttendanceRecordsEntity::getId).setHeader("NO.");
         grid.addColumn(AttendanceRecordsEntity::getIndexNumber).setHeader("INDEX NUMBER");
         grid.addColumn(AttendanceRecordsEntity::getFullname).setHeader("FULL NAME");
-        grid.addComponentColumn(item -> {return item.getPresentLabel();}).setHeader("PRESENT").setKey("presentColumn");
-        grid.addComponentColumn(item -> {return item.getAbscentLabel();}).setHeader("ABSENT").setKey("absentColumn");
-        grid.addComponentColumn(item -> {return item.getExcusedLabel();}).setHeader("EXCUSED").setKey("excusedColumn");
-        grid.addComponentColumn(item -> {return item.getTotalAttendanceLabel();}).setHeader("TOTAL ATTENDANCE");
+        grid.addComponentColumn(AttendanceRecordsEntity::getPresentLabel).setHeader("PRESENT").setKey("presentColumn");
+        grid.addComponentColumn(AttendanceRecordsEntity::getAbscentLabel).setHeader("ABSENT").setKey("absentColumn");
+        grid.addComponentColumn(AttendanceRecordsEntity::getExcusedLabel).setHeader("EXCUSED").setKey("excusedColumn");
+        grid.addComponentColumn(AttendanceRecordsEntity::getTotalAttendanceLabel).setHeader("TOTAL ATTENDANCE");
 
         grid.getColumns().forEach(each -> each.setAutoWidth(true));
         grid.getColumns().forEach(each -> each.setSortable(true));
