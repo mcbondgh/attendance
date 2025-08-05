@@ -48,10 +48,14 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     public MainLayout() {
         try {
             roleId = Integer.parseInt(SessionManager.getAttribute("roleId").toString());
+            if (!(roleId == 1 || roleId == 2)) {
+                UI.getCurrent().getPage().setLocation("/rep-dashboard");
+                return;
+            }
             setPrimarySection(Section.DRAWER);
             addDrawerContent();
             addHeaderContent();
-        }catch (Exception e) {
+        } catch (Exception e) {
             SessionManager.destroySession();
             UI.getCurrent().getPage().setLocation(UserLoginView.class.getAnnotation(Route.class).value());
         }

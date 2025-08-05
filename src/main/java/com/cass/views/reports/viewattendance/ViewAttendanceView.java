@@ -51,7 +51,7 @@ public class ViewAttendanceView extends VerticalLayout {
 
     private final Grid<AttendanceRecordsEntity> grid = new Grid<>();
     private Filter filterObj;
-    private ComboBox<String> classPicker = new ComboBox<>("Select Class", "A", "B");
+    private ComboBox<String> classPicker = new ComboBox<>("Select Section");
     private DatePicker startDatePicker = new DatePicker("Start Date");
     private DatePicker endDatePicker = new DatePicker("End Date");
     private ComboBox<String> programPicker = new ComboBox<>("Select Program");
@@ -86,6 +86,7 @@ public class ViewAttendanceView extends VerticalLayout {
         coursePicker.setInvalid(coursePicker.isEmpty());
         yearGroup.setRequired(true);
         yearGroup.setInvalid(yearGroup.isEmpty());
+        SpecialMethods.setClassSections(classPicker);
     }
 
     private void isFieldEmpty(Button button) {

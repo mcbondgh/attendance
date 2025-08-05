@@ -63,12 +63,12 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
     private ComboBox<String> courseSelector = new ComboBox<>("Course");
     private NumberField maxScoreField = new NumberField("Maximum Score");
     private Button toggleButton = new Button(" Add Activity");
-    private final ComboBox<String> sectionSelector = new ComboBox<>("Class", "A", "B");
+    private final ComboBox<String> sectionSelector = new ComboBox<>("Section");
     private final ComboBox<String> levelSelector = new ComboBox<>("Level");
 
     public ManageClassActivityView() {
-        getContent().add(renderPageHeader(), renderPageView());
         setRequiredFields();
+        getContent().add(renderPageHeader(), renderPageView());
         loadFields();
     }
 
@@ -94,6 +94,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         activitySelector.setInvalid(activitySelector.isEmpty());
         levelSelector.setRequired(true);
         levelSelector.setInvalid(levelSelector.isEmpty());
+        SpecialMethods.setClassSections(sectionSelector);
     }
 
     private void checkForEmptyFields(Component component) {

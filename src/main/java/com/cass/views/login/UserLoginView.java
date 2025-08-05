@@ -7,7 +7,9 @@ import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.UI;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -39,7 +41,7 @@ import javax.mail.Session;
 @Route(value = "")
 @RouteAlias(value = "login")
 // @PermitAll
-public class UserLoginView extends VerticalLayout{
+public class UserLoginView extends VerticalLayout {
     DAO DAO_OBJECT = new DAO();
 
     public UserLoginView() {
@@ -57,7 +59,7 @@ public class UserLoginView extends VerticalLayout{
         Span errorText = new Span(" Invalid Username or password");
         Span footerText = new Span("Powered by Mc's Republic");
         footerText.addClassName("login-footer-text");
-        
+
         Div div1 = new Div(title, paragraph);
         Div div2 = new Div(usernameField, passwordField, new Hr(), loginBtn, footerText);
         Div errorDiv = new Div(LineAwesomeIcon.EXCLAMATION_CIRCLE_SOLID.create(), errorText);
@@ -71,9 +73,9 @@ public class UserLoginView extends VerticalLayout{
         errorText.setClassName("login-errorText");
         usernameField.setClassName("login-input-fields");
         passwordField.setClassName("login-input-fields");
-        loginBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, 
-                                ButtonVariant.MATERIAL_CONTAINED, 
-                                ButtonVariant.LUMO_PRIMARY);
+        loginBtn.addThemeVariants(ButtonVariant.LUMO_SMALL,
+                ButtonVariant.MATERIAL_CONTAINED,
+                ButtonVariant.LUMO_PRIMARY);
 
         usernameField.setValueChangeMode(ValueChangeMode.EAGER);
         passwordField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -81,29 +83,30 @@ public class UserLoginView extends VerticalLayout{
         passwordField.setRequired(true);
         usernameField.setInvalid(usernameField.isEmpty());
         passwordField.setInvalid(passwordField.isEmpty());
-        errorDiv.setVisible(isAttached());
+        errorDiv.setVisible(false);
 
         // usernameField.setErrorMessage("required field");
         // passwordField.setErrorMessage("required field");
 
         layout.setSizeFull();
-       
+
         layout.add(mainDiv);
 
         loginBtn.addClickShortcut(Key.ENTER);
         loginBtn.addClickListener(click -> {
-           boolean usernameAndPassEmpty = usernameField.isEmpty() || passwordField.isEmpty();
-           if (usernameAndPassEmpty) {
-               usernameField.setErrorMessage("enter username");
-               passwordField.setErrorMessage("enter password");
-           } else {
-                if(!authenticateUser(usernameField.getValue(), passwordField.getValue())) {
-                    errorDiv.setVisible(true);
-                } else {
-                    SessionManager.setUsername(usernameField.getValue());
-                    UI.getCurrent().getPage().setLocation("dashboard");
-                }
-           }
+            boolean usernameAndPassEmpty = usernameField.isEmpty() || passwordField.isEmpty();
+            if (usernameAndPassEmpty) {
+                usernameField.setErrorMessage("enter username");
+                passwordField.setErrorMessage("enter password");
+            } else {
+                authenticateUser(usernameField.getValue(), passwordField.getValue(), errorDiv);
+//                if (!authenticateUser(usernameField.getValue(), passwordField.getValue())) {
+//                    errorDiv.setVisible(true);
+//                } else {
+//                    SessionManager.setUsername(usernameField.getValue());
+//                    UI.getCurrent().getPage().setLocation("dashboard");
+//                }
+            }
         });
 
         return layout;
@@ -113,32 +116,45 @@ public class UserLoginView extends VerticalLayout{
     /*********************************************************************
      * AUTHENTICATE USER TO GRANT OR DINY ACCESS
      *********************************************************************/
-    private boolean authenticateUser(String username, String password) {
-        boolean resultStatus = false;
-        try {
-            Map<String, String> userData = DAO_OBJECT.getUsersByUsername(username);
+    private void authenticateUser(String username, String password, Component errorDiv) {
 
-            if(userData.isEmpty()) {
-                return resultStatus;
+        try {
+            Map<String, String> userData = DAO_OBJECT.getUsersByUsername(username.toLowerCase());
+            if (userData.isEmpty()) {
+                errorDiv.setVisible(true);
             } else {
-                String name = userData.get("username");
                 String passString = userData.get("password");
-                int roleId = Integer.parseInt(userData.get("roleId"));
-                SessionManager.setAttribute("roleId", roleId);
-                String role = roleId == 1 ? "Admin" : "Teaching Assistant";
-                new UserService().logUser(name, role);
-                //DECIPHER USERS PASSWORD 
+
+                //DECIPHER USERS PASSWORD
                 boolean passwordMatch = Encryption.getOriginalText(passString).equals(password);
-            
-                if(passwordMatch) {
-                    resultStatus = true;
-                }
+                if (passwordMatch) {
+                    String name = userData.get("username");
+
+                    int roleId = Integer.parseInt(userData.get("roleId"));
+
+                    SessionManager.setAttribute("roleId", roleId);
+                    SessionManager.setUsername(username);
+
+                    AtomicReference<String> role = new AtomicReference<>();
+                    if (roleId == 1) {
+                        role.set("Admin");
+                    } else if (roleId == 2) {
+                        role.set("Teaching Assistant");
+                    } else {
+                        role.set("Class Rep");
+                    }
+
+                    new UserService().logUser(name, role.get());
+                    if (role.get().equals("Admin") || role.get().equals("Teaching Assistant")) {
+                        UI.getCurrent().getPage().setLocation("dashboard");
+                    } else UI.getCurrent().getPage().setLocation("/rep-dashboard");
+                } else errorDiv.setVisible(true);
             }
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             new UserConfirmDialogs().showError(e.getMessage());
         }
-        return resultStatus;
+//        return resultStatus;
 
     }
-    
+
 }//end of class...

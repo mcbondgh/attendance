@@ -51,7 +51,7 @@ public class ReportsView extends VerticalLayout {
     private final ComboBox<String> yearGroup = new ComboBox<>("Select Year Group");
     private final Button generateReportButton = new Button("Generate");
     private final ComboBox<String> typePicker = new ComboBox<>("Select Activity");
-    private final ComboBox<String> classPicker = new ComboBox<>("Select Class", "A", "B");
+    private final ComboBox<String> classPicker = new ComboBox<>("Select Section");
 
     private final TextField filterField = new TextField();
     private final Anchor pdfLink = new Anchor("#", "PDF");
@@ -61,7 +61,7 @@ public class ReportsView extends VerticalLayout {
         SpecialMethods.loadProgrammes(programmePicker);
         SpecialMethods.setCourses(coursePicker);
         SpecialMethods.setYear(yearGroup);
-//        SpecialMethods.setSemester(classPicker);
+        SpecialMethods.setClassSections(classPicker);
         SpecialMethods.setActivityTypes(typePicker);
     }
 

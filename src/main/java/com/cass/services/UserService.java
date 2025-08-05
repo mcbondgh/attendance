@@ -53,8 +53,8 @@ public class UserService extends DAO{
 
     public int logUser(String username, String role) {
         String query = """
-                INSERT INTO `class_attendance`.`signin` (`user_id`, `position`) VALUES (?, ?);
-                
+                INSERT INTO `class_attendance`.`signin` (`username`, `position`) VALUES (?, ?);
+            
                 """;
         try {
             prepare = getCon().prepareStatement(query);

@@ -419,7 +419,7 @@ public class DAO extends Config {
             resultSet = getCon().prepareStatement(query).executeQuery();
             while (resultSet.next()) {
                 int userId = resultSet.getInt(1);
-               String username = resultSet.getString("user_id");
+               String username = resultSet.getString("username");
                String role = resultSet.getString("position");
                Timestamp date = resultSet.getTimestamp("signedin_at");
                data.add(new UserLogsRecord(userId, username, role, date));

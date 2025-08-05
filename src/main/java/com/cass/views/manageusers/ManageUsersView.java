@@ -55,6 +55,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import jakarta.annotation.security.RolesAllowed;
 
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 @PageTitle("User Logs")
 @Route(value = "user-logs", layout = MainLayout.class)
 // @RolesAllowed({"ADMIN","USERS"})
@@ -120,7 +124,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
     }
 
     /***********************************************************************************
-     * CREATE A COMPONENT RENDERER TO ALLOW USER UPATE
+     * CREATE A COMPONENT RENDERER TO ALLOW USER UPDATE
      ***********************************************************************************/
     private ComponentRenderer<Component, UsersEntity> createUserUpdateComponentRenderer() {
         return new ComponentRenderer<>(users -> {
@@ -240,19 +244,32 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
             } else {
                 new UserConfirmDialogs("SAVE USER", "Do you wish add current record to your list of users?").
                         saveDialog().addConfirmListener(confirm -> {
-                            String cipherText = Encryption.generateCipherText(userPasswordField.getValue());
-                            entity.setUsername(usernameField.getValue());
-                            entity.setPassword(cipherText);
-                            entity.setRoleId((byte) (userRolePicker.getValue().equals("Admin") ? 1 : 2));
-                            int responseStatus = SERVICE_OBJ.saveUser(entity);
+                            UI.getCurrent().access(() -> {
 
-                            if (responseStatus > 0) {
-                                popUp.showSuccess("Nice, new user successfully added to list");
-                                userPasswordField.clear();
-                                usernameField.clear();
-                                confirmPasswordField.clear();
-                                LoadTableGrid.loadTable(usersTable, SERVICE_OBJ.getAllUsers());
-                            }
+                                String cipherText = Encryption.generateCipherText(userPasswordField.getValue());
+                                entity.setUsername(usernameField.getValue());
+                                entity.setPassword(cipherText);
+
+                                var roleId = new AtomicReference<Byte>();
+                                var userRole = userRolePicker.getValue();
+                                if (Objects.equals(userRole, "Admin")) {
+                                    roleId.set((byte) 1);
+                                } else if (Objects.equals(userRole, "Teaching Assistant")) {
+                                    roleId.set((byte) 2);
+                                } else roleId.set((byte) 3);
+
+                                entity.setRoleId(roleId.get());
+//                            entity.setRoleId((byte) (userRolePicker.getValue().equals("Admin") ? 1 : 2));
+                                int responseStatus = SERVICE_OBJ.saveUser(entity);
+
+                                if (responseStatus > 0) {
+                                    popUp.showSuccess("Nice, new user successfully added to list");
+                                    userPasswordField.clear();
+                                    usernameField.clear();
+                                    confirmPasswordField.clear();
+                                    LoadTableGrid.loadTable(usersTable, SERVICE_OBJ.getAllUsers());
+                                }
+                            });
                         });
             }
         });

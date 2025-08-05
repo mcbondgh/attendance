@@ -50,7 +50,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
     StudentEntity STUDENT_ENTITY_OBJ = new StudentEntity();
     StudentService STUDENT_SERVICE_OBJ = new StudentService();
 
-    private ComboBox<String> sectionPicker = new ComboBox<>("Select Section", "A", "B");
+    private ComboBox<String> sectionPicker = new ComboBox<>("Select Section");
     private VerticalLayout pageLayout = new VerticalLayout();
     private FormLayout formLayout = new FormLayout();
     private TextField studentNumberField = new TextField("Student Number");
@@ -67,6 +67,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
     public AddStudentView() {
         pageLayout.setClassName("container");
         setClassName("page-container");
+        SpecialMethods.setClassSections(sectionPicker);
 
         pageLayout.add(renderPageHeader(), studentGrid());
         pageLayout.setSizeFull();

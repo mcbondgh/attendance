@@ -101,6 +101,10 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
         coursesGrid.addColumn(CourseRecord::level).setHeader("Level");
         coursesGrid.addThemeVariants(GridVariant.LUMO_COMPACT);
         coursesGrid.addClassNames("default-grid-style");
+        coursesGrid.getColumns().forEach(col -> {
+            col.setAutoWidth(true);
+            col.setResizable(true);
+        });
         coursesGrid.setSizeFull();
         coursesGrid.setItems(loadCourseData());
         return coursesGrid;

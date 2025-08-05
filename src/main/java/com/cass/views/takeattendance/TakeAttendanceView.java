@@ -51,10 +51,11 @@ public class TakeAttendanceView extends VerticalLayout {
     private final ComboBox<String> levelSelector = new ComboBox<>("Select Level");
     private final ComboBox<String> yearGroup = new ComboBox<>("Select Year");
     private final Button generateSheetButton = new Button("Generate Sheet");
-    private final ComboBox<String> sectionSelector = new ComboBox<>("Section", "A", "B");
+    private final ComboBox<String> sectionSelector = new ComboBox<>("Section");
 
     public TakeAttendanceView() {
         setSpacing(false);
+        SpecialMethods.setClassSections(sectionSelector);
         add(renderPageView());
     }
 

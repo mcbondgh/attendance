@@ -86,7 +86,8 @@ public class ActivitiesView extends VerticalLayout {
         ComboBox<String> programmeSelector = new ComboBox<>("Select Programme");
         ComboBox<String> courseSelector = new ComboBox<>("Select Course");
         TextField filterField = new TextField();
-        final ComboBox<String> classSelector = new ComboBox<>("Class", "A", "B");
+        final ComboBox<String> classSelector = new ComboBox<>("Section");
+        SpecialMethods.setClassSections(classSelector);
         ComboBox<String> levelSelector = new ComboBox<>("Level");
 
         ListBox<ActivitiesEntity> listView = new ListBox<>();

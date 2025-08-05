@@ -123,8 +123,45 @@ box-sizing: border-box;
 }
 
 
+/* REP ADD STUDENT VIEW*/
+.back-button {
+    background:dodgerblue;
+    outline:none;
+    color:#ffff;
+}
+
+.back-button:hover {
+    cursor:pointer;
+    opacity:0.9;
+}
+.add-student-body-container {
+    border:1px solid #ddd;
+    border-radius:5px;
+    gap:10px;
+    padding:10px;
+    box-sizing:border-box
+}
+.add-student-inner-layout {
+    background:#fff;
+    margin:auto;
+    box-sizing:border-box
+    border:1px solid #ddd;
+    border-radius:9px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 @media screen and (max-width: 600px) {
-  .header-container {
+  .header-container,{
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
@@ -156,7 +193,7 @@ box-sizing: border-box;
     width: 100%;
   }
 
-  .items-layout, .leve-and-section-container {
+  .items-layout, .leve-and-section-container ,.add-student-body-container {
     flex-direction: column;
     width: 100%;
   }
@@ -166,5 +203,8 @@ box-sizing: border-box;
   .default-button {
     width: 100%;
   }
+.add-student-inner-layout {
+    min-width:100%;
+}
 
 }
