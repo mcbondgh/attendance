@@ -8,6 +8,11 @@ import java.time.format.FormatStyle;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.itextpdf.forms.form.element.CheckBox;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.function.ValueProvider;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import com.cass.data.AttendanceEntity;
@@ -51,7 +56,8 @@ public class TakeAttendanceView extends VerticalLayout {
     private final ComboBox<String> levelSelector = new ComboBox<>("Select Level");
     private final ComboBox<String> yearGroup = new ComboBox<>("Select Year");
     private final Button generateSheetButton = new Button("Generate Sheet");
-    private final ComboBox<String> sectionSelector = new ComboBox<>("Section");
+    private final ComboBox<String> sectionSelector = new ComboBox<>("Class Section");
+    private final Checkbox markAllPresent = new Checkbox("Mark All");
 
     public TakeAttendanceView() {
         setSpacing(false);
@@ -165,8 +171,18 @@ public class TakeAttendanceView extends VerticalLayout {
         attendanceTable.addColumn(StudentEntity::getId).setHeader("ROLL NO.").setKey("rollNoColumn");
         attendanceTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER");
         attendanceTable.addColumn(StudentEntity::getFullName).setHeader("NAME");
+
 //        attendanceTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
-        attendanceTable.addComponentColumn(StudentEntity::getAttendanceButton).setHeader("OPTION").setFrozenToEnd(true);
+        attendanceTable.addComponentColumn(StudentEntity::getAttendanceButton).setHeader(markAllPresent).setFrozenToEnd(true).setSortable(false);
+
+        //add event listener to mark-all component
+        markAllPresent.addValueChangeListener(e -> {
+           if (e.getValue()) {
+               attendanceTable.getListDataView().getItems().forEach(each -> {
+                   each.getAttendanceButton().setValue("P");
+               });
+           }else attendanceTable.getListDataView().getItems().forEach(each -> each.getAttendanceButton().setValue(""));
+        });
 
         attendanceTable.getColumns().forEach(each -> each.setAutoWidth(true));
         attendanceTable.getColumns().forEach(each -> each.setSortable(true));

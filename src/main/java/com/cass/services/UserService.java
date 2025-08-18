@@ -2,19 +2,20 @@ package com.cass.services;
 
 import com.cass.data.UsersEntity;
 
-public class UserService extends DAO{
-    
+public class UserService extends DAO {
+
     public int saveUser(UsersEntity entity) {
         int status = 0;
         try {
-            String query = "INSERT INTO users(username, password, role_id) VALUES(?, ?, ?);";
+            String query = "INSERT INTO users(username, password, role_id, index_number) VALUES(?, ?, ?, ?);";
             prepare = getCon().prepareStatement(query);
             prepare.setString(1, entity.getUsername());
             prepare.setString(2, entity.getPassword());
             prepare.setByte(3, entity.getRoleId());
+            prepare.setString(4, entity.getIndexNumber());
             status = prepare.executeUpdate();
             getCon().close();
-        }catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return status;
@@ -32,7 +33,7 @@ public class UserService extends DAO{
             prepare.setInt(4, entity.getStatusId());
             prepare.setInt(5, entity.getId());
             return prepare.executeUpdate();
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
@@ -45,7 +46,7 @@ public class UserService extends DAO{
             prepare.setString(1, password);
             prepare.setString(2, username);
             return prepare.executeUpdate();
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
@@ -54,22 +55,18 @@ public class UserService extends DAO{
     public int logUser(String username, String role) {
         String query = """
                 INSERT INTO `class_attendance`.`signin` (`username`, `position`) VALUES (?, ?);
-            
+                
                 """;
         try {
             prepare = getCon().prepareStatement(query);
             prepare.setString(1, username);
             prepare.setString(2, role);
             return prepare.executeUpdate();
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
     }
-
-
-
-
 
 
 }

@@ -11,13 +11,15 @@ public class UsersEntity {
     private Span statusValue = new Span();
     private String roleName;
     private Button editBtn = new Button();
+    private String indexNumber;
 
-    public UsersEntity(int id, String username, String password, byte roleId, byte status) {
+    public UsersEntity(int id, String username, String password, byte roleId, byte status, String indexNumber) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.roleId = roleId;
         this.statusId = status;
+        this.indexNumber = indexNumber;
         setParameters();
     }
 
@@ -28,7 +30,7 @@ public class UsersEntity {
             statusValue.setText( "Active");
             statusValue.addClassNames("status-label", "active");
         } else {
-            statusValue.setText( "Active");
+            statusValue.setText( "Deactivated");
             statusValue.addClassNames("status-label", "inactive");
         }
     }
@@ -89,7 +91,11 @@ public class UsersEntity {
         this.editBtn = editBtn;
     }
 
-    
-    
 
+    public String getIndexNumber() {
+        return indexNumber;
+    }
+    public void setIndexNumber(String indexNumber){
+        this.indexNumber = indexNumber;
+    }
 }

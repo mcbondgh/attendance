@@ -147,7 +147,16 @@ public class UserLoginView extends VerticalLayout {
                     new UserService().logUser(name, role.get());
                     if (role.get().equals("Admin") || role.get().equals("Teaching Assistant")) {
                         UI.getCurrent().getPage().setLocation("dashboard");
-                    } else UI.getCurrent().getPage().setLocation("/rep-dashboard");
+                    } else {
+                        String index = userData.get("index_number");
+                        var repData = DAO_OBJECT.getClassRepInfo(index);
+                        SessionManager.setAttribute("section", repData.get("section"));
+                        SessionManager.setAttribute("level", repData.get("level"));
+                        SessionManager.setAttribute("yearGroup", repData.get("year_group"));
+                        SessionManager.setAttribute("class", repData.get("class"));
+
+                        UI.getCurrent().getPage().setLocation("/rep-dashboard");
+                    };
                 } else errorDiv.setVisible(true);
             }
         } catch (NullPointerException e) {

@@ -27,6 +27,7 @@ public class RepDashboardView extends VerticalLayout {
         try {
             String sessionUser = SessionManager.getAttribute("activeUser").toString();
             activeUser = new AtomicReference<>(sessionUser.toUpperCase());
+
         } catch (NullPointerException e) {
             UI.getCurrent().getPage().setLocation("/login");
         }

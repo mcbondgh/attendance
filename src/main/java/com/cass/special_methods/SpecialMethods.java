@@ -12,7 +12,7 @@ public class SpecialMethods {
     static DAO DAO = new DAO();
 
     static List<String> loadClasses() {
-        //        for (StudentClassesEntity item : DAO.getAllClasses()) {
+        //   for (StudentClassesEntity item : DAO.getAllClasses()) {
 //           if (item.isStatus()) {
 //               list .add(item.getClassName());
 //           }
@@ -62,7 +62,7 @@ public class SpecialMethods {
 
     public static void setClassSections(ComboBox<String> selector) {
         String[] classes = {"A", "B", "C", "D"};
-        selector.setItems(loadClasses());
+        selector.setItems(classes);
     }
 
     public static void setActivityTypes(ComboBox<String> selector) {
