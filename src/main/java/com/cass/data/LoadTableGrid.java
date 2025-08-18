@@ -3,7 +3,6 @@ package com.cass.data;
 import java.util.Collection;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 
 public class LoadTableGrid {
@@ -12,8 +11,8 @@ public class LoadTableGrid {
         GridListDataView<T> data = tableName.setItems(dataCollection);
         return data;
     }
-    public static <T> GridListDataView<T> loadTable(Grid<T> tableName, Collection<T> dataCollection) {
-        return tableName.setItems(dataCollection);
+    public static <T> void loadTable(Grid<T> tableName, Collection<T> dataCollection) {
+        tableName.setItems(dataCollection);
     }
         
 }

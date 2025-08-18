@@ -11,6 +11,7 @@ import com.cass.security.Config;
 import org.apache.fop.pdf.ObjectStream;
 
 public class DAO extends Config {
+
     public Collection<StudentEntity> getStudentByClass(String programme, String yearGroup, String level, String section) {
         Collection<StudentEntity> data = new ArrayList<>();
         try {
@@ -114,7 +115,7 @@ public class DAO extends Config {
                 int id = resultSet.getInt("id");
                 String indexNo = resultSet.getString("indexNumber");
                 String fullName = resultSet.getString("fullName");
-                String program = resultSet.getString("program");
+                String program = resultSet.getString("programme");
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
                 byte status = resultSet.getByte("status");
@@ -214,7 +215,8 @@ public class DAO extends Config {
                 data.add(new AttendanceRecordsEntity(index.incrementAndGet(), indexNumber, fullName, presentCount, absentCount, totalAttendance, excusedCount));
             }
             getCon().close();
-        } catch (SQLException ignore) { ignore.printStackTrace();
+        } catch (SQLException ignore) {
+            ignore.printStackTrace();
         }
         return data;
     }
@@ -286,7 +288,8 @@ public class DAO extends Config {
                 int activities = resultSet.getInt("activity_count");
                 data.add(new ActivitiesEntity(counter.incrementAndGet(), name, index, score, maxScore, activities));
             }
-        } catch (Exception ignore) { ignore.printStackTrace();
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
         }
         return data;
     }
@@ -295,11 +298,11 @@ public class DAO extends Config {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         try {
             String query = """
-                    SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, course, className, maximumScore, score, activityDate, dateCreated
-                    FROM class_attendance.activity_records AS ar\s
-                    INNER JOIN studentslist AS sl\s
-                    ON ar.rowNumber = sl.id WHERE(status = 1 AND year_group = ?);
-                   \s""";
+                     SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, course, className, maximumScore, score, activityDate, dateCreated
+                     FROM class_attendance.activity_records AS ar\s
+                     INNER JOIN studentslist AS sl\s
+                     ON ar.rowNumber = sl.id WHERE(status = 1 AND year_group = ?);
+                    \s""";
             prepare = getCon().prepareStatement(query);
             prepare.setString(1, yearGroup);
             resultSet = prepare.executeQuery();
@@ -328,13 +331,14 @@ public class DAO extends Config {
     public Map<String, String> getUsersByUsername(String username) {
         Map<String, String> data = new HashMap<>();
         try {
-            String query = "SELECT username, password, role_id FROM users WHERE username = '" + username + "';";
+            String query = "SELECT username, password, role_id, index_number FROM users WHERE username = '" + username + "';";
             prepare = getCon().prepareStatement(query);
             resultSet = prepare.executeQuery();
             if (resultSet.next()) {
                 data.put("username", resultSet.getString("username"));
                 data.put("password", resultSet.getString("password"));
                 data.put("roleId", String.valueOf(resultSet.getInt("role_id")));
+                data.putIfAbsent("index_number", resultSet.getString("index_number") == null ? "0": resultSet.getString("index_number"));
             }
             getCon().close();
         } catch (SQLException ignore) {
@@ -357,12 +361,36 @@ public class DAO extends Config {
                 String password = resultSet.getString("password");
                 byte role = resultSet.getByte("role_id");
                 byte statusId = resultSet.getByte("status");
+                String index = resultSet.getString("index_number");
 
-                data.add(new UsersEntity(id, username, password, role, statusId));
+                data.add(new UsersEntity(id, username, password, role, statusId, index));
             }
             getCon().close();
         } catch (SQLException ignore) {
             ignore.printStackTrace();
+        }
+        return data;
+    }
+
+    public Map<String, String> getClassRepInfo(String indexNumber) {
+        Map<String, String> data = new HashMap<>();
+        String query = """
+                SELECT
+                section, level, year_group, class
+                FROM studentslist WHERE TRIM(indexNumber) = TRIM(?);
+                """;
+        try {
+            prepare = getCon().prepareStatement(query);
+            prepare.setString(1, indexNumber);
+            resultSet = prepare.executeQuery();
+            if (resultSet.next()) {
+                data.put("section", resultSet.getString("section"));
+                data.put("level", resultSet.getString("level"));
+                data.put("year_group", resultSet.getString("year_group"));
+                data.put("class", resultSet.getString("class"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return data;
     }
@@ -413,16 +441,16 @@ public class DAO extends Config {
     }
 
     public List<UserLogsRecord> getSignLogs() {
-       List<UserLogsRecord> data = new ArrayList<>();
+        List<UserLogsRecord> data = new ArrayList<>();
         try {
             String query = "SELECT * FROM signin ORDER BY id DESC LIMIT 20;";
             resultSet = getCon().prepareStatement(query).executeQuery();
             while (resultSet.next()) {
                 int userId = resultSet.getInt(1);
-               String username = resultSet.getString("username");
-               String role = resultSet.getString("position");
-               Timestamp date = resultSet.getTimestamp("signedin_at");
-               data.add(new UserLogsRecord(userId, username, role, date));
+                String username = resultSet.getString("username");
+                String role = resultSet.getString("position");
+                Timestamp date = resultSet.getTimestamp("signedin_at");
+                data.add(new UserLogsRecord(userId, username, role, date));
             }
             resultSet.close();
             getCon().close();

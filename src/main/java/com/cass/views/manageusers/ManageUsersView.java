@@ -7,56 +7,28 @@ import com.cass.security.Encryption;
 import com.cass.services.UserService;
 import com.cass.special_methods.SpecialMethods;
 import com.cass.views.MainLayout;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H5;
-import com.vaadin.flow.component.html.H6;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Main;
-import com.vaadin.flow.component.html.OrderedList;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
-import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.dom.Style.FlexWrap;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
-import com.vaadin.flow.theme.lumo.LumoUtility.ListStyleType;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import com.vaadin.flow.theme.lumo.LumoUtility.MaxWidth;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
-
-import jakarta.annotation.security.RolesAllowed;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @PageTitle("User Logs")
@@ -68,9 +40,16 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
     private OrderedList imageContainer;
     private final Grid<UsersEntity> usersTable = new Grid<>(UsersEntity.class, false);
     UserService SERVICE_OBJ = new UserService();
+    private TextField indexNumberField = new TextField("Index Number", "04/2020/0203");
 
     public ManageUsersView() {
         add(renderPageHeader(), renderPageView());
+    }
+
+    @Override
+    public void onAttach(AttachEvent event) {
+        indexNumberField.setRequired(true);
+        indexNumberField.setMaxLength(20);
     }
 
 
@@ -224,13 +203,29 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
         userPasswordField.setInvalid(isVisible());
         confirmPasswordField.setInvalid(isVisible());
         userRolePicker.setInvalid(isAttached());
+        indexNumberField.setVisible(false);
+
+        indexNumberField.setValueChangeMode(ValueChangeMode.LAZY);
+
+        //check from users table if index number already exists.
+        indexNumberField.addValueChangeListener(event -> {
+
+        });
+
+        userRolePicker.addValueChangeListener(e -> {
+            indexNumberField.setVisible(e.getValue().equals("Class Rep"));
+        });
 
         //ADD COMPONENTS TO LAYOUT
-        layout.add(usernameField, userPasswordField, confirmPasswordField, userRolePicker, new Hr(), saveButton);
+        layout.add(usernameField, userPasswordField, confirmPasswordField, userRolePicker, indexNumberField, new Hr(), saveButton);
         dialog.add(layout);
 
         //ADD CLICK LISTENER TO BUTTON TO CHECK AND SAVE USER
         saveButton.addClickListener(click -> {
+
+            if (userRolePicker.getValue().equals("Class Rep")) {
+
+            }
             UserConfirmDialogs popUp = new UserConfirmDialogs();
             UserService SERVICE_OBJ = new UserService();
             UsersEntity entity = new UsersEntity();
@@ -249,6 +244,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
                                 String cipherText = Encryption.generateCipherText(userPasswordField.getValue());
                                 entity.setUsername(usernameField.getValue());
                                 entity.setPassword(cipherText);
+                                entity.setIndexNumber(indexNumberField.getValue());
 
                                 var roleId = new AtomicReference<Byte>();
                                 var userRole = userRolePicker.getValue();

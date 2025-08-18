@@ -87,8 +87,10 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         programmeSelector.setInvalid(programmeSelector.isEmpty());
         programmeSelector.setRequired(true);
         sectionSelector.setRequired(true);
+        sectionSelector.setWidthFull();
         sectionSelector.setInvalid(sectionSelector.isEmpty());
         courseSelector.setRequired(true);
+        courseSelector.setWidthFull();
         courseSelector.setInvalid(courseSelector.isEmpty());
         activitySelector.setRequired(true);
         activitySelector.setInvalid(activitySelector.isEmpty());
@@ -179,7 +181,6 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
 
         Div classAndCourseContainer = new Div(courseSelector, sectionSelector);
         classAndCourseContainer.addClassNames("date-activity-container");
-        sectionSelector.getStyle().setWidth("50px");
         classAndCourseContainer.getStyle().setAlignItems(Style.AlignItems.CENTER);
 
         activitySelector.addClassNames("item-selector", "activity-selector");

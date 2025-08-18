@@ -94,8 +94,9 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
         ComboBox<String> programmePicker = new ComboBox<>();
         ComboBox<String> yearPicker = new ComboBox<>();
-        ComboBox<String> sectionPicker = new ComboBox<>("", "A", "B");
+        ComboBox<String> sectionPicker = new ComboBox<>("");
         ComboBox<String> levelPicker = new ComboBox<>();
+        SpecialMethods.setClassSections(sectionPicker);
 
         programmePicker.addClassNames("item-picker");
         yearPicker.addClassNames("item-picker");
@@ -163,6 +164,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         studentsTable.setItemDetailsRenderer(showStudentDetails());
         studentsTable.getColumns().forEach(col -> col.setAutoWidth(true));
         studentsTable.getColumns().forEach(col -> col.setSortable(true));
+        studentsTable.setSizeUndefined();
 
         VerticalLayout layout = new VerticalLayout(filterField, studentsTable);
         layout.setSpacing(false);
@@ -203,7 +205,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
     protected Span studentStatus(byte status) {
         Span badge = new Span();
         badge.setText(status == 1 ? "active" : "inactive");
-        badge.getElement().getThemeList().add(status == 1 ? "badge success" : "badge error");
+        badge.getElement().getThemeList().add(status == 1 ? "badge success pill" : "badge error pill");
         return badge;
     }
 
@@ -221,7 +223,8 @@ public class AddStudentView extends Composite<VerticalLayout> {
             SpecialMethods.setLevel(studentLevelSelector);
             ComboBox<String> studentYearSelector = new ComboBox<>("Year");
             SpecialMethods.setYear(studentYearSelector);
-            ComboBox<String> studentSectionSelector = new ComboBox<>("Section", "A", "B");
+            ComboBox<String> studentSectionSelector = new ComboBox<>("Section");
+            SpecialMethods.setClassSections(studentSectionSelector);
 
             studentLevelSelector.setClassName("item-selector");
             studentLevelSelector.setPlaceholder("Select Level");
@@ -463,7 +466,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                             resetFields();
                         });
                     } else {
-                        dialogs.showError("Oops! failed to save student, retry");
+                        dialogs.showError("Oops! failed to save student, index number may already exist");
                     }
                 });
             }
