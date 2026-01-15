@@ -444,7 +444,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
             if (validateInputs()) {
                 dialogs.showError("Fill out all required fields");
             } else if (matchesIndexNo) {
-                System.out.println(matchesIndexNo);
+//                System.out.println(matchesIndexNo);
                 new UserConfirmDialogs().showError("Index Number already exists, enter a unique index number");
                 studentNumberField.setErrorMessage("Duplicate Index Number");
             } else {
