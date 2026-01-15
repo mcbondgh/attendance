@@ -59,7 +59,7 @@ public class UserConfirmDialogs {
         layout.setWidthFull();
         notify.setPosition(Position.TOP_END);
         notify.setDuration(3000);
-        layout.getStyle().setFontSize("12px").setColor("black");
+        layout.getStyle().setFontSize("13px").setColor("black");
         notify.add(layout);
         notify.open();
     }

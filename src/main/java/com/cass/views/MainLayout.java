@@ -11,6 +11,7 @@ import com.cass.views.classActivities.ManageClassActivityView;
 import com.cass.views.manageusers.ManageUsersView;
 import com.cass.views.manageusers.UserLogsView;
 import com.cass.views.reports.ReportsView;
+import com.cass.views.settings.SettingsView;
 import com.cass.views.takeattendance.TakeAttendanceView;
 import com.cass.views.reports.viewattendance.ViewAttendanceView;
 import com.vaadin.flow.component.Component;
@@ -100,10 +101,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         SideNavItem usersNav = new SideNavItem("Manage Users", ManageUsersView.class, LineAwesomeIcon.USERS_COG_SOLID.create());
         SideNavItem userLogsNav = new SideNavItem("User Logs", UserLogsView.class, LineAwesomeIcon.USERS_COG_SOLID.create());
+        SideNavItem settingsView = new SideNavItem("Settings", SettingsView.class.getAnnotation(Route.class).value(), LineAwesomeIcon.USERS_COG_SOLID.create());
 
         if (roleId == 1) {
             navItem.addItem(usersNav);
             navItem.addItem(userLogsNav);
+            navItem.addItem(settingsView);
         }
 
         SideNav reportsNav = new SideNav("Reports");

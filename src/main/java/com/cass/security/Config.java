@@ -7,16 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.hibernate.mapping.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import java.util.*;
 
 public class Config extends ConfigProperties{
 
@@ -30,7 +20,7 @@ public class Config extends ConfigProperties{
 //            String USERNAME = loadProps().getProperty("username");
 //            String PASSWORD = loadProps().getProperty("password");
 
-            String URL = "jdbc:mysql://69.10.41.133:3308/class_attendance";
+            String URL = "jdbc:mysql://69.10.38.195:3308/class_attendance";
             String USERNAME = "attendance";
             String PASSWORD = "1244656800";
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);

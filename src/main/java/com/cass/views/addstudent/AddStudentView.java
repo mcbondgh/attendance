@@ -94,7 +94,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
         ComboBox<String> programmePicker = new ComboBox<>();
         ComboBox<String> yearPicker = new ComboBox<>();
-        ComboBox<String> sectionPicker = new ComboBox<>("");
+        ComboBox<String> sectionPicker = new ComboBox<>();
         ComboBox<String> levelPicker = new ComboBox<>();
         SpecialMethods.setClassSections(sectionPicker);
 
@@ -187,8 +187,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
     //STUDENT STABLE DATA PROVIDER.
     protected GridListDataView<StudentEntity> tableData(String programme, String yearGroup, String level, String section) {
-        GridListDataView<StudentEntity> data = studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(programme, yearGroup, level, section));
-        return data;
+        return studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(programme, yearGroup, level, section));
     }
 
     //TABLE BUTTON IMPLEMEMTATION.

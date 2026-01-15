@@ -87,6 +87,7 @@ public class ActivitiesView extends VerticalLayout {
         ComboBox<String> courseSelector = new ComboBox<>("Select Course");
         TextField filterField = new TextField();
         final ComboBox<String> classSelector = new ComboBox<>("Section");
+        classSelector.setWidth("fit-content");
         SpecialMethods.setClassSections(classSelector);
         ComboBox<String> levelSelector = new ComboBox<>("Level");
 
@@ -270,7 +271,7 @@ public class ActivitiesView extends VerticalLayout {
         grid.addColumn(activityRecord::activityType).setHeader("ACTIVITY TYPE");
         grid.addColumn(activityRecord::activityDate).setHeader("ENTRY DATE");
         grid.addColumn(activityRecord::score).setHeader("SCORE").setKey("score");
-        grid.addColumn(activityRecord::score).setHeader("MAX SCORE").setKey("max");
+        grid.addColumn(activityRecord::maxScore).setHeader("MAX SCORE").setKey("max");
         grid.getColumns().forEach(each -> each.setAutoWidth(true));
 
         FlexLayout vLayout = new FlexLayout(nameField, indexNumberField);

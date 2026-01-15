@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RepAddStudentView extends VerticalLayout {
     private AtomicReference<String> activeUser, section, level, programme, studentYearGroup;
     private DAO DATA_SOURCE;
+    private final Grid<StudentEntity> studentsGrid = new Grid<>();
 
     public RepAddStudentView() {
         addClassName("content-page");
@@ -64,7 +65,6 @@ public class RepAddStudentView extends VerticalLayout {
     private TextField indexNumberField = new TextField("Index Number");
     private Button saveButton = new Button("Save", LineAwesomeIcon.SAVE.create());
 
-    private final Grid<StudentEntity> studentsGrid = new Grid<>(StudentEntity.class);
 
 
     private Component headerLayout() {
@@ -111,6 +111,9 @@ public class RepAddStudentView extends VerticalLayout {
         saveButton.setWidthFull();
         saveButton.addClassName("default-button-style");
 
+        nameField.setWidthFull();
+        indexNumberField.setWidthFull();
+
         VerticalLayout parent = new VerticalLayout(header, new Hr(), nameField, indexNumberField, new Hr(), saveButton);
         parent.setClassName("add-student-inner-layout");
         parent.setSpacing(false);
@@ -139,7 +142,8 @@ public class RepAddStudentView extends VerticalLayout {
             studentsGrid.getListDataView().refreshAll();
         });
 
-        VerticalLayout parent = new VerticalLayout(header, new Hr(), filterField, configureStudentsGrid());
+        configureStudentsGrid();
+        VerticalLayout parent = new VerticalLayout(header, new Hr(), filterField, studentsGrid);
         parent.setSpacing(false);
         parent.setSizeFull();
         parent.setClassName("add-student-inner-layout");
@@ -148,8 +152,8 @@ public class RepAddStudentView extends VerticalLayout {
     }
 
 //    COMPONENTS RENDERERS
-    private final Grid<StudentEntity> configureStudentsGrid() {
-        studentsGrid.setSizeFull();
+    private void configureStudentsGrid() {
+        studentsGrid.setSizeUndefined();
         studentsGrid.addColumn(StudentEntity::getIndexNumber).setHeader("Index Number");
         studentsGrid.addColumn(StudentEntity::getFullName).setHeader("Full Name");
         studentsGrid.addColumn(StudentEntity::getStudentClass).setHeader("Class");
@@ -159,9 +163,9 @@ public class RepAddStudentView extends VerticalLayout {
             col.setResizable(true);
             col.setSortable(true);
         });
-        studentsGrid.setItems(studentGridDataSource());
+//        studentsGrid.setItems(studentGridDataSource());
         studentsGrid.addClassName("student-grid");
-        return studentsGrid;
+
     }
 
     private static Renderer<StudentEntity> studentStatus() {

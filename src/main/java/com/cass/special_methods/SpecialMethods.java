@@ -61,7 +61,7 @@ public class SpecialMethods {
     }
 
     public static void setClassSections(ComboBox<String> selector) {
-        String[] classes = {"A", "B", "C", "D"};
+        String[] classes = {"A", "B", "C", "D", "E"};
         selector.setItems(classes);
     }
 

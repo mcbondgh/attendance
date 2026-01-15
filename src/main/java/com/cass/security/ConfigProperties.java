@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
+import static com.itextpdf.kernel.pdf.PdfName.Properties;
+
 public class ConfigProperties {
 private static Properties properties = new Properties();
     

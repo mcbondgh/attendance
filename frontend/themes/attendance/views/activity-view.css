@@ -132,6 +132,9 @@
     padding-top: 0;
     box-sizing:border-box;
 }
+.list-view-container .vaadin-combo-box-container {
+    background-color: red;
+}
 
 .date-activity-container {
     gap:5px;

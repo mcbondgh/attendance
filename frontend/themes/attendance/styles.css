@@ -11,6 +11,7 @@
 @import url('./views/users-view.css');
 @import url('./views/courses-view.css');
 @import url('./reports/reports-view.css');
+@import url('./views/settings-view.css');
     html {
       --lumo-size-xl: 3rem;
       --lumo-size-l: 2.5rem;

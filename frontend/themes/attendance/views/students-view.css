@@ -150,8 +150,11 @@ box-sizing: border-box;
 }
 
 
-
-
+/* CLASS REP UI STYLING FOR STUDENTS LIST*/
+.student-grid {
+    padding:10px;
+    border:1px solid red;
+}
 
 
 

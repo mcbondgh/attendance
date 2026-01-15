@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cass.data.*;
 import com.cass.security.Config;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.notification.Notification;
 import org.apache.fop.pdf.ObjectStream;
 
 public class DAO extends Config {
@@ -132,6 +134,21 @@ public class DAO extends Config {
             // TODO: handle exception
         }
         return data;
+    }
+
+    public Map<String, Object> fetchViewAccessRoutes() {
+        var map = new HashMap<String, Object>();
+        String query = "SELECT * FROM view_access";
+        try {
+            resultSet = getCon().prepareStatement(query).executeQuery();
+             while (resultSet.next()) {
+                 map.put("route", resultSet.getString("route"));
+                 map.put("status", resultSet.getBoolean("is_enabled"));
+             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return map;
     }
 
     public Collection<StudentEntity> fetchActiveStudentsForAttendanceTable(String studentClass, String level, String programme, String section) {
@@ -421,7 +438,7 @@ public class DAO extends Config {
     public List<CourseRecord> getAllCourses() {
         List<CourseRecord> data = new ArrayList<>();
         try {
-            String query = "SELECT * FROM courses";
+            String query = "SELECT * FROM courses WHERE (is_active = TRUE) ORDER BY course_name ASC;";
             resultSet = getCon().prepareStatement(query).executeQuery();
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);
