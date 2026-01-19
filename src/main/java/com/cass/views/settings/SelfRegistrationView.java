@@ -97,6 +97,7 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
         levelSelector.setRequired(true);
         programmeSelector.setRequiredIndicatorVisible(true);
         yearSelector.setRequired(true);
+        yearSelector.setValue("2026");
         sectionSelector.setRequired(true);
 
         studentNumberField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -224,7 +225,7 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
         layout.setWidthFull();
         layout.addClassNames("student-not-found-layout");
 
-        Paragraph paragraph = new Paragraph("Student not found in any programme of study or class. Kindly click on the button below to add yourself to your class list.");
+        Paragraph paragraph = new Paragraph("Student not found in any programme of study or class. Kindly click on the 'ADD YOURSELF' button to register");
         layout.add(paragraph);
         return layout;
     }

@@ -61,6 +61,7 @@ public class ActivitiesView extends VerticalLayout {
         HorizontalLayout layout = new HorizontalLayout();
         H5 headerTitle = new H5("STUDENT ACTIVITY RECORDS");
         Button viewButton = new Button("Add Records");
+        viewButton.addClassNames("default-button");
 
         layout.addClassNames("dashboard-header-container", "view-header-container");
         headerTitle.setClassName("dashboard-header-text");

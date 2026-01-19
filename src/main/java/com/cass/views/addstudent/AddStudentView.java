@@ -136,7 +136,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
             if (!checkFields) {
                 tableData(programmePicker.getValue(), yearPicker.getValue(), levelPicker.getValue(), sectionPicker.getValue());
                 int tableSize = studentsTable.getListDataView().getItemCount();
-                H6 tableLabel = new H6("TOTAL STUDENTS " + tableSize);
+                H6 tableLabel = new H6("TOTAL: " + tableSize);
                 tableLabel.setClassName("table-counter");
                 studentsTable.getColumnByKey("indexNumberColumn").setFooter(tableLabel);
             }

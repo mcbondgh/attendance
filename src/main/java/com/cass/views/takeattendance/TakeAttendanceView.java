@@ -10,8 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.itextpdf.forms.form.element.CheckBox;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.function.ValueProvider;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -30,8 +29,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.html.H6;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -62,6 +59,7 @@ public class TakeAttendanceView extends VerticalLayout {
     public TakeAttendanceView() {
         setSpacing(false);
         SpecialMethods.setClassSections(sectionSelector);
+        sectionSelector.getListDataView().addItemBefore("All Classes", "A");
         add(renderPageView());
     }
 
@@ -81,12 +79,12 @@ public class TakeAttendanceView extends VerticalLayout {
         programmeSelector.addClassName("take-attendance-combobox");
         yearGroup.addClassNames("take-attendance-combobox");
 
-
         // LOAD SELECTORS.
         SpecialMethods.setCourses(courseSelector);
         SpecialMethods.loadProgrammes(programmeSelector);
         SpecialMethods.setLevel(levelSelector);
         SpecialMethods.setYear(yearGroup);
+        yearGroup.setValue("2026");
         sectionSelector.setValue("A");
         levelSelector.setValue("100");
 
@@ -103,13 +101,16 @@ public class TakeAttendanceView extends VerticalLayout {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
         datePicker.setMin(today);
 
-        HorizontalLayout headerLayout = new HorizontalLayout(courseSelector, programmeSelector, levelSelector, sectionSelector, generateSheetButton);
+        HorizontalLayout headerLayout = new HorizontalLayout(courseSelector, programmeSelector, levelSelector, sectionSelector, yearGroup, new Hr(), generateSheetButton);
 
         layout.setSizeFull();
         layout.setClassName("main-container");
         headerLayout.setWidthFull();
+        headerLayout.setSpacing(true);
+        headerLayout.setPadding(true);
         headerLayout.setClassName("header-layout");
-        generateSheetButton.setClassName("filter-button");
+        generateSheetButton.addClassNames("default-button", "filter-button");
+        generateSheetButton.getStyle().setMarginBottom("8px");
         generateSheetButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
 
         layout.add(headerLayout, createTable());
@@ -120,7 +121,7 @@ public class TakeAttendanceView extends VerticalLayout {
                 Date date = Date.valueOf(LocalDate.now());
                 if (isFieldEmpty()) {
                     new UserConfirmDialogs().showError("You have empty fields, please fill all.");
-                } else if (SERVICE_OBJ.checkAttendanceByDate(date, courseSelector.getValue(), programmeSelector.getValue(), levelSelector.getValue(), sectionSelector.getValue())) {
+                } else if (SERVICE_OBJ.checkAttendanceByDate(date, courseSelector.getValue(), programmeSelector.getValue(), levelSelector.getValue(), sectionSelector.getValue(), yearGroup.getValue())) {
                     new UserConfirmDialogs()
                             .showError("Sorry Attendance for the specified date and Programme already recorded");
                 } else {
@@ -128,11 +129,11 @@ public class TakeAttendanceView extends VerticalLayout {
                     // loadTabelData(studentClass);
                     UI.getCurrent().access(()-> {
                         LoadTableGrid.loadTable(attendanceTable,
-                                SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(studentClass, levelSelector.getValue(), programmeSelector.getValue(), sectionSelector.getValue()));
+                                SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(studentClass, levelSelector.getValue(), programmeSelector.getValue(), sectionSelector.getValue(), yearGroup.getValue()));
                         int tableSize = attendanceTable.getListDataView().getItemCount();
                         H6 counterText = new H6(tableSize + " Students");
                         counterText.setClassName("table-counter");
-                        attendanceTable.getColumnByKey("rollNoColumn").setFooter(counterText);
+                        attendanceTable.getColumnByKey("indexNoColumn").setFooter(counterText);
                     });
                 }
             }catch(Exception e) {
@@ -146,8 +147,9 @@ public class TakeAttendanceView extends VerticalLayout {
 
     // Load Data into a GridList
     protected GridListDataView<StudentEntity> loadTaleData(String searchString) {
-        return attendanceTable
-                .setItems(SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(searchString, levelSelector.getValue(), programmeSelector.getValue(), sectionSelector.getValue()));
+//        return attendanceTable
+//                .setItems(SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(searchString, levelSelector.getValue(), programmeSelector.getValue(), sectionSelector.getValue()));
+        return null;
     }
 
     private Component createTable() {
@@ -168,8 +170,8 @@ public class TakeAttendanceView extends VerticalLayout {
         filterField.setPrefixComponent(LineAwesomeIcon.SEARCH_SOLID.create());
 
         // set table columns
-        attendanceTable.addColumn(StudentEntity::getId).setHeader("ROLL NO.").setKey("rollNoColumn");
-        attendanceTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER");
+//        attendanceTable.addColumn(StudentEntity::getId).setHeader("ROLL NO.").setKey("rollNoColumn");
+        attendanceTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER").setKey("indexNoColumn");
         attendanceTable.addColumn(StudentEntity::getFullName).setHeader("NAME");
 
 //        attendanceTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
@@ -234,7 +236,7 @@ public class TakeAttendanceView extends VerticalLayout {
                         if (responseStatus.get() > 0) {
                             UI.getCurrent().access(() -> {
                                 attendanceTable.setItems(Collections.emptyList());
-                                attendanceTable.getColumnByKey("rollNoColumn").setFooter("Empty Table");
+                                attendanceTable.getColumnByKey("indexNoColumn").setFooter("Empty Table");
                                 new UserConfirmDialogs()
                                         .showSuccess("NICE, attendance for ".concat(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                                                 + " successfully saved.");

@@ -151,15 +151,33 @@ public class DAO extends Config {
         return map;
     }
 
-    public Collection<StudentEntity> fetchActiveStudentsForAttendanceTable(String studentClass, String level, String programme, String section) {
+    public Collection<StudentEntity> fetchActiveStudentsForAttendanceTable(String studentClass, String level, String programme, String section, String yearGroup) {
         Collection<StudentEntity> data = new ArrayList<>();
         try {
-            String query = "SELECT * FROM studentslist WHERE (status = 1 AND level = '" + level + "' AND programme = '" + programme + "')";
-            String query1 = "SELECT * FROM studentslist WHERE(status = 1 AND class = '" + studentClass + "' AND level = '" + level + "' " +
-                    "AND programme = '" + programme + "' AND section = '" + section + "');";
-            String preferredQuery = Objects.equals(studentClass, "All Classes") ? query : query1;
-            prepare = getCon().prepareStatement(preferredQuery);
+
+//            String query1 = "SELECT * FROM studentslist WHERE(status = 1 AND class = '" + studentClass + "' AND level = '" + level + "' " +
+//                    "AND programme = '" + programme + "' AND section = '" + section + "' + AND year_group = '" + yearGroup + "');";
+//
+
+            String preferredQuery;
+                    //Objects.equals(studentClass, "All Classes") ? query : queryToUse;
+            if (Objects.equals(section, "All Classes")) {
+               preferredQuery = "SELECT * FROM studentslist WHERE (status = 1 AND level = '" + level + "' AND programme = '" + programme + "' AND year_group = '" + yearGroup + "');";
+                prepare = getCon().prepareStatement(preferredQuery);
+            }else {
+                preferredQuery = """
+                    SELECT * FROM studentslist
+                    WHERE(status = TRUE AND class = ? AND level = ? AND programme = ? AND section = ? AND year_group = ?);
+                    """;
+                prepare = getCon().prepareStatement(preferredQuery);
+                prepare.setString(1, studentClass);
+                prepare.setString(2, level);
+                prepare.setString(3, programme);
+                prepare.setString(4, section);
+                prepare.setString(5, yearGroup);
+            }
             resultSet = prepare.executeQuery();
+//            resultSet = prepare.executeQuery();
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 String indexNo = resultSet.getString("indexNumber");
@@ -167,18 +185,18 @@ public class DAO extends Config {
                 String stuClass = resultSet.getString("class");
                 data.add(new StudentEntity(id, indexNo, fullName, stuClass));
             }
-            getCon().close();
-        } catch (SQLException ignore) {
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return data;
     }
 
-    public boolean checkAttendanceByDate(Date dateToCheck, String course, String programme, String level, String className) {
+    public boolean checkAttendanceByDate(Date dateToCheck, String course, String programme, String level, String className, String yearGroup) {
         boolean result = false;
         try {
             String query = """
                     SELECT COUNT(id) AS result FROM attendance_records\s
-                    WHERE (attendanceDate = ? AND course = ? AND programme = ? AND level = ? AND className = ?);
+                    WHERE (attendanceDate = ? AND course = ? AND programme = ? AND level = ? AND className = ? AND year_group = ?);
                     """;
             prepare = getCon().prepareStatement(query);
             prepare.setDate(1, dateToCheck);
@@ -186,6 +204,7 @@ public class DAO extends Config {
             prepare.setString(3, programme);
             prepare.setString(4, level);
             prepare.setString(5, className);
+            prepare.setString(6, yearGroup);
             resultSet = prepare.executeQuery();
             if (resultSet.next()) {
                 int counter = resultSet.getInt(1);

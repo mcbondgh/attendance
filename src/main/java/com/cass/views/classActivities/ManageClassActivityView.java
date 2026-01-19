@@ -124,6 +124,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         HorizontalLayout layout = new HorizontalLayout();
         H5 headerTitle = new H5("ACADEMIC ACTIVITY BOARD");
         Button viewButton = new Button("View Records");
+        viewButton.addClassNames("default-button");
 
         layout.addClassNames("dashboard-header-container", "view-header-container");
         headerTitle.setClassName("dashboard-header-text");

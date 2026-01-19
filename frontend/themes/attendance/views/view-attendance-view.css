@@ -163,11 +163,12 @@ font-size: small;
 
   .header-layout {
     flex-direction: column;
-    gap:0;
+    gap:1PX;
     width: 100%;
   }
   .header-layout vaadin-combo-box, vaadin-date-picker, .filter-field{
-    width: 100%; 
+    width: 100%;
+    margin:1px auto;
   }
 
 }
