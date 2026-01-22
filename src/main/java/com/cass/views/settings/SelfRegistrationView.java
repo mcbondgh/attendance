@@ -52,6 +52,7 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
     TextField studentNumberField = new TextField("Index Number", "B....00 or O4/..../....");
     TextField fullnameField = new TextField("Student Name");
     Select<String> programmeSelector = new Select<>();
+    Select<String> programmeTypeSelector = new Select<>();
 
     ComboBox<String> levelSelector = new ComboBox<>("Select Level");
     Button addNewStudentBtn = new Button("Save", LineAwesomeIcon.SAVE.create());
@@ -75,7 +76,7 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Notification.show("Failed to retrieve data, kindly check your internet connection", 4000, Notification.Position.TOP_END);
+            Notification.show("Failed to retrieve data, Page will reload after 10 seconds", 4000, Notification.Position.TOP_END);
 //            UI.getCurrent().getPage().reload();
             ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
             scheduledExecutorService.scheduleAtFixedRate(() -> UI.getCurrent().getPage().reload(), 0, 10, TimeUnit.SECONDS);
@@ -87,10 +88,13 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
     @Override
     public void onAttach(AttachEvent event) {
         programmeSelector.setLabel("Programme");
-        SpecialMethods.loadProgrammes(programmeSelector);
+        SpecialMethods.setProgramme(programmeSelector);
         SpecialMethods.setLevel(levelSelector);
         SpecialMethods.setYear(yearSelector);
         SpecialMethods.setClassSections(sectionSelector);
+        programmeTypeSelector.setLabel("Programme Type");
+        SpecialMethods.setProgrammeType(programmeTypeSelector);
+        programmeTypeSelector.setValue("Regular");
 
         studentNumberField.setRequired(true);
         fullnameField.setRequired(true);
@@ -107,7 +111,7 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
 
     private Component routeClosedComponent() {
 
-        Paragraph paragraph = new Paragraph("This page is temporarily closed by administrator. Kindly revisit this page some other time when it's enabled by MC's REPUBLIC GH");
+        Paragraph paragraph = new Paragraph("This page is temporarily closed by administrator. Kindly revisit some other time when it's enabled by MC's REPUBLIC GH");
         var returnBtn = new Button("Return To Login", LineAwesomeIcon.BACKWARD_SOLID.create(), event -> {
             UI.getCurrent().navigate("login");
         });
@@ -259,8 +263,8 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
 
         layout.add(headerDiv, 2);
         layout.add(studentNumberField, 2);
-        layout.add(fullnameField, 2);
-        layout.add(programmeSelector, levelSelector, yearSelector, sectionSelector);
+        layout.add(fullnameField, levelSelector);
+        layout.add(programmeSelector, programmeTypeSelector, yearSelector, sectionSelector);
         layout.add(new Hr());
         layout.add(addButton, 2);
 
@@ -268,10 +272,21 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
         return layout;
     }
 
+    private final ExecutorService dbExecutor = Executors.newFixedThreadPool(20);
     private void processFormData(ClickEvent<Button> event) {
         UI ui = UI.getCurrent();
-        CompletableFuture.supplyAsync(() -> STUDENT_SERVICE_OBJ.getStudentByStudentIndex(studentNumberField.getValue()).size())
+        CompletableFuture.supplyAsync(() -> STUDENT_SERVICE_OBJ.getStudentByStudentIndex(studentNumberField.getValue()).size(), dbExecutor)
                 .thenAccept(studentExist -> {
+                    StudentEntity dataSource = new StudentEntity();
+                    dataSource.setFullName(fullnameField.getValue());
+                    dataSource.setIndexNumber(studentNumberField.getValue());
+                    dataSource.setProgramme(programmeSelector.getValue());
+                    dataSource.setLevel(levelSelector.getValue());
+                    dataSource.setYearGroup(yearSelector.getValue());
+                    dataSource.setSection(sectionSelector.getValue());
+                    dataSource.setStudentClass(programmeSelector.getValue());
+                    dataSource.setProgrammeType(programmeTypeSelector.getValue());
+
                     ui.access(() -> {
                         UserConfirmDialogs confirmDialogs = new UserConfirmDialogs("Self Registration",
                                 "Please be sure the data you provided is correct and accurate. If correct, kindly confirm to register else cancel to abort the process.");
@@ -282,15 +297,6 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
                             studentNumberField.setErrorMessage("Index number is already registered");
                             studentNumberField.focus();
                         } else {
-                            StudentEntity dataSource = new StudentEntity();
-                            dataSource.setFullName(fullnameField.getValue());
-                            dataSource.setIndexNumber(studentNumberField.getValue());
-                            dataSource.setProgramme(programmeSelector.getValue());
-                            dataSource.setLevel(levelSelector.getValue());
-                            dataSource.setYearGroup(yearSelector.getValue());
-                            dataSource.setSection(sectionSelector.getValue());
-                            dataSource.setStudentClass(programmeSelector.getValue());
-
                             confirmDialogs.saveDialog().addConfirmListener(conf -> {
                                 if (STUDENT_SERVICE_OBJ.saveNewStudent(dataSource) > 0) {
                                     UI.getCurrent().getPage().reload();

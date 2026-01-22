@@ -29,6 +29,7 @@ public class DAO extends Config {
                 String indexNo = resultSet.getString("indexNumber");
                 String fullName = resultSet.getString("fullName");
                 String program = resultSet.getString("programme");
+                String type = resultSet.getString("programme_type");
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
                 String stuSection = resultSet.getString("section");
@@ -37,7 +38,7 @@ public class DAO extends Config {
                 byte status = resultSet.getByte("status");
                 Timestamp dateAdded = resultSet.getTimestamp("dateAdded");
                 Timestamp dateUpdated = resultSet.getTimestamp("dateUpdated");
-                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, year, stuSection, stuLevel, dateAdded, dateUpdated));
+                data.add(new StudentEntity(id, indexNo, fullName, program, type, stuClass, department, status, year, stuSection, stuLevel, dateAdded, dateUpdated));
             }
             getCon().close();
         } catch (Exception e) {
@@ -87,7 +88,8 @@ public class DAO extends Config {
                 int id = resultSet.getInt("id");
                 String indexNo = resultSet.getString("indexNumber");
                 String fullName = resultSet.getString("fullName");
-                String program = resultSet.getString("program");
+                String program = resultSet.getString("programme");
+                String type = resultSet.getString("programme_type");
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
                 byte status = resultSet.getByte("status");
@@ -96,7 +98,7 @@ public class DAO extends Config {
                 String level = resultSet.getString("level");
                 Timestamp dateAdded = resultSet.getTimestamp("dateAdded");
                 Timestamp dateUpdated = resultSet.getTimestamp("dateUpdated");
-                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, year, section, level, dateAdded, dateUpdated));
+                data.add(new StudentEntity(id, indexNo, fullName, program, type, stuClass, department, status, year, section, level, dateAdded, dateUpdated));
             }
             getCon().close();
         } catch (Exception e) {
@@ -118,6 +120,7 @@ public class DAO extends Config {
                 String indexNo = resultSet.getString("indexNumber");
                 String fullName = resultSet.getString("fullName");
                 String program = resultSet.getString("programme");
+                String type = resultSet.getString("programme_type");
                 String stuClass = resultSet.getString("class");
                 String department = resultSet.getString("department");
                 byte status = resultSet.getByte("status");
@@ -126,7 +129,7 @@ public class DAO extends Config {
                 String level = resultSet.getString("level");
                 Timestamp dateAdded = resultSet.getTimestamp("dateAdded");
                 Timestamp dateUpdated = resultSet.getTimestamp("dateUpdated");
-                data.add(new StudentEntity(id, indexNo, fullName, program, stuClass, department, status, year, section, level, dateAdded, dateUpdated));
+                data.add(new StudentEntity(id, indexNo, fullName, program, type, stuClass, department, status, year, section, level, dateAdded, dateUpdated));
             }
             getCon().close();
         } catch (Exception e) {
@@ -432,20 +435,26 @@ public class DAO extends Config {
     }
 
 
-    public Collection<StudentClassesEntity> getAllClasses() {
-        Collection<StudentClassesEntity> data = new ArrayList<>();
+    public Collection<ProgrammesEntity> getAllProgrammes() {
+        Collection<ProgrammesEntity> data = new ArrayList<>();
         try {
-//            id, className, creditHours, department, dateCreated
-            String query = "SELECT * FROM student_classes;";
+            //id, programme_name, programme_type, department, status, date_created
+            String query = "SELECT * FROM programmes WHERE (status = TRUE) ORDER BY programme_name ASC;";
             prepare = getCon().prepareStatement(query);
             resultSet = prepare.executeQuery();
+            //
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String className = resultSet.getString("className");
-                byte creditHours = resultSet.getByte("creditHours");
-                String dept = resultSet.getString("department");
-                boolean status = resultSet.getBoolean("status");
-                data.add(new StudentClassesEntity(id, className, creditHours, dept, status));
+                data.add(
+                        new ProgrammesEntity(
+                                resultSet.getInt("id"),
+                                resultSet.getString("programme_name"),
+                                resultSet.getString("programme_type"),
+                                resultSet.getBoolean("status"),
+                                resultSet.getTimestamp("date_created"),
+                                resultSet.getString("department")
+                        )
+                );
+
             }
             getCon().close();
         } catch (SQLException ignore) {
@@ -457,18 +466,22 @@ public class DAO extends Config {
     public List<CourseRecord> getAllCourses() {
         List<CourseRecord> data = new ArrayList<>();
         try {
-            String query = "SELECT * FROM courses WHERE (is_active = TRUE) ORDER BY course_name ASC;";
+            String query = """
+                    SELECT course_id, course_name, course_code, programme_name, level, date_added, is_active FROM courses AS c
+                    INNER JOIN programmes AS p
+                    ON c.programme = p.id
+                    WHERE is_active = TRUE;
+                    """;
             resultSet = getCon().prepareStatement(query).executeQuery();
             while (resultSet.next()) {
-                int id = resultSet.getInt(1);
+                int id = resultSet.getInt("course_id");
                 String name = resultSet.getString("course_name");
                 String code = resultSet.getString("course_code");
-                String programme = resultSet.getString("programme");
+                String programme = resultSet.getString("programme_name");
                 String level = resultSet.getString("level");
                 data.add(new CourseRecord(id, name, code, level, programme));
             }
             resultSet.close();
-            getCon().close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

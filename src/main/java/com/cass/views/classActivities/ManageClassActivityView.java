@@ -111,7 +111,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
     }
 
     private void loadFields() {
-        SpecialMethods.loadProgrammes(programmeSelector);
+        SpecialMethods.setProgramme(programmeSelector);
         SpecialMethods.setActivityTypes(activitySelector);
         SpecialMethods.setCourses(courseSelector);
         SpecialMethods.setLevel(levelSelector);

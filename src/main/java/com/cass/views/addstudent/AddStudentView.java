@@ -15,7 +15,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.H6;
@@ -53,9 +52,10 @@ public class AddStudentView extends Composite<VerticalLayout> {
     private ComboBox<String> sectionPicker = new ComboBox<>("Select Section");
     private VerticalLayout pageLayout = new VerticalLayout();
     private FormLayout formLayout = new FormLayout();
-    private TextField studentNumberField = new TextField("Student Number");
+    private TextField studentNumberField = new TextField("Index Number");
     private TextField fullnameField = new TextField("Student Name");
     private Select<String> programmeSelector = new Select<>();
+    private Select<String> programmeTypeSelector = new Select<>();
     private final ComboBox<String> courseSelector = new ComboBox<>("Select Course");
     private final ComboBox<String> levelSelector = new ComboBox<>("Select Level");
     private final Button addNewStudentBtn = new Button("Add Student");
@@ -106,10 +106,13 @@ public class AddStudentView extends Composite<VerticalLayout> {
         programmePicker.setPlaceholder("Select Programme");
         yearPicker.setPlaceholder("Select Year");
         sectionPicker.setPlaceholder("Select Section");
+        programmeTypeSelector.setLabel("Programme Type");
 
         SpecialMethods.setLevel(levelPicker);
         SpecialMethods.setYear(yearPicker);
-        SpecialMethods.loadProgrammes(programmePicker);
+        SpecialMethods.setProgramme(programmePicker);
+        SpecialMethods.setProgrammeType(programmeTypeSelector);
+        programmeTypeSelector.setValue("Regular");
 
         sectionPicker.setValue("A");
         levelPicker.setValue("100");
@@ -157,13 +160,17 @@ public class AddStudentView extends Composite<VerticalLayout> {
         studentsTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER").setKey("indexNumberColumn");
         studentsTable.addColumn(StudentEntity::getFullName).setHeader("FULL NAME");
         studentsTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
+//        studentsTable.addColumn(StudentEntity::getYearGroup).setHeader("YEAR GROUP");
         studentsTable.addComponentColumn(item -> studentStatus(item.getStatus())).setHeader("STATUS");
 
         // studentsTable.addColumn(StudentEntity::getPrograme).setHeader("PROGRAM");
         // studentsTable.addComponentColumn(item -> {return editButton(item.getId());}).setHeader("ACTION");
         studentsTable.setItemDetailsRenderer(showStudentDetails());
-        studentsTable.getColumns().forEach(col -> col.setAutoWidth(true));
-        studentsTable.getColumns().forEach(col -> col.setSortable(true));
+        studentsTable.getColumns().forEach(col -> {
+            col.setAutoWidth(true);
+            col.setSortable(true);
+        });
+
         studentsTable.setSizeUndefined();
 
         VerticalLayout layout = new VerticalLayout(filterField, studentsTable);
@@ -186,11 +193,11 @@ public class AddStudentView extends Composite<VerticalLayout> {
     }
 
     //STUDENT STABLE DATA PROVIDER.
-    protected GridListDataView<StudentEntity> tableData(String programme, String yearGroup, String level, String section) {
-        return studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(programme, yearGroup, level, section));
+    protected void tableData(String programme, String yearGroup, String level, String section) {
+        studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(programme, yearGroup, level, section));
     }
 
-    //TABLE BUTTON IMPLEMEMTATION.
+    //TABLE BUTTON IMPLEMENTATION.
     protected Span editButton(int studentId) {
         Span span = new Span(LineAwesomeIcon.PEN_SOLID.create());
         span.setClassName("action-button");
@@ -249,7 +256,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
             updateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
             removeButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
 
-            SpecialMethods.loadProgrammes(studentClass);
+            SpecialMethods.setProgramme(studentClass);
 
             nameField.setValue(student.getFullName());
             studentNumberField.setValue(student.getIndexNumber());
@@ -301,10 +308,8 @@ public class AddStudentView extends Composite<VerticalLayout> {
                                 if (STUDENT_SERVICE_OBJ.updateStudentData(STUDENT_ENTITY_OBJ) > 0) {
                                     UI.getCurrent().access(() -> {
                                         new UserConfirmDialogs().showSuccess("Nice, Student data successfully updated.");
-                                        LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue(),
-                                                yearGroup.getValue(),
-                                                studentSearchLevel.getValue(),
-                                                sectionPicker.getValue()));
+                                        studentsTable.setItems(new StudentService().getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
+                                                studentSearchLevel.getValue(), sectionPicker.getValue()));
                                     });
                                 }
                             });
@@ -318,7 +323,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                     int responseStatus = STUDENT_SERVICE_OBJ.removeStudent(Integer.parseInt(rowNumber.getValue()));
                     if (responseStatus > 0) {
                         confirmDialogs.showSuccess("NICE, Student successfully removed from class list.");
-                        LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
+                        studentsTable.setItems(new StudentService().getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
                                 studentSearchLevel.getValue(), sectionPicker.getValue()));
                     }
                 });
@@ -334,6 +339,10 @@ public class AddStudentView extends Composite<VerticalLayout> {
         fullnameField.setRequired(true);
         programmeSelector.setEmptySelectionAllowed(false);
         programmeSelector.setRequiredIndicatorVisible(true);
+        programmeTypeSelector.setWidthFull();
+        programmeSelector.setWidthFull();
+        programmeSelector.addClassNames("input-style", "label-style");
+        programmeTypeSelector.addClassNames("input-style", "label-style");
         studentSearchLevel.setRequired(true);
 //        programSelector.setEmptySelectionAllowed(false);
 //        departmentSelector.setEmptySelectionAllowed(false);
@@ -341,7 +350,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         fullnameField.setInvalid(fullnameField.isEmpty());
         programmeSelector.setLabel("Select Programme");
 
-        SpecialMethods.loadProgrammes(programmeSelector);
+        SpecialMethods.setProgramme(programmeSelector);
         SpecialMethods.setCourses(courseSelector);
         SpecialMethods.setLevel(studentSearchLevel);
         SpecialMethods.setLevel(levelSelector);
@@ -386,10 +395,16 @@ public class AddStudentView extends Composite<VerticalLayout> {
         classAndLevelContainer.setWidthFull();
         studentSearchLevel.setWidthFull();
 
+        FlexLayout programmesLayout = new FlexLayout(programmeSelector, programmeTypeSelector);
+        programmesLayout.addClassNames("programme-and-type-container");
+        programmesLayout.getStyle().set("gap", "10px");
+        programmesLayout.getStyle().setAlignItems(Style.AlignItems.BASELINE);
+        programmesLayout.getStyle().setJustifyContent(Style.JustifyContent.SPACE_BETWEEN);
+        programmesLayout.setWidthFull();
+
         formLayout.add(
-                studentNumberField, fullnameField,
-                programmeSelector, yearSelector,
-                classAndLevelContainer
+                studentNumberField, fullnameField, yearSelector,
+                programmesLayout, classAndLevelContainer
         );
 
         return formLayout;
@@ -458,6 +473,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                     STUDENT_ENTITY_OBJ.setYearGroup(yearSelector.getValue());
                     STUDENT_ENTITY_OBJ.setProgramme(programmeSelector.getValue());
                     STUDENT_ENTITY_OBJ.setSection(sectionPicker.getValue());
+                    STUDENT_ENTITY_OBJ.setProgrammeType(programmeTypeSelector.getValue());
 
                     if (STUDENT_SERVICE_OBJ.saveNewStudent(STUDENT_ENTITY_OBJ) > 0) {
                         getUI().get().access(() -> {

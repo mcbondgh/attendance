@@ -7,7 +7,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 public class StudentEntity {
     private int id;
-    private String indexNumber, fullName, programme;
+    private String indexNumber, fullName, programme, programmeType;
     private String studentClass, department;
     private byte status;
     private Timestamp dateAdded, dateUpdated;
@@ -40,7 +40,7 @@ public class StudentEntity {
     }
 
 
-    public StudentEntity(int id, String indexNumber, String fullName, String programe, String studentClass,
+    public StudentEntity(int id, String indexNumber, String fullName, String programe, String programmeType, String studentClass,
             String department, byte status, String yearGroup, String section, String level, Timestamp dateAdded, Timestamp dateUpdated) {
         this.id = id;
         this.indexNumber = indexNumber;
@@ -54,6 +54,7 @@ public class StudentEntity {
         this.yearGroup = yearGroup;
         this.level = level;
         this.section = section;
+        this.programmeType = programmeType;
     }
     public int getId() {
         return id;
@@ -93,6 +94,14 @@ public class StudentEntity {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+
+    public String getProgrammeType() {
+        return programmeType;
+    }
+
+    public void setProgrammeType(String programmeType) {
+        this.programmeType = programmeType;
     }
 
     public String getDepartment() {

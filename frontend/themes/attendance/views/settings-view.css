@@ -1,10 +1,11 @@
 .list-checker-page {
     background-color: #ffffff;
 }
+
 .list-checker-layout {
     background-color: #ffffff;
     /*border-radius: 10px;*/
-    margin:0;
+    margin: 0;
     border: 1px solid rgb(221, 221, 221);
 }
 
@@ -12,6 +13,7 @@
     color: rgba(78, 103, 129, 0.91);
     font-size: small;
 }
+
 .list-checker-layout h3 {
     color: #066f7f;
 }
@@ -22,14 +24,16 @@
     background-color: white;
     padding: 0;
 }
+
 .input-style::part(input-field) {
     height: 40px;
 }
+
 .search-layout {
     margin: 5px auto;
     border-radius: 5px;
-    padding:1px;
-    max-width:900px;
+    padding: 1px;
+    max-width: 900px;
     box-sizing: border-box;
     align-items: baseline;
     justify-content: space-between;
@@ -38,29 +42,30 @@
 .search-layout .default-button {
     background-color: #066f7f;
     align-self: self-end;
-    padding:20px;
+    padding: 15px;
 }
 
-.search-layout .input-style::part(input-field){
+.search-layout .input-style::part(input-field) {
     padding: 8px;
     font-size: 18px;
 }
 
 .student-details-display-layout .status-indicator {
-    width:100%;
-    padding:18px;
+    width: 100%;
+    padding: 18px;
 }
 
 .student-details-display-layout {
     box-sizing: border-box;
     border: 1px solid #ddd;
     border-radius: 10px;
-    max-width:80%;
-    margin:auto;
+    max-width: 80%;
+    margin: auto;
 }
+
 .student-details-display-layout vaadin-button {
-    background-color:#066f7f;
-    color:#fff;
+    background-color: #066f7f;
+    color: #fff;
     font-size: smaller;
 }
 
@@ -73,9 +78,9 @@
     text-align: center;
     justify-content: center;
     box-sizing: border-box;
-    padding:20px;
-    margin:auto;
-    max-width:900px;
+    padding: 20px;
+    margin: auto;
+    max-width: 900px;
     color: rgb(150, 16, 16);
 }
 
@@ -86,12 +91,12 @@
     box-sizing: border-box;
     width: 100%;
     background-color: rgb(245, 231, 231);
-    padding:20px;
+    padding: 20px;
 }
 
 .add-student-button-container .add-student-button {
     background-color: #066f7f;
-    padding:20px;
+    padding: 20px;
     cursor: pointer;
 }
 
@@ -100,52 +105,56 @@
     box-sizing: border-box;
     justify-content: center;
     align-items: center;
-    margin:0 auto;
-    max-width:900px;
+    margin: 0 auto;
+    max-width: 900px;
 }
 
 .add-student-form-layout {
-    max-width:900px;
+    max-width: 900px;
     border: 1px solid #d0d0d0;
     align-items: center;
-    padding:10px;
+    padding: 10px;
     border-radius: 8px;
     justify-content: center;
-    margin:5px auto;
+    margin: 5px auto;
     text-align: center;
 }
+
 .add-student-form-layout p {
     font-size: smaller;
     color: rgba(69, 76, 96, 0.58);
 }
+
 .add-student-form-layout h3 {
     color: #066f7f;
 }
 
- .default-button {
-    padding:20px;
+.default-button {
+    padding: 15px;
     background-color: #066f7f;
     border-radius: 8px;
-     color:#fff;
+    color: #fff;
+    font-size: 12px !important;
 }
 
- .route-closed-layout p {
-     text-wrap: wrap;
-     font-size: 20px;
-     max-width: 600px;
-     color: #3b4141;
-     margin:auto;
- }
- .route-closed-layout {
-     background-color: rgba(255, 255, 255, 0.76);
-     box-sizing: border-box;
-     padding:50px;
-     align-items: center;
-     text-align: center;
-     border-radius: 10px;
-     margin:50% auto;
-     justify-content: center;
- }
+.route-closed-layout p {
+    text-wrap: wrap;
+    font-size: 20px;
+    max-width: 600px;
+    color: #3b4141;
+    margin: auto;
+}
+
+.route-closed-layout {
+    background-color: rgba(255, 255, 255, 0.76);
+    box-sizing: border-box;
+    padding: 50px;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+    margin: 50% auto;
+    justify-content: center;
+}
 
 .route-closed-layout .default-button {
     max-width: 300px;
@@ -157,7 +166,7 @@
 }
 
 .notification-horizontal-layout {
-    width:400px;
+    width: 400px;
     align-items: center;
     justify-content: space-between;
 }
@@ -166,12 +175,14 @@
 @media screen and (max-width: 768px) {
     .search-layout {
         display: block;
-        padding:10px;
+        padding: 10px;
     }
+
     .search-layout .default-button {
         margin-top: 10px;
         min-width: 100%;
     }
+
     .student-details-display-layout {
         max-width: 100%;
         text-wrap: wrap;

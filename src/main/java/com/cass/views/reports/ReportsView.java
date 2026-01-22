@@ -58,7 +58,7 @@ public class ReportsView extends VerticalLayout {
     private final Anchor csvLink = new Anchor("#", "CSV");
 
     void populateFields() {
-        SpecialMethods.loadProgrammes(programmePicker);
+        SpecialMethods.setProgramme(programmePicker);
         SpecialMethods.setCourses(coursePicker);
         SpecialMethods.setYear(yearGroup);
         SpecialMethods.setClassSections(classPicker);

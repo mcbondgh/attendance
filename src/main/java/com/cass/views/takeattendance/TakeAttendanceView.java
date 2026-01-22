@@ -81,7 +81,7 @@ public class TakeAttendanceView extends VerticalLayout {
 
         // LOAD SELECTORS.
         SpecialMethods.setCourses(courseSelector);
-        SpecialMethods.loadProgrammes(programmeSelector);
+        SpecialMethods.setProgramme(programmeSelector);
         SpecialMethods.setLevel(levelSelector);
         SpecialMethods.setYear(yearGroup);
         yearGroup.setValue("2026");

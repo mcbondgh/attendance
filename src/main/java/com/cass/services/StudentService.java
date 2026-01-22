@@ -13,8 +13,8 @@ public class StudentService extends DAO {
         int status = 0;
         try {
             String query = """
-                    INSERT INTO studentslist(indexNumber, fullName, class, year_group, level, section, programme)
-                    VALUES(?, ?, ?, ?, ?, ?, ?);
+                    INSERT INTO studentslist(indexNumber, fullName, class, year_group, level, section, programme, programme_type)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?);
                     """;
             prepare = getCon().prepareStatement(query);
             prepare.setString(1, entity.getIndexNumber());
@@ -24,8 +24,8 @@ public class StudentService extends DAO {
             prepare.setString(5, entity.getLevel());
             prepare.setString(6, entity.getSection());
             prepare.setString(7, entity.getProgramme());
+            prepare.setString(8, entity.getProgrammeType());
             status = prepare.executeUpdate();
-            getCon().close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }

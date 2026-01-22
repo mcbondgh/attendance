@@ -31,8 +31,6 @@ public class RepDashboardView extends VerticalLayout {
         } catch (NullPointerException e) {
             UI.getCurrent().getPage().setLocation("/login");
         }
-
-
     }
 
     @Override

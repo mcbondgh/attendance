@@ -1,6 +1,7 @@
 package com.cass.views.courses;
 
 import com.cass.data.CourseRecord;
+import com.cass.data.ProgrammesEntity;
 import com.cass.dialogs.UserConfirmDialogs;
 import com.cass.services.CoursesModel;
 import com.cass.services.DAO;
@@ -9,6 +10,7 @@ import com.cass.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -17,6 +19,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H5;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -31,19 +34,28 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.shared.Registration;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @PageTitle("Manage Course")
 @Route(value = "courses", layout = MainLayout.class)
 // @RolesAllowed({ "ADMIN", "USERS" })
 @AnonymousAllowed
 public class ManageCoursesView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final Grid<CourseRecord>coursesGrid = new Grid<>(CourseRecord.class, false);
+    private final Grid<CourseRecord> coursesGrid = new Grid<>(CourseRecord.class, false);
+    ComboBox<String> programSelector = new ComboBox<>("Programme");
+
     public ManageCoursesView() {
         setSpacing(true);
         setSizeFull();
         addClassName("content-page");
-        add(renderPageHeader(),renderPageBody());
+        add(renderPageHeader(), renderPageBody());
     }
+
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
 
@@ -56,7 +68,7 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
 
 
     /*******************************************************************************************************************
-                                VIEWS
+     VIEWS
      *******************************************************************************************************************/
     private Component renderPageHeader() {
         HorizontalLayout layout = new HorizontalLayout();
@@ -65,7 +77,7 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
 
         layout.addClassNames("dashboard-header-container", "view-header-container");
         headerTitle.setClassName("dashboard-header-text");
-        viewButton.addClassName("activity-button");
+        viewButton.addClassNames("activity-button", "default-button");
         viewButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
 
         layout.add(headerTitle, viewButton);
@@ -76,7 +88,9 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
         });
         return layout;
     }
+
     private Component renderPageBody() {
+        SpecialMethods.setProgramme(programSelector);
         VerticalLayout layout = new VerticalLayout(configureGrid());
         layout.addClassName("page-content-container");
 //        layout.setSpacing(false);
@@ -86,11 +100,15 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
 
 
     /*******************************************************************************************************************
-                                IMPLEMENTATION OF OTHER METHODS...
+     IMPLEMENTATION OF OTHER METHODS...
      *******************************************************************************************************************/
 
     public ListDataProvider<CourseRecord> loadCourseData() {
         return new ListDataProvider<>(new DAO().getAllCourses());
+    }
+
+    private ListDataProvider<ProgrammesEntity> loadProgrammesData() {
+        return new ListDataProvider<>(new DAO().getAllProgrammes());
     }
 
     private Component configureGrid() {
@@ -101,6 +119,7 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
         coursesGrid.addColumn(CourseRecord::level).setHeader("Level");
         coursesGrid.addThemeVariants(GridVariant.LUMO_COMPACT);
         coursesGrid.addClassNames("default-grid-style");
+        coursesGrid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
         coursesGrid.getColumns().forEach(col -> {
             col.setAutoWidth(true);
             col.setResizable(true);
@@ -117,8 +136,6 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
         TextField courseNameField = new TextField("Course Name", "eg Project Management");
         TextField courseCodeField = new TextField("Course Code", "CSD 300");
         ComboBox<String> levelSelector = new ComboBox<>("Level", "Level 100", "Leve 200", "Level 300", "Level 400");
-        ComboBox<String> programSelector = new ComboBox<>("Programme");
-        SpecialMethods.setProgramme(programSelector);
 
         courseNameField.setRequired(true);
         courseCodeField.setRequired(true);
@@ -130,9 +147,22 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
 
         Button addButton = new Button("Add Course", VaadinIcon.PLUS_CIRCLE_O.create());
         addButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+        addButton.addClassNames("default-button", "activity-button");
 
-        Div formContainer = new Div(courseNameField, courseCodeField, levelSelector, programSelector, addButton);
+        Div formContainer = new Div(courseNameField, programSelector, courseCodeField, levelSelector, new Hr(), addButton);
         formContainer.addClassNames("dialog-inner-container");
+
+        AtomicInteger programmeId = new AtomicInteger(0);
+        UI ui = UI.getCurrent();
+        programSelector.addValueChangeListener(selected -> {
+            var component = selected.getSource();
+            loadProgrammesData().getItems().forEach(item -> {
+                if (item.getProgramme().equals(component.getValue())) {
+                    programmeId.set(item.getId());
+                }
+            });
+            component.setHelperText("Id: " + programmeId.get());
+        });
 
         formContainer.getElement().addEventListener("mouseover", e -> {
             String errorMsg = "Please fill field";
@@ -140,7 +170,7 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
             courseCodeField.setErrorMessage(errorMsg);
             programSelector.setErrorMessage(errorMsg);
             levelSelector.setErrorMessage(errorMsg);
-            boolean validateField = courseNameField.isInvalid() || courseCodeField.isInvalid() || programSelector.isEmpty() || levelSelector.isEmpty();
+            boolean validateField = (courseNameField.isInvalid() || courseNameField.isEmpty()) || courseCodeField.isInvalid() || programSelector.isEmpty() || levelSelector.isEmpty();
             addButton.setEnabled(!validateField);
         });
 
@@ -150,18 +180,17 @@ public class ManageCoursesView extends VerticalLayout implements BeforeEnterObse
         });
 
         addButton.addClickListener(e -> {
-            CourseRecord.addCourseRecord formData = new CourseRecord.addCourseRecord(courseNameField.getValue(),
-                    courseCodeField.getValue(), levelSelector.getValue(), programSelector.getValue());
+            CourseRecord.addCourseRecord formData = new CourseRecord.addCourseRecord(courseNameField.getValue(), courseCodeField.getValue(), levelSelector.getValue(), String.valueOf(programmeId.get()));
 
-           var dialog = new UserConfirmDialogs("SAVE COURSE", "Please confirm to save course else cancel to abort");
-           dialog.saveDialog().addConfirmListener(confirmEvent -> {
-               int responseStatus = new CoursesModel().createCourse(formData);
-               if (responseStatus > 0) {
-                   courseCodeField.clear();
-                   courseNameField.clear();
-                   coursesGrid.setItems(loadCourseData());
-               }
-           });
+            var dialog = new UserConfirmDialogs("SAVE COURSE", "Please confirm to save course else cancel to abort");
+            dialog.saveDialog().addConfirmListener(confirmEvent -> {
+                int responseStatus = new CoursesModel().createCourse(formData);
+                if (responseStatus > 0) {
+                    courseCodeField.clear();
+                    courseNameField.clear();
+                    coursesGrid.setItems(loadCourseData());
+                }
+            });
         });
 
         Dialog dialog = new Dialog();

@@ -7,18 +7,21 @@ import java.util.Properties;
 import static com.itextpdf.kernel.pdf.PdfName.Properties;
 
 public class ConfigProperties {
-private static Properties properties = new Properties();
-    
-    protected static Properties loadProps(){
+    private static final Properties properties = new Properties();
+
+    protected static Properties loadProps() {
         String path = "src/main/resources/application.properties";
-       try {
-        InputStream input = new FileInputStream(path); 
-        if (input != null) {
-            properties.load(input);
+        try (InputStream input = ConfigProperties.class.getResourceAsStream("application.properties")) {
+            if (input == null) {
+                // Fallback to a file system path if the resource stream is not found
+                FileInputStream fileInput = new FileInputStream(path);
+                properties.load(fileInput);
+            } else {
+                properties.load(input);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load properties file", e);
         }
-       } catch (Exception e) {
-        e.printStackTrace();
-       }
-       return properties;
+        return properties;
     }
 }

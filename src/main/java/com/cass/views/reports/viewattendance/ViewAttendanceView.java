@@ -107,7 +107,7 @@ public class ViewAttendanceView extends VerticalLayout {
         hLayout.setSpacing(false);
 
         generateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
-        SpecialMethods.loadProgrammes(programPicker);
+        SpecialMethods.setProgramme(programPicker);
         SpecialMethods.setCourses(coursePicker);
         SpecialMethods.setYear(yearGroup);
         classPicker.setValue("A");

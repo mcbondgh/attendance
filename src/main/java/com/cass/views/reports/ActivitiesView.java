@@ -95,7 +95,7 @@ public class ActivitiesView extends VerticalLayout {
         ListBox<ActivitiesEntity> listView = new ListBox<>();
         Button loadButton = new Button("Load Students");
 
-        SpecialMethods.loadProgrammes(programmeSelector);
+        SpecialMethods.setProgramme(programmeSelector);
         SpecialMethods.setLevel(levelSelector);
         SpecialMethods.setYear(yearGroup);
         SpecialMethods.setCourses(courseSelector);

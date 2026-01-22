@@ -96,10 +96,6 @@ box-sizing: border-box;
 
 }
 
-.default-button {
-  font-size: 12px !important;
-  /* padding:5px; */
-}
 
 .items-layout {
   box-sizing: border-box;
@@ -108,6 +104,8 @@ box-sizing: border-box;
 }
 .item-picker {
   box-sizing: border-box;
+  margin: 10px auto;
+  min-width:unset;
 }
 
 .updateFormLayout-layout {
@@ -122,7 +120,10 @@ box-sizing: border-box;
   box-sizing: border-box;
   border-radius: 2px;
 }
+.programme-and-type-container, .leve-and-section-container {
+  padding: 10px 0;
 
+}
 
 /* REP ADD STUDENT VIEW*/
 .back-button {
@@ -194,8 +195,9 @@ box-sizing: border-box;
     width: 100%;
   }
 
-  .items-layout, .leve-and-section-container ,.add-student-body-container {
+  .items-layout, .leve-and-section-container ,.add-student-body-container, .programme-and-type-container {
     flex-direction: column;
+    margin: 8px auto;
     width: 100%;
   }
   .item-picker {

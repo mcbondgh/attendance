@@ -141,7 +141,8 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
                 USERS_ENTITY.setUsername(usernameTextField.getValue());
                 String pwdValue = passwordTextField.isEmpty() ? users.getPassword() : Encryption.generateCipherText(passwordTextField.getValue());
                 USERS_ENTITY.setPassword(pwdValue);
-                byte roleId = (byte) (roleSelector.getValue().equals("Admin") ? 1 : 2);
+                String roleName = roleSelector.getValue();
+                byte roleId = (byte) (roleName.equals("Teaching Assistant") ? 2 : roleName.equals("Class Rep") ? 3 : 1);
                 byte statusId = (byte) (statusRadioGroup.getValue().equals("active") ? 1 : 0);
                 USERS_ENTITY.setStatus(statusId);
                 USERS_ENTITY.setRoleId(roleId);
