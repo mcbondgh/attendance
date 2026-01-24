@@ -32,7 +32,7 @@ import java.util.function.DoubleConsumer;
 
 public class DocumentGenerator {
 
-    public static InputStream generateAttendancePdf(String className, String programme, Grid<AttendanceRecordsEntity> dataTable) {
+    public static InputStream generateAttendancePdf(LocalDate startDate, LocalDate endDate, String className, String programme, Grid<AttendanceRecordsEntity> dataTable) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -45,26 +45,32 @@ public class DocumentGenerator {
             PdfDocument pdfDocument = new PdfDocument(pdfWriter);
             Document document = new Document(pdfDocument);
 
-            Table table = new Table(5);
+            Table table = new Table(6);
             table.useAllAvailableWidth();
             table.setAutoLayout();
 
+            String dateDiv = "FROM: " + startDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+                    + "   |   TO: " + endDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
+            Paragraph dateRange = new Paragraph(dateDiv).setFontSize(12).setTextAlignment(TextAlignment.CENTER).setBold();
             Paragraph heading = new Paragraph("ATTENDANCE REPORT");
             heading.setTextAlignment(TextAlignment.CENTER);
             heading.setBold();
             heading.setFontSize(17);
             //CREATE TABLE HEADER.
-            table.addHeaderCell(new Cell(0,5).add(heading));
+            table.addHeaderCell(new Cell(0,6).add(heading));
+            table.addHeaderCell(new Cell(0,2).add(new Paragraph("DATE RANGE")).setFontSize(12).setBold());
+            table.addHeaderCell(new Cell(0,4).add(dateRange).setFontSize(12).setBold());
             table.addHeaderCell(new Cell(0, 2).add(new Paragraph("CLASS")).setFontSize(12).setBold());
-            table.addHeaderCell(new Cell(0, 3).add(new Paragraph(className)).setFontSize(12).setBold());
+            table.addHeaderCell(new Cell(0, 4).add(new Paragraph(className).setTextAlignment(TextAlignment.CENTER)).setFontSize(12).setBold());
 //            table.addHeaderCell(new Cell(0,1).add(new Paragraph("DATE")));
 //            table.addHeaderCell(new Cell(0,1).add(new Paragraph(attendanceDate.get())).setBold());
             table.addHeaderCell(new Cell(0,2).add(new Paragraph("PROGRAMME")).setBold());
-            table.addHeaderCell(new Cell(0,3).add(new Paragraph(programme)).setBold());
+            table.addHeaderCell(new Cell(0,4).add(new Paragraph(programme).setTextAlignment(TextAlignment.CENTER)).setBold());
 
             //set table content headers
             table.addHeaderCell(new Cell(0, 1).add(new Paragraph("NO.")).setFontSize(10).setBold());
             table.addHeaderCell(new Cell(0, 1).add(new Paragraph("INDEX NO.")).setFontSize(10).setBold());
+            table.addHeaderCell(new Cell(0, 1).add(new Paragraph("LEVEL")).setFontSize(10).setBold());
             table.addHeaderCell(new Cell(0, 1).add(new Paragraph("PRESENT.")).setFontSize(10).setBold());
             table.addHeaderCell(new Cell(0, 1).add(new Paragraph("ABSENT.")).setFontSize(10).setBold());
             table.addHeaderCell(new Cell(0, 1).add(new Paragraph("TOTAL ATTENDANCE.")).setFontSize(10).setBold());
@@ -73,6 +79,7 @@ public class DocumentGenerator {
             dataTable.getListDataView().getItems().forEach(data -> {
                 table.addCell(new Cell(0,  1).add(new Paragraph(String.valueOf(data.getId()))));
                 table.addCell(new Cell(0,  1).add(new Paragraph(data.getIndexNumber())));
+                table.addCell(new Cell(0,  1).add(new Paragraph(data.getLevel())));
                 table.addCell(new Cell(0,  1).add(new Paragraph(String.valueOf(data.getPresent()))));
                 table.addCell(new Cell(0,  1).add(new Paragraph(String.valueOf(data.getAbscent()))));
                 table.addCell(new Cell(0,  1).add(new Paragraph(String.valueOf(data.getTotalAttendance()))));

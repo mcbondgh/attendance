@@ -111,7 +111,7 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
 
     private Component routeClosedComponent() {
 
-        Paragraph paragraph = new Paragraph("This page is temporarily closed by administrator. Kindly revisit some other time when it's enabled by MC's REPUBLIC GH");
+        Paragraph paragraph = new Paragraph("This page is temporarily closed by administrator. Kindly revisit some other time when it's enabled by MC's REPUBLICgh");
         var returnBtn = new Button("Return To Login", LineAwesomeIcon.BACKWARD_SOLID.create(), event -> {
             UI.getCurrent().navigate("login");
         });
@@ -120,7 +120,10 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
         returnBtn.getStyle().set("margin-top", "20px");
         returnBtn.setWidthFull();
 
-        Section section = new Section(paragraph, returnBtn);
+        H3 closedHeader = new H3("PAGE CLOSED 🚩");
+        closedHeader.addClassNames("route-closed-header");
+
+        Section section = new Section(closedHeader, paragraph);
         section.setWidthFull();
         section.addClassNames("route-closed-layout");
         return section;
@@ -308,7 +311,7 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
                 });
     }
 
-    private Component detailsRowLayout(Span span, H4 value) {
+    private Component detailsRowLayout(Span span, H6 value) {
         FlexLayout layout = new FlexLayout(span, value);
         layout.setWidthFull();
         layout.getStyle().set("gap", "10px");
@@ -326,28 +329,28 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
         rowOne.addClassName("status-indicator");
 
         Span nameLabel = new Span("Full Name: ");
-        H4 nameValue = new H4(dataSource.getFullName());
+        H6 nameValue = new H6(dataSource.getFullName());
         var rowTwo = detailsRowLayout(nameLabel, nameValue);
 
         Span programmeLabel = new Span("Programme: ");
-        H4 programmeValue = new H4(dataSource.getProgramme());
+        var programmeValue = new H6(dataSource.getProgramme());
         var rowThree = detailsRowLayout(programmeLabel, programmeValue);
 
         Span levelLabel = new Span("Level: ");
-        H4 levelValue = new H4(dataSource.getLevel());
+        H6 levelValue = new H6(dataSource.getLevel());
         var rowFour = detailsRowLayout(levelLabel, levelValue);
 
         Span classLabel = new Span("Class Section: ");
-        H4 classValue = new H4(dataSource.getLevel() + "" + dataSource.getSection());
+        var classValue = new H6(dataSource.getLevel() + "" + dataSource.getSection());
         var rowFive = detailsRowLayout(classLabel, classValue);
 
         Span statusLabel = new Span("Status: ");
-        H4 statusValue = new H4(dataSource.getStatus() == 1 ? "Active" : "Inactive");
+        H6 statusValue = new H6(dataSource.getStatus() == 1 ? "Active" : "Inactive");
         statusValue.getElement().getThemeList().add(statusValue.getText().equalsIgnoreCase("Active") ? "badge success pill" : "badge error pill");
         var rowSix = detailsRowLayout(statusLabel, statusValue);
 
         Span yearGroupLabel = new Span("Year Group");
-        H4 yearGroupValue = new H4(dataSource.getYearGroup());
+        H6 yearGroupValue = new H6(dataSource.getYearGroup());
         var rowSeven = detailsRowLayout(yearGroupLabel, yearGroupValue);
 
         Button refereButton = new Button("Refresh Page", VaadinIcon.REFRESH.create(), event -> {

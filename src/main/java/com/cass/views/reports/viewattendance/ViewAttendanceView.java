@@ -224,10 +224,11 @@ public class ViewAttendanceView extends VerticalLayout {
         grid.addColumn(AttendanceRecordsEntity::getId).setHeader("NO.");
         grid.addColumn(AttendanceRecordsEntity::getIndexNumber).setHeader("INDEX NUMBER");
         grid.addColumn(AttendanceRecordsEntity::getFullname).setHeader("FULL NAME");
+        grid.addColumn(AttendanceRecordsEntity::getLevel).setHeader("LEVEL");
         grid.addComponentColumn(AttendanceRecordsEntity::getPresentLabel).setHeader("PRESENT").setKey("presentColumn");
         grid.addComponentColumn(AttendanceRecordsEntity::getAbscentLabel).setHeader("ABSENT").setKey("absentColumn");
         grid.addComponentColumn(AttendanceRecordsEntity::getExcusedLabel).setHeader("EXCUSED").setKey("excusedColumn");
-        grid.addComponentColumn(AttendanceRecordsEntity::getTotalAttendanceLabel).setHeader("TOTAL ATTENDANCE");
+        grid.addComponentColumn(AttendanceRecordsEntity::getTotalAttendanceLabel).setHeader("TOTAL");
 
         grid.getColumns().forEach(each -> each.setAutoWidth(true));
         grid.getColumns().forEach(each -> each.setSortable(true));
@@ -262,7 +263,7 @@ public class ViewAttendanceView extends VerticalLayout {
 //        return DocumentStreams.createFileResource("Attendance Report.pdf",stream);
         return new StreamResource("Attendance Report.pdf", ()-> {
             try {
-                return new ByteArrayInputStream(DocumentGenerator.generateAttendancePdf(classPicker.getValue(), programPicker.getValue(), grid).readAllBytes());
+                return new ByteArrayInputStream(DocumentGenerator.generateAttendancePdf(startDatePicker.getValue(), endDatePicker.getValue(), classPicker.getValue(), programPicker.getValue(), grid).readAllBytes());
             } catch (IOException e) {
                 POPUP = new UserConfirmDialogs();
                 POPUP.showError("Attendance table is empty, nothing to export.");

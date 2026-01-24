@@ -1,20 +1,23 @@
 package com.cass.services;
 
 import com.cass.data.UsersEntity;
+import com.cass.security.Config;
 
-public class UserService extends DAO {
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+public class UserService extends DAO{
 
     public int saveUser(UsersEntity entity) {
         int status = 0;
-        try {
+        try(Connection source = Config.getDataSource()) {
             String query = "INSERT INTO users(username, password, role_id, index_number) VALUES(?, ?, ?, ?);";
-            prepare = getCon().prepareStatement(query);
+           PreparedStatement prepare = source.prepareStatement(query);
             prepare.setString(1, entity.getUsername());
             prepare.setString(2, entity.getPassword());
             prepare.setByte(3, entity.getRoleId());
             prepare.setString(4, entity.getIndexNumber());
             status = prepare.executeUpdate();
-            getCon().close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -25,8 +28,8 @@ public class UserService extends DAO {
         String query = """
                 UPDATE users SET username = ?, `password` = ?, role_id = ?, `status` = ?  WHERE id = ?
                 """;
-        try {
-            prepare = getCon().prepareStatement(query);
+        try(Connection source = Config.getDataSource()) {
+           PreparedStatement prepare = source.prepareStatement(query);
             prepare.setString(1, entity.getUsername());
             prepare.setString(2, entity.getPassword());
             prepare.setInt(3, entity.getRoleId());
@@ -41,24 +44,19 @@ public class UserService extends DAO {
 
     public int updatePasswordOnly(String username, String password) {
         String query = "UPDATE users SET `password` = ? WHERE username = ?";
-        try {
-            prepare = getCon().prepareStatement(query);
-            prepare.setString(1, password);
-            prepare.setString(2, username);
-            return prepare.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return LogUserActivity(password, username, query);
     }
 
     public int logUser(String username, String role) {
         String query = """
                 INSERT INTO `class_attendance`.`signin` (`username`, `position`) VALUES (?, ?);
-                
                 """;
-        try {
-            prepare = getCon().prepareStatement(query);
+        return LogUserActivity(username, role, query);
+    }
+
+    private int LogUserActivity(String username, String role, String query) {
+        try(Connection source = Config.getDataSource()) {
+           PreparedStatement prepare = source.prepareStatement(query);
             prepare.setString(1, username);
             prepare.setString(2, role);
             return prepare.executeUpdate();

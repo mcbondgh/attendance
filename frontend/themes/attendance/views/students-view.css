@@ -12,6 +12,9 @@ box-sizing: border-box;
   box-sizing: border-box;
   justify-content: space-between;
 }
+.header-container .default-button {
+
+}
 .header-filter-container {
   display: flex;
   /* width: 100%; */
@@ -93,19 +96,23 @@ box-sizing: border-box;
   width: 100%;
   flex-wrap: wrap;
   padding: 10px;
-
 }
-
 
 .items-layout {
   box-sizing: border-box;
   display: flex;
   gap:10px;
+  align-items: center;
+  justify-content: flex-start;
+  width:100%;
 }
-.item-picker {
+
+.add-student-header-layout .item-picker {
   box-sizing: border-box;
-  margin: 10px auto;
-  min-width:unset;
+  margin:5px auto;
+}
+.add-student-header-layout {
+  flex-wrap: wrap;
 }
 
 .updateFormLayout-layout {
@@ -209,5 +216,8 @@ box-sizing: border-box;
 .add-student-inner-layout {
     min-width:100%;
 }
+  .header-container .item-picker {
+    margin-top:10px;
+  }
 
 }

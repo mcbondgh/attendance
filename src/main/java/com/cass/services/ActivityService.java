@@ -1,20 +1,24 @@
 package com.cass.services;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cass.data.ActivitiesEntity;
+import com.cass.security.Config;
 
-public class ActivityService extends DAO {
+public class ActivityService extends DAO{
 
     public int saveAcademicActivity(ActivitiesEntity entity) {
 
-        try {
+        try(Connection source = Config.getDataSource()) {
             String query = """
                 INSERT INTO activity_records(rowNumber, level, programme, activityType, course, className, maximumScore, score, activityDate)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
-            prepare = getCon().prepareStatement(query);
+
+            PreparedStatement prepare = source.prepareStatement(query);
             prepare.setInt(1, entity.getRowNumber());
             prepare.setString(2, entity.getLevel());
             prepare.setString(3, entity.getPrograme());

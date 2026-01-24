@@ -37,6 +37,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -59,7 +60,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
     private final ComboBox<String> courseSelector = new ComboBox<>("Select Course");
     private final ComboBox<String> levelSelector = new ComboBox<>("Select Level");
     private final Button addNewStudentBtn = new Button("Add Student");
-    private final Grid<StudentEntity> studentsTable = new Grid<>();
+    private static final Grid<StudentEntity> studentsTable = new Grid<>(StudentEntity.class, false);
     private final ComboBox<String> yearGroup = new ComboBox<>();
     private final ComboBox<String> yearSelector = new ComboBox<>("Year Group");
     ComboBox<String> studentSearchLevel = new ComboBox<>();
@@ -83,7 +84,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         layout.setWidthFull();
         layout.setAlignItems(Alignment.CENTER);
         layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        layout.addClassName("header-container");
+        layout.addClassName("add-student-header-layout");
 
         //declare needed components
         Button getStudentButton = new Button("Load Students");
@@ -121,20 +122,20 @@ public class AddStudentView extends Composite<VerticalLayout> {
         programmePicker.setRequired(true);
         yearPicker.setRequired(true);
 
-        HorizontalLayout itemsLayout = new HorizontalLayout(programmePicker, levelPicker, yearPicker, sectionPicker, getStudentButton);
+        Div itemsLayout = new Div(programmePicker, levelPicker, yearPicker, sectionPicker, getStudentButton);
         itemsLayout.addClassName("items-layout");
-        itemsLayout.setAlignItems(Alignment.BASELINE);
-        itemsLayout.setJustifyContentMode(JustifyContentMode.START);
+//        itemsLayout.setAlignItems(Alignment.BASELINE);
+//        itemsLayout.setJustifyContentMode(JustifyContentMode.START);
 
         layout.add(itemsLayout, addNewStudentBtn);
 
         //ACTION EVENT LISTENERS
         getStudentButton.addClickListener(event -> {
             boolean checkFields = programmePicker.isEmpty() || yearPicker.isEmpty() || sectionPicker.isEmpty() || levelPicker.isEmpty();
-            String errormsg = "Please make a selection";
-            programmePicker.setErrorMessage(programmePicker.isInvalid() ? errormsg : null);
-            yearPicker.setErrorMessage(yearPicker.isInvalid() ? errormsg : null);
-            sectionPicker.setErrorMessage(sectionPicker.isInvalid() ? errormsg : null);
+            String errors = "Please make a selection";
+            programmePicker.setErrorMessage(programmePicker.isInvalid() ? errors : null);
+            yearPicker.setErrorMessage(yearPicker.isInvalid() ? errors : null);
+            sectionPicker.setErrorMessage(sectionPicker.isInvalid() ? errors : null);
 
             if (!checkFields) {
                 tableData(programmePicker.getValue(), yearPicker.getValue(), levelPicker.getValue(), sectionPicker.getValue());
@@ -159,9 +160,10 @@ public class AddStudentView extends Composite<VerticalLayout> {
         // studentsTable.addColumn(StudentEntity::getId).setHeader("ID").setFooter("TOTAL STUDENTS");
         studentsTable.addColumn(StudentEntity::getIndexNumber).setHeader("INDEX NUMBER").setKey("indexNumberColumn");
         studentsTable.addColumn(StudentEntity::getFullName).setHeader("FULL NAME");
-        studentsTable.addColumn(StudentEntity::getStudentClass).setHeader("CLASS");
-//        studentsTable.addColumn(StudentEntity::getYearGroup).setHeader("YEAR GROUP");
+        studentsTable.addColumn(StudentEntity::getStudentClass).setHeader("PROGRAMME");
+        studentsTable.addColumn(StudentEntity::getProgrammeType).setHeader("PROG TYPE");
         studentsTable.addComponentColumn(item -> studentStatus(item.getStatus())).setHeader("STATUS");
+        studentsTable.setSizeUndefined();
 
         // studentsTable.addColumn(StudentEntity::getPrograme).setHeader("PROGRAM");
         // studentsTable.addComponentColumn(item -> {return editButton(item.getId());}).setHeader("ACTION");
@@ -170,8 +172,6 @@ public class AddStudentView extends Composite<VerticalLayout> {
             col.setAutoWidth(true);
             col.setSortable(true);
         });
-
-        studentsTable.setSizeUndefined();
 
         VerticalLayout layout = new VerticalLayout(filterField, studentsTable);
         layout.setSpacing(false);
@@ -232,6 +232,11 @@ public class AddStudentView extends Composite<VerticalLayout> {
             ComboBox<String> studentSectionSelector = new ComboBox<>("Section");
             SpecialMethods.setClassSections(studentSectionSelector);
 
+            Select<String> typeSelector = new Select<>();
+            typeSelector.setLabel("Programme Type");
+            typeSelector.addClassNames("item-selector");
+            SpecialMethods.setProgrammeType(typeSelector);
+
             studentLevelSelector.setClassName("item-selector");
             studentLevelSelector.setPlaceholder("Select Level");
             studentYearSelector.setClassName("item-selector");
@@ -266,6 +271,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
             studentYearSelector.setValue(student.getYearGroup());
             studentLevelSelector.setValue(student.getLevel());
             studentSectionSelector.setValue(student.getSection());
+            typeSelector.setValue(student.getProgrammeType());
 
             //set all fields as required
             nameField.setRequired(true);
@@ -282,8 +288,8 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
             updateFormLayout.setColspan(div1, 4);
 //            updateFormLayout.setColspan(nameField, 2);
-            updateFormLayout.add(div1, nameField, studentNumberField, rowNumber, studentClass, studentYearSelector,
-                    studentLevelSelector, studentSectionSelector, checkbox, buttonsContainer);
+            updateFormLayout.add(div1, rowNumber, nameField, studentNumberField,  studentClass, studentYearSelector,
+                    studentLevelSelector, typeSelector, studentSectionSelector, checkbox, buttonsContainer);
 
             //ACTION EVENTS 
             updateButton.addClickListener(event -> {
@@ -302,14 +308,19 @@ public class AddStudentView extends Composite<VerticalLayout> {
                     STUDENT_ENTITY_OBJ.setLevel(studentLevelSelector.getValue());
                     STUDENT_ENTITY_OBJ.setSection(studentSectionSelector.getValue());
                     STUDENT_ENTITY_OBJ.setProgramme(studentClass.getValue());
+                    STUDENT_ENTITY_OBJ.setProgrammeType(typeSelector.getValue());
 
                     new UserConfirmDialogs("UPDATE STUDENT DATA", "Do you wish to updated student data to current values").
                             saveDialog().addConfirmListener(ev -> {
+                                var data = new StudentService().getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
+                                        studentSearchLevel.getValue(), sectionPicker.getValue());
                                 if (STUDENT_SERVICE_OBJ.updateStudentData(STUDENT_ENTITY_OBJ) > 0) {
-                                    UI.getCurrent().access(() -> {
-                                        new UserConfirmDialogs().showSuccess("Nice, Student data successfully updated.");
-                                        studentsTable.setItems(new StudentService().getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
-                                                studentSearchLevel.getValue(), sectionPicker.getValue()));
+                                    UI ui = UI.getCurrent();
+                                    CompletableFuture.runAsync(() -> {
+                                        ui.access(() -> {
+                                            new UserConfirmDialogs().showSuccess("Nice, Student data successfully updated.");
+                                            LoadTableGrid.loadTable(studentsTable, data);
+                                        });
                                     });
                                 }
                             });
@@ -479,6 +490,9 @@ public class AddStudentView extends Composite<VerticalLayout> {
                         getUI().get().access(() -> {
                             dialogs.showSuccess("Nice, student successfully added to class list");
                             resetFields();
+                            LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(
+                                    programmeSelector.getValue(), yearSelector.getValue(),
+                                    levelSelector.getValue(), sectionPicker.getValue()));
                         });
                     } else {
                         dialogs.showError("Oops! failed to save student, index number may already exist");

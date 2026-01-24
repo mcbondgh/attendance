@@ -33,7 +33,7 @@ public class StudentEntity {
         this.indexNumber = indexNumber;
         this.fullName = fullName;
         this.studentClass = studentClass;
-        attendanceSelector.setItems("present", "abscent", "excused");
+        attendanceSelector.setItems("present", "absent", "excused");
         attendanceSelector.addClassName("radio-buttons");
         this.attendanceButton.setItems("P", "A", "excused");
         attendanceButton.setClassName("radio-buttons");

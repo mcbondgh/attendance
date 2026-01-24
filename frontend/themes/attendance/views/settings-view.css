@@ -1,5 +1,9 @@
 .list-checker-page {
-    background-color: #ffffff;
+    background-color: #f3f4ff;
+    padding: 15px;
+    box-sizing: border-box;
+    margin: auto;
+    height: unset;
 }
 
 .list-checker-layout {
@@ -72,6 +76,12 @@
 .details-row-layout {
     border-bottom: 2px solid rgb(238, 238, 238);
     padding: 5px 0;
+    font-size: small;
+    font-family: 'Poppins', sans-serif;
+}
+
+.details-row-layout h6 {
+    color: #066f7f;
 }
 
 .student-not-found-layout {
@@ -91,7 +101,7 @@
     box-sizing: border-box;
     width: 100%;
     background-color: rgb(245, 231, 231);
-    padding: 20px;
+    padding: 5px;
 }
 
 .add-student-button-container .add-student-button {
@@ -136,24 +146,31 @@
     color: #fff;
     font-size: 12px !important;
 }
-
+.route-closed-layout h3 {
+    color: #a21439;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
 .route-closed-layout p {
-    text-wrap: wrap;
-    font-size: 20px;
-    max-width: 600px;
-    color: #3b4141;
-    margin: auto;
+    color: rgba(133, 21, 54, 0.55);
+    line-height: 2.0;
+    font-size: 18px;
+    text-align: center;
+    justify-content: stretch;
 }
 
 .route-closed-layout {
-    background-color: rgba(255, 255, 255, 0.76);
-    box-sizing: border-box;
-    padding: 50px;
-    align-items: center;
+    justify-content: center; /* Horizontally centers */
+    align-items: center;    /* Vertically centers */
     text-align: center;
+    margin: 100px auto;
+    background-color: #ffe4e4;
+    border: 1px solid rgba(241, 241, 241, 0.11);
+    box-sizing: border-box;
+    /*box-shadow: var(--lumo-box-shadow-xs);*/
     border-radius: 10px;
-    margin: 50% auto;
-    justify-content: center;
+    max-width: 800px;
+    padding: 30px;
 }
 
 .route-closed-layout .default-button {

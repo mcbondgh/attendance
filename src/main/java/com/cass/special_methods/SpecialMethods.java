@@ -13,12 +13,6 @@ public class SpecialMethods {
     static DAO DAO = new DAO();
 
     static List<String> loadClasses() {
-        //   for (StudentClassesEntity item : DAO.getAllClasses()) {
-//           if (item.isStatus()) {
-//               list .add(item.getClassName());
-//           }
-//        }
-
         return DAO.getAllCourses().stream().map(CourseRecord::programme).distinct().toList();
     }
 
@@ -47,14 +41,14 @@ public class SpecialMethods {
     }
 
     public static void setProgramme(ComboBox<String> selector) {
-        var programmes = DAO.getAllProgrammes().stream().map(ProgrammesEntity::getProgramme).distinct().toList();
+        var programmes = new DAO().getAllProgrammes().stream().map(ProgrammesEntity::getProgramme).distinct().toList();
 //        List<String> values = List.of("HND NETWORK MANAGEMENT", "HND COMPUTER SCIENCE", "BTECH COMPUTER SCIENCE");
 
         selector.setItems(programmes);
     }
 
     public static void setProgramme(Select<String> selector) {
-        var programmes = DAO.getAllProgrammes().stream().map(ProgrammesEntity::getProgramme).distinct().toList();
+        var programmes = new DAO().getAllProgrammes().stream().map(ProgrammesEntity::getProgramme).distinct().toList();
 //        List<String> values = List.of("HND NETWORK MANAGEMENT", "HND COMPUTER SCIENCE", "BTECH COMPUTER SCIENCE");
         selector.setItems(programmes);
     }

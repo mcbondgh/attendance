@@ -13,7 +13,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @PageTitle("Manage Users")
-@Route(value = "manage-users", layout = MainLayout.class)
+@Route(value = "user-logs", layout = MainLayout.class)
 // @RolesAllowed({"ADMIN","USERS"})
 @AnonymousAllowed
 public class UserLogsView extends VerticalLayout {

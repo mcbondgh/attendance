@@ -10,6 +10,7 @@ import com.cass.views.reports.ActivitiesView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.dom.Style;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -65,6 +66,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
     private Button toggleButton = new Button(" Add Activity");
     private final ComboBox<String> sectionSelector = new ComboBox<>("Section");
     private final ComboBox<String> levelSelector = new ComboBox<>("Level");
+//    private final ComboBox<String>yearGroupSelector = new ComboBox<>("Year Group");
 
     public ManageClassActivityView() {
         setRequiredFields();
@@ -84,9 +86,13 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         maxScoreField.setRequired(true);
         maxScoreField.setAllowedCharPattern("[0-9.]");
         maxScoreField.setInvalid(maxScoreField.isEmpty());
+
+
         programmeSelector.setInvalid(programmeSelector.isEmpty());
         programmeSelector.setRequired(true);
         sectionSelector.setRequired(true);
+//        yearGroupSelector.setRequired(true);
+//        yearGroupSelector.setInvalid(yearGroupSelector.isEmpty());
         sectionSelector.setWidthFull();
         sectionSelector.setInvalid(sectionSelector.isEmpty());
         courseSelector.setRequired(true);
@@ -96,7 +102,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         activitySelector.setInvalid(activitySelector.isEmpty());
         levelSelector.setRequired(true);
         levelSelector.setInvalid(levelSelector.isEmpty());
-        SpecialMethods.setClassSections(sectionSelector);
+
     }
 
     private void checkForEmptyFields(Component component) {
@@ -104,7 +110,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
             UI.getCurrent().access(() -> {
                 createActivityButton.setEnabled(
                         !(datePicker.isInvalid() || levelSelector.isInvalid() || maxScoreField.isEmpty() || activitySelector.isInvalid() ||
-                                programmeSelector.isInvalid() || courseSelector.isInvalid()));
+                                programmeSelector.isInvalid()));
             });
         });
 
@@ -115,6 +121,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         SpecialMethods.setActivityTypes(activitySelector);
         SpecialMethods.setCourses(courseSelector);
         SpecialMethods.setLevel(levelSelector);
+        SpecialMethods.setClassSections(sectionSelector);
     }
 
     /****************************************************************************************************
@@ -190,7 +197,8 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         courseSelector.addClassNames("item-selector", "course-selector");
         sectionSelector.addClassNames("item-selector", "course-selector");
         levelSelector.addClassNames("item-selector", "level-selector");
-        formlayout.add(programmeSelector, classAndCourseContainer, levelSelector, dateAndActivityContainer, maxScoreField, new Hr(),
+//        yearGroupSelector.addClassNames("item-selector", "year-group-selector");
+        formlayout.add(programmeSelector, levelSelector, sectionSelector, dateAndActivityContainer, maxScoreField, new Hr(),
                 createActivityButton);
 
         layout.add(headerText, formlayout);

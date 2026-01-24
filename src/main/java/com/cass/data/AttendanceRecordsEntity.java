@@ -7,7 +7,7 @@ import com.vaadin.flow.component.html.H6;
 
 public class AttendanceRecordsEntity {
     private int id, rowNumber;
-    private String indexNumber, className, programeName;
+    private String indexNumber, className, programeName, level;
     private String fullname;
     private String attendanceValue;
     private Date attendanceDate;
@@ -21,10 +21,11 @@ public class AttendanceRecordsEntity {
     public AttendanceRecordsEntity() {
     }
 
-    public AttendanceRecordsEntity(int id, String indexNumber, String fullname, int present, int abscent, int totalAttendance, int excused) {
+    public AttendanceRecordsEntity(int id, String indexNumber, String fullname, String level, int present, int abscent, int totalAttendance, int excused) {
         this.id = id;
         this.indexNumber = indexNumber;
         this.fullname = fullname;
+        this.level = level;
         this.present = present;
         this.abscent = abscent;
         this.excused = excused;
@@ -70,6 +71,14 @@ public class AttendanceRecordsEntity {
 
     public String getClassName() {
         return className;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
     }
 
     public void setClassName(String className) {

@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 @PageTitle("User Logs")
-@Route(value = "user-logs", layout = MainLayout.class)
+@Route(value = "manage-users", layout = MainLayout.class)
 // @RolesAllowed({"ADMIN","USERS"})
 @AnonymousAllowed
 public class ManageUsersView extends VerticalLayout implements HasComponents, HasStyle {
@@ -97,6 +97,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
         usersTable.addComponentColumn(UsersEntity::getStatusValue).setHeader("STATUS");
         LoadTableGrid.loadTable(usersTable, SERVICE_OBJ.getAllUsers());
         usersTable.setClassName("users-table");
+        usersTable.setSizeUndefined();
 
         usersTable.setItemDetailsRenderer(createUserUpdateComponentRenderer());
         return usersTable;
@@ -257,9 +258,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
 
                                 entity.setRoleId(roleId.get());
 //                            entity.setRoleId((byte) (userRolePicker.getValue().equals("Admin") ? 1 : 2));
-                                int responseStatus = SERVICE_OBJ.saveUser(entity);
-
-                                if (responseStatus > 0) {
+                                if (SERVICE_OBJ.saveUser(entity) > 0) {
                                     popUp.showSuccess("Nice, new user successfully added to list");
                                     userPasswordField.clear();
                                     usernameField.clear();
