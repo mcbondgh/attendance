@@ -276,13 +276,15 @@ public class SelfRegistrationView extends VerticalLayout implements BeforeEnterO
     }
 
     private final ExecutorService dbExecutor = Executors.newFixedThreadPool(20);
+
     private void processFormData(ClickEvent<Button> event) {
         UI ui = UI.getCurrent();
-        CompletableFuture.supplyAsync(() -> STUDENT_SERVICE_OBJ.getStudentByStudentIndex(studentNumberField.getValue()).size(), dbExecutor)
+        var trimmedIndex = studentNumberField.getValue().replaceAll(" ", "");
+        CompletableFuture.supplyAsync(() -> STUDENT_SERVICE_OBJ.getStudentByStudentIndex(trimmedIndex).size(), dbExecutor)
                 .thenAccept(studentExist -> {
                     StudentEntity dataSource = new StudentEntity();
                     dataSource.setFullName(fullnameField.getValue());
-                    dataSource.setIndexNumber(studentNumberField.getValue());
+                    dataSource.setIndexNumber(trimmedIndex);
                     dataSource.setProgramme(programmeSelector.getValue());
                     dataSource.setLevel(levelSelector.getValue());
                     dataSource.setYearGroup(yearSelector.getValue());

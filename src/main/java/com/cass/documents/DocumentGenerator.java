@@ -32,7 +32,7 @@ import java.util.function.DoubleConsumer;
 
 public class DocumentGenerator {
 
-    public static InputStream generateAttendancePdf(LocalDate startDate, LocalDate endDate, String className, String programme, Grid<AttendanceRecordsEntity> dataTable) {
+    public static InputStream generateAttendancePdf(LocalDate startDate, LocalDate endDate, String className, String course, String programme, Grid<AttendanceRecordsEntity> dataTable) {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -62,8 +62,8 @@ public class DocumentGenerator {
             table.addHeaderCell(new Cell(0,4).add(dateRange).setFontSize(12).setBold());
             table.addHeaderCell(new Cell(0, 2).add(new Paragraph("CLASS")).setFontSize(12).setBold());
             table.addHeaderCell(new Cell(0, 4).add(new Paragraph(className).setTextAlignment(TextAlignment.CENTER)).setFontSize(12).setBold());
-//            table.addHeaderCell(new Cell(0,1).add(new Paragraph("DATE")));
-//            table.addHeaderCell(new Cell(0,1).add(new Paragraph(attendanceDate.get())).setBold());
+            table.addHeaderCell(new Cell(0,2).add(new Paragraph("COURSE")));
+            table.addHeaderCell(new Cell(0,4).add(new Paragraph(course)).setBold()).setTextAlignment(TextAlignment.CENTER);
             table.addHeaderCell(new Cell(0,2).add(new Paragraph("PROGRAMME")).setBold());
             table.addHeaderCell(new Cell(0,4).add(new Paragraph(programme).setTextAlignment(TextAlignment.CENTER)).setBold());
 
@@ -136,7 +136,7 @@ public class DocumentGenerator {
         return null;
     }
 
-    public static InputStream generateActivityReportPDF(String className1, String program1, Grid<ActivitiesEntity> reportsTable) {
+    public static InputStream generateActivityReportPDF(String className1, String program1, Grid<ActivitiesEntity> reportsTable, String activityType, String section) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter pdfWriter = new PdfWriter(outputStream);
         PdfDocument pdfDocument = new PdfDocument(pdfWriter);
@@ -146,12 +146,14 @@ public class DocumentGenerator {
         Table table = new Table(5);
         table.useAllAvailableWidth();
 
-        Paragraph className = new Paragraph("CLASS: " + className1.toUpperCase() + "    |   COURSE: " +program1.toUpperCase()).setBold();
+        Paragraph className = new Paragraph("Programme: " + className1.toUpperCase() + "  |  Course: " + program1.toUpperCase() ).setBold();
+        Paragraph activityType1 = new Paragraph("Section: " + section +  "  |  Activity Type: " + activityType.toUpperCase() ).setBold();
 //        Paragraph program = new Paragraph().setBold();
 //        Paragraph semester = new Paragraph(semester1.toUpperCase() ).setBold();
 //        Paragraph yearGroup = new Paragraph().setBold();
         Div container = new Div();
         container.add(className);
+        container.add(activityType1);
         container.setTextAlignment(TextAlignment.CENTER);
         container.setFontSize(10);
 //        container.setHeight(1);

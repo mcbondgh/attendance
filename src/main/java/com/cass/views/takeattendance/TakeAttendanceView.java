@@ -57,6 +57,7 @@ public class TakeAttendanceView extends VerticalLayout {
     private final ComboBox<String> sectionSelector = new ComboBox<>("Class Section");
     private final Checkbox markAllPresent = new Checkbox("Mark All");
     private final Select<String> programmeTypeSelector = new Select<>();
+    private final AtomicInteger rowNumber = new AtomicInteger(0);
 
     public TakeAttendanceView() {
         setSpacing(false);
@@ -134,7 +135,7 @@ public class TakeAttendanceView extends VerticalLayout {
                 } else {
                     String studentClass = programmeSelector.getValue();
                     // loadTableData(studentClass);
-                    UI.getCurrent().access(()-> {
+                    UI.getCurrent().access(() -> {
                         LoadTableGrid.loadTable(attendanceTable,
                                 SERVICE_OBJ.fetchActiveStudentsForAttendanceTable(studentClass, levelSelector.getValue(), programmeSelector.getValue(), programmeTypeSelector.getValue(), sectionSelector.getValue(), yearGroup.getValue()));
                         int tableSize = attendanceTable.getListDataView().getItemCount();
@@ -143,7 +144,7 @@ public class TakeAttendanceView extends VerticalLayout {
                         attendanceTable.getColumnByKey("indexNoColumn").setFooter(counterText);
                     });
                 }
-            }catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 new UserConfirmDialogs().showError("Please select attendance date");
             }
@@ -161,7 +162,7 @@ public class TakeAttendanceView extends VerticalLayout {
 
     private Component createTable() {
         VerticalLayout layout = new VerticalLayout();
-        Paragraph tableTitle = new Paragraph("Student Attendance Table");
+        Paragraph tableTitle = new Paragraph("Marked Students: " + rowNumber);
         TextField filterField = new TextField();
         Button saveAttendanceBtn = new Button("Save Attendance");
         FlexLayout buttonsLayout = new FlexLayout(saveAttendanceBtn);
@@ -193,10 +194,19 @@ public class TakeAttendanceView extends VerticalLayout {
 //               });
 //           }else attendanceTable.getListDataView().getItems().forEach(each -> each.getAttendanceButton().setValue(""));
 //        });
+        attendanceTable.getSelectionModel().addSelectionListener(event -> {
+            UI.getCurrent().access(() -> {
+                var counted = (long) event.getAllSelectedItems().size();
+                tableTitle.setText("Marked Students: " + counted);
+            });
+        });
 
         attendanceTable.getColumns().forEach(each -> {
-            each.setAutoWidth(true); each.setResizable(true) ;each.setFlexGrow(1);
-            each.setSortable(true); each.setWidth("100%");
+            each.setAutoWidth(true);
+            each.setResizable(true);
+            each.setFlexGrow(1);
+            each.setSortable(true);
+            each.setWidth("100%");
         });
         layout.add(tableTitle, filterField, attendanceTable, buttonsLayout);
 
@@ -223,40 +233,40 @@ public class TakeAttendanceView extends VerticalLayout {
                 new UserConfirmDialogs().showError("Please generate attendance sheet first.");
             } else {
                 new UserConfirmDialogs("SAVE ATTENDANCE",
-                    "Please confirm to save attendance. NOTE: once confirmed, attendance for current date cannot be taken again.")
-                    .saveDialog().addConfirmListener(confirm -> {
-                        AttendanceEntity entity = new AttendanceEntity();
-                        AtomicInteger responseStatus = new AtomicInteger(0);
+                        "Please confirm to save attendance. NOTE: once confirmed, attendance for current date cannot be taken again.")
+                        .saveDialog().addConfirmListener(confirm -> {
+                            AttendanceEntity entity = new AttendanceEntity();
+                            AtomicInteger responseStatus = new AtomicInteger(0);
 
-                        attendanceTable.getListDataView().getItems().forEach(each -> {
+                            attendanceTable.getListDataView().getItems().forEach(each -> {
 //                            rowNumber, indexNumber, programme, course, level,s
 //                            className, year_group, attendanceValue, attendanceDate
-                            Date date = Date.valueOf(LocalDate.now());
-                            String attendanceValue =  attendanceTable.getSelectedItems().contains(each) ? "P" : "A";//each.getAttendanceButton().isEmpty() ? "A" : each.getAttendanceButton().getValue();
-                            entity.setRowNumber(each.getId());
-                            entity.setIndexNumber(each.getIndexNumber());
-                            entity.setProgramme(programmeSelector.getValue());
-                            entity.setCourse(courseSelector.getValue());
-                            entity.setLevel(levelSelector.getValue());
-                            entity.setclassName(sectionSelector.getValue());
-                            entity.setYearGroup(String.valueOf(LocalDate.now().getYear()));
-                            entity.setAttendanceValue(attendanceValue);
-                            entity.setAttendanceDate(date);
+                                Date date = Date.valueOf(LocalDate.now());
+                                String attendanceValue = attendanceTable.getSelectedItems().contains(each) ? "P" : "A";//each.getAttendanceButton().isEmpty() ? "A" : each.getAttendanceButton().getValue();
+                                entity.setRowNumber(each.getId());
+                                entity.setIndexNumber(each.getIndexNumber());
+                                entity.setProgramme(programmeSelector.getValue());
+                                entity.setCourse(courseSelector.getValue());
+                                entity.setLevel(levelSelector.getValue());
+                                entity.setclassName(sectionSelector.getValue());
+                                entity.setYearGroup(String.valueOf(LocalDate.now().getYear()));
+                                entity.setAttendanceValue(attendanceValue);
+                                entity.setAttendanceDate(date);
 //                            System.out.println("Index No: " + each.getIndexNumber() + " Attendance: " + attendanceValue);
-                            responseStatus.addAndGet(SERVICE_OBJ.saveAttendance(entity));
-                        });
-                        if (responseStatus.get() > 0) {
-                            UI.getCurrent().access(() -> {
-                                attendanceTable.setItems(Collections.emptyList());
-                                attendanceTable.getColumnByKey("indexNoColumn").setFooter("Empty Table");
-                                new UserConfirmDialogs()
-                                        .showSuccess("NICE, attendance for ".concat(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
-                                                + " successfully saved.");
+                                responseStatus.addAndGet(SERVICE_OBJ.saveAttendance(entity));
                             });
-                        } else {
-                            new UserConfirmDialogs().showError("Sorry, failed to save attendance for current date");
-                        }
-                    });
+                            if (responseStatus.get() > 0) {
+                                UI.getCurrent().access(() -> {
+                                    attendanceTable.setItems(Collections.emptyList());
+                                    attendanceTable.getColumnByKey("indexNoColumn").setFooter("Empty Table");
+                                    new UserConfirmDialogs()
+                                            .showSuccess("NICE, attendance for ".concat(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                                                    + " successfully saved.");
+                                });
+                            } else {
+                                new UserConfirmDialogs().showError("Sorry, failed to save attendance for current date");
+                            }
+                        });
             }
         });
         return layout;

@@ -110,7 +110,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
             UI.getCurrent().access(() -> {
                 createActivityButton.setEnabled(
                         !(datePicker.isInvalid() || levelSelector.isInvalid() || maxScoreField.isEmpty() || activitySelector.isInvalid() ||
-                                programmeSelector.isInvalid()));
+                                programmeSelector.isInvalid() || courseSelector.isInvalid()));
             });
         });
 
@@ -154,6 +154,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         H6 headerText = new H6("Add Activity");
         FormLayout formlayout = new FormLayout();
         VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(false);
 
         formlayout.addClassNames("activity-formlayout");
         layout.addClassName("activity-inner-formlayout");
@@ -198,12 +199,20 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         sectionSelector.addClassNames("item-selector", "course-selector");
         levelSelector.addClassNames("item-selector", "level-selector");
 //        yearGroupSelector.addClassNames("item-selector", "year-group-selector");
-        formlayout.add(programmeSelector, levelSelector, sectionSelector, dateAndActivityContainer, maxScoreField, new Hr(),
+
+        FormLayout sectionAndYearDiv = new FormLayout(sectionSelector, levelSelector);
+        sectionAndYearDiv.setWidthFull();
+        sectionAndYearDiv.getStyle().setBoxSizing(Style.BoxSizing.BORDER_BOX);
+        sectionAndYearDiv.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("300px", 2));
+
+        sectionAndYearDiv.addClassNames("class-level-container");
+        formlayout.add(programmeSelector, courseSelector, sectionAndYearDiv, dateAndActivityContainer, maxScoreField, new Hr(),
                 createActivityButton);
 
         layout.add(headerText, formlayout);
 
-        // check for invalid fields and set button enabled or disables same
+        // check for invalid fields and set a button enabled or disables same
         checkForEmptyFields(formlayout);
 
         // ADD CLICK LISTENER TO THE generateButton TO FETCH AND FILL TABLE RECORDS.
@@ -309,10 +318,10 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
                                 if (counter.get() > 0) {
                                     new UserConfirmDialogs().showSuccess("Nice, activity has successfully been saved.");
                                     activityTable.setItems(Collections.emptyList());
-                                    levelSelector.clear();
-                                    programmeSelector.clear();
-                                    courseSelector.clear();
-                                    maxScoreField.clear();
+//                                    levelSelector.clear();
+//                                    programmeSelector.clear();
+//                                    courseSelector.clear();
+//                                    maxScoreField.clear();
                                 }
                             });
                         });

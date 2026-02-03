@@ -9,6 +9,7 @@ import com.cass.views.classActivities.ManageClassActivityView;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.dom.Style;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -50,6 +51,12 @@ public class ActivitiesView extends VerticalLayout {
     private final Grid<StudentEntity> studentGrid = new Grid<>();
     private final ActivityService SERVICE_OBJ = new ActivityService();
 
+    private final ComboBox<String> programmeSelector = new ComboBox<>("Select Programme");
+    private final ComboBox<String> courseSelector = new ComboBox<>("Select Course");
+    private final ComboBox<String> levelSelector = new ComboBox<>("Level");
+    private final ComboBox<String> classSelector = new ComboBox<>("Section");
+    private final Select<String> programmeType = new Select<>();
+
     public ActivitiesView() {
         add(renderPageHeader(), renderPageView());
     }
@@ -84,16 +91,20 @@ public class ActivitiesView extends VerticalLayout {
 
     private Component createMiniSideLayout() {
         VerticalLayout layout = new VerticalLayout();
-        ComboBox<String> programmeSelector = new ComboBox<>("Select Programme");
-        ComboBox<String> courseSelector = new ComboBox<>("Select Course");
+
+//        programmeType.setLabel("Programme Type");
+//        programmeType.setItems("Regular", "Weekend");
+//        programmeType.setValue("Regular");
         TextField filterField = new TextField();
-        final ComboBox<String> classSelector = new ComboBox<>("Section");
+
         classSelector.setWidth("fit-content");
         SpecialMethods.setClassSections(classSelector);
-        ComboBox<String> levelSelector = new ComboBox<>("Level");
 
         ListBox<ActivitiesEntity> listView = new ListBox<>();
         Button loadButton = new Button("Load Students");
+        programmeType.setLabel("Programme Type");
+        programmeType.setItems("Regular", "Weekend");
+        programmeType.setValue("Regular");
 
         SpecialMethods.setProgramme(programmeSelector);
         SpecialMethods.setLevel(levelSelector);
@@ -123,18 +134,21 @@ public class ActivitiesView extends VerticalLayout {
         filterField.setClassName("filter-activity-field");
         listView.setClassName("activity-view-list-view");
         loadButton.setClassName("activity-view-load-button");
+        programmeType.setClassName("list-view-picker");
+        programmeType.setWidthFull();
         programmeSelector.addClassNames("list-view-picker", "semester-picker");
         // set filter-field placeHolder
         filterField.setPlaceholder("filter by index number");
 
         Div classAndLeveContainer = new Div(levelSelector, classSelector);
         classAndLeveContainer.addClassNames("class-level-container");
+        classAndLeveContainer.setWidthFull();
         classSelector.setClassName("item-selector");
         levelSelector.addClassNames("item-selector");
 
         layout.setWidthFull();
         layout.setSpacing(false);
-        layout.add(filterField, new Hr(), programmeSelector, classAndLeveContainer, yearGroup, loadButton);
+        layout.add(filterField, new Hr(), programmeSelector, programmeType, courseSelector, levelSelector, classSelector, yearGroup, loadButton);
 
         // check and disable 'load button' if 'courseSelector' is empty
         layout.getElement().addEventListener("mouseover", callBack -> {
@@ -152,7 +166,7 @@ public class ActivitiesView extends VerticalLayout {
         // Add Click Listener to 'load button'
         loadButton.addClickListener(event -> {
             UI.getCurrent().access(() -> {
-                Collection<StudentEntity> data = SERVICE_OBJ.getStudentByClass(programmeSelector.getValue(), yearGroup.getValue(), levelSelector.getValue(), classSelector.getValue());
+                Collection<StudentEntity> data = SERVICE_OBJ.getStudentByClass(programmeSelector.getValue(), programmeType.getValue(), yearGroup.getValue(), levelSelector.getValue(), classSelector.getValue());
                 if (data.isEmpty()) {
                     studentGrid.setItems(Collections.emptyList());
                     new UserConfirmDialogs().showError("Class list is empty");
@@ -291,7 +305,7 @@ public class ActivitiesView extends VerticalLayout {
         Collection<activityRecord> data = new ArrayList<>();
         double totalScore = 0;
         double maxScore = 0;
-        for (ActivitiesEntity item : SERVICE_OBJ.fetchStudentActivities(yearGroup.getValue())) {
+        for (ActivitiesEntity item : SERVICE_OBJ.fetchStudentActivities(yearGroup.getValue(), programmeSelector.getValue(), courseSelector.getValue())) {
             if (studentIndex == item.getRowNumber()) {
                 nameField.setValue(item.getFullname());
                 indexNumberField.setValue(item.getIndexNumber());

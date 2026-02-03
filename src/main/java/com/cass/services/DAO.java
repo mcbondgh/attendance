@@ -11,16 +11,17 @@ import com.mysql.cj.protocol.Resultset;
 
 public class DAO {
 
-    public Collection<StudentEntity> getStudentByClass(String programme, String yearGroup, String level, String section) {
+    public Collection<StudentEntity> getStudentByClass(String programme, String programmeType, String yearGroup, String level, String section) {
         Collection<StudentEntity> data = new ArrayList<>();
         try(Connection source = Config.getDataSource()) {
-            String query = "SELECT * FROM studentsList WHERE(class = ? AND year_group = ? AND `level` = ? AND section = ?)";
+            String query = "SELECT * FROM studentsList WHERE(class = ? AND programme_type = ? AND year_group = ? AND `level` = ? AND section = ?)";
 
             PreparedStatement prepare = source.prepareStatement(query);
             prepare.setString(1, programme);
-            prepare.setString(2, yearGroup);
-            prepare.setString(3, level);
-            prepare.setString(4, section);
+            prepare.setString(2, programmeType);
+            prepare.setString(3, yearGroup);
+            prepare.setString(4, level);
+            prepare.setString(5, section);
 
             ResultSet resultSet = prepare.executeQuery();
             while (resultSet.next()) {
@@ -331,17 +332,19 @@ public class DAO {
         return data;
     }
 
-    public Collection<ActivitiesEntity> fetchStudentActivities(String yearGroup) {
+    public Collection<ActivitiesEntity> fetchStudentActivities(String yearGroup, String programme, String course) {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         try(Connection source = Config.getDataSource()) {
             String query = """
-                     SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, course, className, maximumScore, score, activityDate, dateCreated
-                     FROM class_attendance.activity_records AS ar\s
-                     INNER JOIN studentslist AS sl\s
-                     ON ar.rowNumber = sl.id WHERE(status = 1 AND year_group = ?);
-                    \s""";
+                    SELECT ar.id, rowNumber, indexNumber, fullname, title, activityType, course, className, maximumScore, score, activityDate, dateCreated
+                    FROM class_attendance.activity_records AS ar
+                    INNER JOIN studentslist AS sl
+                    ON ar.rowNumber = sl.id WHERE(status = 1 AND year_group = ? AND ar.course = ? AND ar.programme = ?)
+                    """;
             PreparedStatement prepare = source.prepareStatement(query);
             prepare.setString(1, yearGroup);
+            prepare.setString(2, course);
+            prepare.setString(3, programme);
             ResultSet resultSet = prepare.executeQuery();
             while (resultSet.next()) {
                 int id = resultSet.getInt("ar.id");
@@ -350,12 +353,12 @@ public class DAO {
                 int rowNo = resultSet.getInt("rowNumber");
                 String title = resultSet.getString("title");
                 String activityType = resultSet.getString("activityType");
-                String course = resultSet.getString("course");
+                String courseValue = resultSet.getString("course");
                 String studentClass = resultSet.getString("className");
                 double maxScore = resultSet.getDouble("maximumScore");
                 double score = resultSet.getDouble("score");
                 Date activityDate = resultSet.getDate("activityDate");
-                data.add(new ActivitiesEntity(id, fullname, indexNumber, studentClass, title, activityType, activityDate, maxScore, score, rowNo, course));
+                data.add(new ActivitiesEntity(id, fullname, indexNumber, studentClass, title, activityType, activityDate, maxScore, score, rowNo, courseValue));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -386,7 +389,7 @@ public class DAO {
     public Collection<UsersEntity> getAllUsers() {
         Collection<UsersEntity> data = new ArrayList<>();
         try(Connection source = Config.getDataSource()) {
-            String query = "SELECT * FROM users WHERE status = TRUE ORDER BY username ASC;";
+            String query = "SELECT * FROM users WHERE (is_deleted = FALSE) ORDER BY username ASC;";
             PreparedStatement prepare = source.prepareStatement(query);
             ResultSet resultSet = prepare.executeQuery();
             while (resultSet.next()) {

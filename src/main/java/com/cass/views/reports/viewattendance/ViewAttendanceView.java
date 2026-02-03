@@ -263,7 +263,7 @@ public class ViewAttendanceView extends VerticalLayout {
 //        return DocumentStreams.createFileResource("Attendance Report.pdf",stream);
         return new StreamResource("Attendance Report.pdf", ()-> {
             try {
-                return new ByteArrayInputStream(DocumentGenerator.generateAttendancePdf(startDatePicker.getValue(), endDatePicker.getValue(), classPicker.getValue(), programPicker.getValue(), grid).readAllBytes());
+                return new ByteArrayInputStream(DocumentGenerator.generateAttendancePdf(startDatePicker.getValue(), endDatePicker.getValue(), classPicker.getValue(), coursePicker.getValue(), programPicker.getValue(), grid).readAllBytes());
             } catch (IOException e) {
                 POPUP = new UserConfirmDialogs();
                 POPUP.showError("Attendance table is empty, nothing to export.");

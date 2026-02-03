@@ -233,9 +233,11 @@ public class ReportsView extends VerticalLayout {
 //        pdfLink.setTarget("_blank");
             String className = programmePicker.getValue();
             String course = coursePicker.getValue();
+            String activityType = typePicker.getValue();
+            String section = classPicker.getValue();
 
             //create pdf downloadable file.
-            InputStream pdfStream = DocumentGenerator.generateActivityReportPDF(className, course, reportsTable);
+            InputStream pdfStream = DocumentGenerator.generateActivityReportPDF(className, course, reportsTable, activityType, section);
             StreamResource pdfResource = DocumentStreams.createFileResource("Assessment Report.pdf", pdfStream);
             pdfLink.setHref(pdfResource);
             pdfLink.setTarget("_blank");

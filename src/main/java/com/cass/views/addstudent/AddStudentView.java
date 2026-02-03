@@ -15,10 +15,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H5;
-import com.vaadin.flow.component.html.H6;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -52,7 +49,6 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
     private ComboBox<String> sectionPicker = new ComboBox<>("Select Section");
     private VerticalLayout pageLayout = new VerticalLayout();
-    private FormLayout formLayout = new FormLayout();
     private TextField studentNumberField = new TextField("Index Number");
     private TextField fullnameField = new TextField("Student Name");
     private Select<String> programmeSelector = new Select<>();
@@ -60,7 +56,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
     private final ComboBox<String> courseSelector = new ComboBox<>("Select Course");
     private final ComboBox<String> levelSelector = new ComboBox<>("Select Level");
     private final Button addNewStudentBtn = new Button("Add Student");
-    private static final Grid<StudentEntity> studentsTable = new Grid<>(StudentEntity.class, false);
+    private final Grid<StudentEntity> studentsTable = new Grid<>(StudentEntity.class, false);
     private final ComboBox<String> yearGroup = new ComboBox<>();
     private final ComboBox<String> yearSelector = new ComboBox<>("Year Group");
     ComboBox<String> studentSearchLevel = new ComboBox<>();
@@ -91,7 +87,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         getStudentButton.addClassNames("default-button", "load-students-button");
         getStudentButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
         addNewStudentBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
-        addNewStudentBtn.addClassNames("default-button");
+        addNewStudentBtn.addClassNames("default-button", "add-student-button");
 
         ComboBox<String> programmePicker = new ComboBox<>();
         ComboBox<String> yearPicker = new ComboBox<>();
@@ -127,7 +123,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
 //        itemsLayout.setAlignItems(Alignment.BASELINE);
 //        itemsLayout.setJustifyContentMode(JustifyContentMode.START);
 
-        layout.add(itemsLayout, addNewStudentBtn);
+        layout.add(addNewStudentBtn, new Hr(), itemsLayout);
 
         //ACTION EVENT LISTENERS
         getStudentButton.addClickListener(event -> {
@@ -138,7 +134,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
             sectionPicker.setErrorMessage(sectionPicker.isInvalid() ? errors : null);
 
             if (!checkFields) {
-                tableData(programmePicker.getValue(), yearPicker.getValue(), levelPicker.getValue(), sectionPicker.getValue());
+                tableData(programmePicker.getValue(), programmeTypeSelector.getValue(), yearPicker.getValue(), levelPicker.getValue(), sectionPicker.getValue());
                 int tableSize = studentsTable.getListDataView().getItemCount();
                 H6 tableLabel = new H6("TOTAL: " + tableSize);
                 tableLabel.setClassName("table-counter");
@@ -193,8 +189,8 @@ public class AddStudentView extends Composite<VerticalLayout> {
     }
 
     //STUDENT STABLE DATA PROVIDER.
-    protected void tableData(String programme, String yearGroup, String level, String section) {
-        studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(programme, yearGroup, level, section));
+    protected void tableData(String programme, String type, String yearGroup, String level, String section) {
+        studentsTable.setItems(STUDENT_SERVICE_OBJ.getStudentByClass(programme, type, yearGroup, level, section));
     }
 
     //TABLE BUTTON IMPLEMENTATION.
@@ -298,9 +294,10 @@ public class AddStudentView extends Composite<VerticalLayout> {
                     studentNumberField.setErrorMessage("required field");
                     nameField.setErrorMessage("required field");
                 } else {
+                    var cleanedIndexNumber = studentNumberField.getValue().replaceAll(" ", "");
                     STUDENT_ENTITY_OBJ.setId(student.getId());
                     STUDENT_ENTITY_OBJ.setFullName(nameField.getValue());
-                    STUDENT_ENTITY_OBJ.setIndexNumber(studentNumberField.getValue());
+                    STUDENT_ENTITY_OBJ.setIndexNumber(cleanedIndexNumber);
                     STUDENT_ENTITY_OBJ.setStudentClass(studentClass.getValue());
                     STUDENT_ENTITY_OBJ.setStatus((byte) (checkbox.getValue().equals("active") ? 1 : 0));
                     STUDENT_ENTITY_OBJ.setDateUpdated(Timestamp.valueOf(LocalDateTime.now()));
@@ -312,7 +309,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
 
                     new UserConfirmDialogs("UPDATE STUDENT DATA", "Do you wish to updated student data to current values").
                             saveDialog().addConfirmListener(ev -> {
-                                var data = new StudentService().getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
+                                var data = new StudentService().getStudentByClass(studentClass.getValue(), programmeTypeSelector.getValue(), yearGroup.getValue(),
                                         studentSearchLevel.getValue(), sectionPicker.getValue());
                                 if (STUDENT_SERVICE_OBJ.updateStudentData(STUDENT_ENTITY_OBJ) > 0) {
                                     UI ui = UI.getCurrent();
@@ -334,7 +331,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                     int responseStatus = STUDENT_SERVICE_OBJ.removeStudent(Integer.parseInt(rowNumber.getValue()));
                     if (responseStatus > 0) {
                         confirmDialogs.showSuccess("NICE, Student successfully removed from class list.");
-                        studentsTable.setItems(new StudentService().getStudentByClass(studentClass.getValue(), yearGroup.getValue(),
+                        studentsTable.setItems(new StudentService().getStudentByClass(studentClass.getValue(), programmeTypeSelector.getValue(), yearGroup.getValue(),
                                 studentSearchLevel.getValue(), sectionPicker.getValue()));
                     }
                 });
@@ -385,6 +382,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
     /*--------------- */
 
     private FormLayout formDesign() {
+        FormLayout formLayout = new FormLayout();
         formLayout.setClassName("student-form-layout");
         // saveStudentButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         studentSearchLevel.setLabel("Select Level");
@@ -450,6 +448,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         studentFormDialog.setDraggable(true);
 
         close.addClickListener(event -> {
+            studentFormDialog.removeAll();
             studentFormDialog.close();
         });
 
@@ -461,9 +460,10 @@ public class AddStudentView extends Composite<VerticalLayout> {
         saveStudentButton.addClickListener(event -> {
             UserConfirmDialogs dialogs = new UserConfirmDialogs("Save New Student", "Confirm to add student to selected class list.");
             boolean matchesIndexNo = false;
-            String indexNumber = studentNumberField.getValue();
+            String indexNumber = studentNumberField.getValue().replaceAll(" ", "");
             for (StudentEntity item : STUDENT_SERVICE_OBJ.getStudentByStudentIndex(indexNumber)) {
-                if (item.getIndexNumber().trim().equalsIgnoreCase(indexNumber.trim())) {
+                var fetchedIndex = item.getIndexNumber().replaceAll(" ", "");
+                if (fetchedIndex.trim().equalsIgnoreCase(indexNumber.trim())) {
                     matchesIndexNo = true;
                 }
             }
@@ -477,7 +477,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                 dialogs.saveDialog().addConfirmListener(click -> {
 
                     //feed entity instance with collected data.
-                    STUDENT_ENTITY_OBJ.setIndexNumber(studentNumberField.getValue());
+                    STUDENT_ENTITY_OBJ.setIndexNumber(indexNumber.trim());
                     STUDENT_ENTITY_OBJ.setFullName(fullnameField.getValue());
                     STUDENT_ENTITY_OBJ.setLevel(levelSelector.getValue());
                     STUDENT_ENTITY_OBJ.setStudentClass(programmeSelector.getValue());
@@ -491,7 +491,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                             dialogs.showSuccess("Nice, student successfully added to class list");
                             resetFields();
                             LoadTableGrid.loadTable(studentsTable, STUDENT_SERVICE_OBJ.getStudentByClass(
-                                    programmeSelector.getValue(), yearSelector.getValue(),
+                                    programmeSelector.getValue(), programmeTypeSelector.getValue(), yearSelector.getValue(),
                                     levelSelector.getValue(), sectionPicker.getValue()));
                         });
                     } else {
@@ -500,7 +500,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
                 });
             }
         });
-        studentFormDialog.add(formDesign());
+        if (studentFormDialog.getChildren().findAny().isEmpty()) studentFormDialog.add(formDesign());
         studentFormDialog.open();
     }
 

@@ -13,7 +13,18 @@ box-sizing: border-box;
   justify-content: space-between;
 }
 .header-container .default-button {
+ background-color: #066f7f;
+  padding: 10px;
+}
+.add-student-button {
+    margin-bottom: 15px;
+}
 
+.load-students-button {
+  background-color: dodgerblue;
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
 }
 .header-filter-container {
   display: flex;

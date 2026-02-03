@@ -145,13 +145,13 @@
     align-items:center;
     justify-content: flex-start;
     /* border: 1px solid red; */
-    gap:5px;
+    gap:8px;
     box-sizing: border-box;
 }
 
 .class-level-container .item-selector{
     /* border:1px solid orange; */
-    max-width:31%;
+    max-width:100%;
 }
 
 
@@ -169,7 +169,11 @@
     margin-right: 5px;
 }
 
+
 @media screen and (max-width:600px) {
+    .section-and-level-div {
+        flex-direction: column;
+    }
     .dashboard-header-text {
         font-size: 14px;
     }

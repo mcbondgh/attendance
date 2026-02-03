@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @PageTitle("Add Student")
 @Route("/rep-add-student")
 public class RepAddStudentView extends VerticalLayout {
-    private AtomicReference<String> activeUser, section, level, programme, studentYearGroup;
+    private AtomicReference<String> activeUser, section, level, programme, studentYearGroup, programmeType;
     private DAO DATA_SOURCE;
     private final Grid<StudentEntity> studentsGrid = new Grid<>();
 
@@ -49,6 +49,7 @@ public class RepAddStudentView extends VerticalLayout {
             studentYearGroup = new AtomicReference<>(SessionManager.getAttribute("yearGroup").toString());
             level = new AtomicReference<>(SessionManager.getAttribute("level").toString());
             programme = new AtomicReference<>(SessionManager.getAttribute("class").toString());
+            programmeType = new AtomicReference<>("");
             section = new AtomicReference<>(SessionManager.getAttribute("section").toString());
 
         } catch (NullPointerException e) {
@@ -179,7 +180,7 @@ public class RepAddStudentView extends VerticalLayout {
 
     //REFERENCE METHODS IMPLEMENTATION
     private Collection<StudentEntity> studentGridDataSource() {
-        return DATA_SOURCE.getStudentByClass(programme.get(), studentYearGroup.get(), level.get(), section.get());
+        return DATA_SOURCE.getStudentByClass(programme.get(), "", studentYearGroup.get(), level.get(), section.get());
     }
 
     private String totalStudentCount() {

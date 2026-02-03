@@ -40,7 +40,7 @@ public class ManageUsersView extends VerticalLayout implements HasComponents, Ha
     private OrderedList imageContainer;
     private final Grid<UsersEntity> usersTable = new Grid<>(UsersEntity.class, false);
     UserService SERVICE_OBJ = new UserService();
-    private TextField indexNumberField = new TextField("Index Number", "04/2020/0203");
+    private TextField indexNumberField = new TextField("Index Number", "../..../....");
 
     public ManageUsersView() {
         add(renderPageHeader(), renderPageView());
