@@ -40,8 +40,8 @@
 /* --------------------------------------------------------------------------------------------- */
 
 .table-layout {
-
-  padding: 0;
+  /*padding: 0;*/
+  margin:5px;
 }
 .take-attendance-view-select-2::part(input-field),
 .take-attendance-view-select-1::part(input-field) {

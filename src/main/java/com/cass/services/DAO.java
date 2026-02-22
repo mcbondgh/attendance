@@ -47,15 +47,16 @@ public class DAO {
         return data;
     }
 
-    public Collection<ActivitiesEntity> fetchClassListByClassName(String programme, String sectionOrClass, String level) {
+    public Collection<ActivitiesEntity> fetchClassListByClassName(String programme, String sectionOrClass, String level, String programmeType) {
         Collection<ActivitiesEntity> data = new ArrayList<>();
         try(Connection source = Config.getDataSource()) {
-            String query = "SELECT * FROM studentsList WHERE(class = ? AND year_group = YEAR(CURRENT_DATE()) AND section = ? AND level = ?)";
+            String query = "SELECT * FROM studentsList WHERE((status = true AND class = ?) AND year_group = YEAR(CURRENT_DATE()) AND section = ? AND level = ? AND programme_type= ?)";
 
             PreparedStatement prepare = source.prepareStatement(query);
             prepare.setString(1, programme);
             prepare.setString(2, sectionOrClass);
             prepare.setString(3, level);
+            prepare.setString(4, programmeType);
             ResultSet resultSet = prepare.executeQuery();
             AtomicInteger counter = new AtomicInteger();
             while (resultSet.next()) {
@@ -411,9 +412,7 @@ public class DAO {
     public Map<String, String> getClassRepInfo(String indexNumber) {
         Map<String, String> data = new HashMap<>();
         String query = """
-                SELECT
-                section, level, year_group, class
-                FROM studentslist WHERE TRIM(indexNumber) = TRIM(?);
+                SELECT * FROM studentslist WHERE TRIM(indexNumber) = TRIM(?);
                 """;
         try(Connection source = Config.getDataSource()) {
             PreparedStatement prepare = source.prepareStatement(query);
@@ -424,6 +423,8 @@ public class DAO {
                 data.put("level", resultSet.getString("level"));
                 data.put("year_group", resultSet.getString("year_group"));
                 data.put("class", resultSet.getString("class"));
+                data.put("programme", resultSet.getString("programme"));
+                data.put("programme_type", resultSet.getString("programme_type"));
             }
         } catch (Exception e) {
             e.printStackTrace();

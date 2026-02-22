@@ -1,6 +1,8 @@
 package com.cass.views.addstudent;
 
 import com.cass.data.StudentEntity;
+import com.cass.documents.DocumentGenerator;
+import com.cass.documents.DocumentStreams;
 import com.cass.security.SessionManager;
 import com.cass.services.DAO;
 import com.cass.views.dashboard.RepDashboardView;
@@ -12,10 +14,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -27,13 +26,15 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-@PageTitle("Add Student")
+@PageTitle("Class List")
 @Route("/rep-add-student")
 public class RepAddStudentView extends VerticalLayout {
     private AtomicReference<String> activeUser, section, level, programme, studentYearGroup, programmeType;
@@ -49,7 +50,7 @@ public class RepAddStudentView extends VerticalLayout {
             studentYearGroup = new AtomicReference<>(SessionManager.getAttribute("yearGroup").toString());
             level = new AtomicReference<>(SessionManager.getAttribute("level").toString());
             programme = new AtomicReference<>(SessionManager.getAttribute("class").toString());
-            programmeType = new AtomicReference<>("");
+            programmeType = new AtomicReference<>(SessionManager.getAttribute("programmeType").toString());
             section = new AtomicReference<>(SessionManager.getAttribute("section").toString());
 
         } catch (NullPointerException e) {
@@ -58,14 +59,14 @@ public class RepAddStudentView extends VerticalLayout {
 
     }
 
-    @Override public void onAttach(AttachEvent event) {
+    @Override
+    public void onAttach(AttachEvent event) {
         add(headerLayout(), bodyLayout());
     }
 
     private TextField nameField = new TextField("Student Name");
     private TextField indexNumberField = new TextField("Index Number");
     private Button saveButton = new Button("Save", LineAwesomeIcon.SAVE.create());
-
 
 
     private Component headerLayout() {
@@ -78,12 +79,10 @@ public class RepAddStudentView extends VerticalLayout {
         backButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
         backButton.addClassName("back-button");
 
-
         H4 headerTitle = new H4(activeUser.get());
         Div container = new Div(new Span("Welcome"), headerTitle);
         container.addClassNames("rep-dashboard-title-div");
         container.getStyle().setAlignItems(Style.AlignItems.CENTER).setPadding("10px");
-
 
         layout.setClassName("rep-dashboard-header-container");
         layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
@@ -97,7 +96,7 @@ public class RepAddStudentView extends VerticalLayout {
 
     private Component bodyLayout() {
         FlexLayout layout = new FlexLayout();
-        layout.setSizeFull();
+        layout.setWidthFull();
         layout.addClassName("add-student-body-container");
 
         layout.add(formSection(), gridSection());
@@ -111,6 +110,7 @@ public class RepAddStudentView extends VerticalLayout {
         saveButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY);
         saveButton.setWidthFull();
         saveButton.addClassName("default-button-style");
+        saveButton.setEnabled(false);
 
         nameField.setWidthFull();
         indexNumberField.setWidthFull();
@@ -118,14 +118,17 @@ public class RepAddStudentView extends VerticalLayout {
         VerticalLayout parent = new VerticalLayout(header, new Hr(), nameField, indexNumberField, new Hr(), saveButton);
         parent.setClassName("add-student-inner-layout");
         parent.setSpacing(false);
-        parent.setWidth("29%");
+        parent.getStyle().setMarginTop("0");
+        parent.setWidth("20%");
 
         return parent;
     }
 
     private VerticalLayout gridSection() {
-        var header = new H4("Total Students: " + totalStudentCount());
+        var header = new H5("Total Students: " + totalStudentCount());
         header.addClassName("add-student-title");
+
+        configureStudentsGrid();
 
         var filterField = new TextField("", "filter by student name or index number");
         filterField.setClassName("filter-field");
@@ -143,28 +146,47 @@ public class RepAddStudentView extends VerticalLayout {
             studentsGrid.getListDataView().refreshAll();
         });
 
-        configureStudentsGrid();
-        VerticalLayout parent = new VerticalLayout(header, new Hr(), filterField, studentsGrid);
+        Anchor exportLink = new Anchor();
+        exportLink.setText("Export");
+        exportLink.addClassName("export-link");
+
+        //check and set the export button to active if the grid is not empty to allow table to be exported.
+        if (studentsGrid.getListDataView().getItems().findAny().isPresent()) {
+            String filename = programme.get() + "_class_list.xlsx";
+            var stream = DocumentGenerator.generateStudentList(programme.get(), studentsGrid);
+            exportLink.setHref(DocumentStreams.createFileResource(filename, stream));
+        }
+
+        FlexLayout flexLayout = new FlexLayout(filterField, exportLink);
+        flexLayout.setAlignItems(Alignment.CENTER);
+        flexLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        flexLayout.setWidthFull();
+        flexLayout.addClassNames("filter-export-container");
+
+        VerticalLayout parent = new VerticalLayout(header, new Hr(), flexLayout, studentsGrid);
         parent.setSpacing(false);
         parent.setSizeFull();
         parent.setClassName("add-student-inner-layout");
-        parent.setWidth("69%");
+        parent.setWidth("79%");
         return parent;
     }
 
-//    COMPONENTS RENDERERS
+    //    COMPONENTS RENDERERS
     private void configureStudentsGrid() {
         studentsGrid.setSizeUndefined();
         studentsGrid.addColumn(StudentEntity::getIndexNumber).setHeader("Index Number");
         studentsGrid.addColumn(StudentEntity::getFullName).setHeader("Full Name");
-        studentsGrid.addColumn(StudentEntity::getStudentClass).setHeader("Class");
+        studentsGrid.addColumn(StudentEntity::getStudentClass).setHeader("Programme");
+//        studentsGrid.addColumn(StudentEntity::getYearGroup).setHeader("Year");
+        studentsGrid.addColumn(StudentEntity::getLevel).setHeader("Level");
+        studentsGrid.addColumn(StudentEntity::getSection).setHeader("Group");
         studentsGrid.addColumn(studentStatus()).setHeader("Status");
         studentsGrid.getColumns().forEach(col -> {
             col.setAutoWidth(true);
             col.setResizable(true);
             col.setSortable(true);
         });
-//        studentsGrid.setItems(studentGridDataSource());
+        studentsGrid.setItems(studentGridDataSource());
         studentsGrid.addClassName("student-grid");
 
     }
@@ -172,6 +194,7 @@ public class RepAddStudentView extends VerticalLayout {
     private static Renderer<StudentEntity> studentStatus() {
         return new ComponentRenderer<>(data -> {
             Span badge = new Span();
+            badge.getStyle().setFontSize("smaller");
             badge.setText(data.getStatus() == 1 ? "active" : "deactivated");
             badge.getElement().getThemeList().add(data.getStatus() == 1 ? "badge success pill" : "badge error pill");
             return badge;
@@ -180,7 +203,7 @@ public class RepAddStudentView extends VerticalLayout {
 
     //REFERENCE METHODS IMPLEMENTATION
     private Collection<StudentEntity> studentGridDataSource() {
-        return DATA_SOURCE.getStudentByClass(programme.get(), "", studentYearGroup.get(), level.get(), section.get());
+        return DATA_SOURCE.getStudentByClass(programme.get(), programmeType.get(), studentYearGroup.get(), level.get(), section.get());
     }
 
     private String totalStudentCount() {

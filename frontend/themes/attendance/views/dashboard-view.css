@@ -106,15 +106,25 @@
 .rep-dashboard-title-div {
     box-sizing:border-box;
 }
+.rep-dashboard-title-div span{
+    color: #456289;
+    font-size: small;
+}
 
 .signout-link {
     text-decoration:none;
     background:#ff0000;
     text-align:center;
     max-width:fit-content;
-    padding:5px;
+    padding:5px 8px;
+    font-size: smaller;
     border-radius: 5px;
     color:#ffff;
+}
+
+.signout-link vaadin-icon {
+    font-size:10px;
+    margin-right: 5px;
 }
 
 .rep-dashboard-header-container{
@@ -144,8 +154,7 @@
     transition: 0.3s ease;
     border: 1px solid #066f7f;
     cursor:pointer;
-    box-shadow:2px 2px 5px solid #ddd;
-
+    box-shadow:2px 2px 5px #ddd;
 }
 
 @media screen and (max-width: 768px) {
@@ -160,7 +169,8 @@
          box-sizing: border-box;
     }
     .signout-link {
-        font-size:small;
+        font-size:smaller;
+        margin-left: 0;
     }
     .dashboard-div h6 {
         font-size: 12px;
@@ -170,7 +180,7 @@
         height:100vh;
     }
     .rep-dashboard-title-div {
-        min-width:80%;
+        min-width:60%;
         padding:0;
     }
 

@@ -6,6 +6,11 @@
 
 .main-container {
     background-color: #fff;
+    padding: 15px;
+}
+.take-attendance-form-section{
+    padding:10px;
+    margin-top: 1px;
 }
 .filter-text-field::part(input-field) {
    font-size: small;
@@ -28,13 +33,84 @@
     width:120px;
 }
 
+/*REP DASHBOARD STYLING*/
+.reset-dialog-row-one {
+    border:1px solid rgb(238, 232, 232);
+    padding: 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: small;
+    background-color: rgb(255, 237, 237);
+    color: rgb(157, 87, 87);
+    text-align: center;
+}
+.reset-dialog-parent {
+    height: 100%;
+    border: 1px solid rgb(238, 232, 232);
+    padding: 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
 
+.reset-dialog-row-one h6 {
+    color: rgb(160, 33, 33);
+    font-weight: 600;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.reset-dialog-row-two {
+    border:1px solid rgb(238, 232, 232);
+    padding: 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-size: small;
+    margin-top: 10px;
+
+}
+.reset-dialog-row-two .default-button-style {
+    background-color: #066f7f;
+    margin-top: 15px;
+}
+.reset-dialog-row-two vaadin-password-field {
+    min-width: 100%;
+    font-size: small;
+}
+
+.add-student-body-container {
+    /*border: 1px solid #ddd;*/
+    box-sizing: border-box;
+    align-items: start;
+    padding-top: 0;
+}
+
+.record-form-inner-box {
+    background-color: #fff;
+    border:1px solid rgb(238, 232, 232);
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin-top: 0;
+    align-items: start;
+    padding: 10px;
+}
+.record-form-inner-box .default-button-style {
+    background-color: #066f7f;
+    margin-top: 15px;
+    color:#fff;
+}
+
+.filter-export-container .filter-field {
+    max-width:75%;
+}
 
 /* mobile view */
 @media screen and (max-width:600px) {
     .take-attendance-combobox {
         width: 100%;
         margin-top: -10px;
+    }
+    .add-student-body-container .section-two {
+       margin-top:10px;
     }
     .filter-text-field {
         width: 100%;

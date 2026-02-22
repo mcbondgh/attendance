@@ -103,7 +103,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         programmePicker.setPlaceholder("Select Programme");
         yearPicker.setPlaceholder("Select Year");
         sectionPicker.setPlaceholder("Select Section");
-        programmeTypeSelector.setLabel("Programme Type");
+//        programmeTypeSelector.setLabel("Programme Type");
 
         SpecialMethods.setLevel(levelPicker);
         SpecialMethods.setYear(yearPicker);
@@ -118,7 +118,7 @@ public class AddStudentView extends Composite<VerticalLayout> {
         programmePicker.setRequired(true);
         yearPicker.setRequired(true);
 
-        Div itemsLayout = new Div(programmePicker, levelPicker, yearPicker, sectionPicker, getStudentButton);
+        Div itemsLayout = new Div(programmePicker, levelPicker, yearPicker, sectionPicker, programmeTypeSelector, getStudentButton);
         itemsLayout.addClassName("items-layout");
 //        itemsLayout.setAlignItems(Alignment.BASELINE);
 //        itemsLayout.setJustifyContentMode(JustifyContentMode.START);

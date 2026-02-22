@@ -10,8 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.itextpdf.forms.form.element.CheckBox;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.ValueProvider;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -75,7 +77,15 @@ public class TakeAttendanceView extends VerticalLayout {
     }
 
     private Component renderPageView() {
-        VerticalLayout layout = new VerticalLayout();
+        var layout = new FormLayout();
+        layout.setWidthFull();
+        layout.setClassName("main-container");
+        layout.getStyle().setPadding("15px");
+        layout.getStyle().setBoxSizing(Style.BoxSizing.BORDER_BOX);
+        layout.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("768px", 6)
+        );
 
         courseSelector.addClassName("take-attendance-combobox");
         programmeSelector.addClassName("take-attendance-combobox");
@@ -110,18 +120,27 @@ public class TakeAttendanceView extends VerticalLayout {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
         datePicker.setMin(today);
 
-        HorizontalLayout headerLayout = new HorizontalLayout(courseSelector, programmeSelector, programmeTypeSelector, levelSelector, sectionSelector, yearGroup);
+        H5 titleHeader = new H5("Fill Out Form");
+        titleHeader.addClassNames("take-attendance-form-header-title");
 
-        layout.setWidthFull();
-        layout.setClassName("main-container");
-        headerLayout.setWidthFull();
-        headerLayout.setSpacing(true);
-        headerLayout.setClassName("header-layout");
+//        var filterFormLayout = new Div(titleHeader);
+        FormLayout filterFormLayout = new FormLayout();
+        filterFormLayout.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1)
+        );
+        filterFormLayout.add(titleHeader, courseSelector, programmeSelector, programmeTypeSelector, levelSelector, sectionSelector, yearGroup, new Hr(), generateSheetButton);
+//        filterFormLayout.add(courseSelector, programmeSelector, programmeTypeSelector, levelSelector, sectionSelector, yearGroup, new Hr(), generateSheetButton);
+//        filterFormLayout.setWidthFull();
+//        filterFormLayout.getStyle().setBoxSizing(Style.BoxSizing.BORDER_BOX);
+//        filterFormLayout.addClassName("take-attendance-form-section");
+
         generateSheetButton.addClassNames("default-button", "filter-button");
-        generateSheetButton.getStyle().setMarginBottom("8px");
+        generateSheetButton.getStyle().setMargin("8px auto");
         generateSheetButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_CONTRAST);
 
-        layout.add(headerLayout, generateSheetButton, new Hr(), createTable());
+        layout.add(filterFormLayout, 1);
+        layout.addClassNames("take-attendance-form-layout");
+        layout.add(createTable(), 5);
 
         // ADD EVENT LISTENERS
         generateSheetButton.addClickListener(event -> {
@@ -168,7 +187,9 @@ public class TakeAttendanceView extends VerticalLayout {
         FlexLayout buttonsLayout = new FlexLayout(saveAttendanceBtn);
         filterField.setClassName("filter-text-field");
         filterField.setClearButtonVisible(true);
+
         layout.addClassName("table-layout");
+
         tableTitle.setClassName("attendance-table-title");
         saveAttendanceBtn.setClassName("save-button");
         buttonsLayout.setClassName("buttons-layout");

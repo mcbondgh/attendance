@@ -60,6 +60,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
     private ComboBox<String> activitySelector = new ComboBox<>("Activity Type");
     private DatePicker datePicker = new DatePicker("Activity Date");
     private ComboBox<String> programmeSelector = new ComboBox<>("Programme");
+    private ComboBox<String> programmeTypeSelector = new ComboBox<>("Programme Type", "Regular", "Weekend");
     private TextField titleField = new TextField("Title");
     private ComboBox<String> courseSelector = new ComboBox<>("Course");
     private NumberField maxScoreField = new NumberField("Maximum Score");
@@ -86,7 +87,8 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         maxScoreField.setRequired(true);
         maxScoreField.setAllowedCharPattern("[0-9.]");
         maxScoreField.setInvalid(maxScoreField.isEmpty());
-
+        programmeTypeSelector.setValue("Regular");
+        programmeTypeSelector.setAllowCustomValue(false);
 
         programmeSelector.setInvalid(programmeSelector.isEmpty());
         programmeSelector.setRequired(true);
@@ -204,10 +206,10 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         sectionAndYearDiv.setWidthFull();
         sectionAndYearDiv.getStyle().setBoxSizing(Style.BoxSizing.BORDER_BOX);
         sectionAndYearDiv.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
-                new FormLayout.ResponsiveStep("300px", 2));
+                new FormLayout.ResponsiveStep("50px", 2));
 
         sectionAndYearDiv.addClassNames("class-level-container");
-        formlayout.add(programmeSelector, courseSelector, sectionAndYearDiv, dateAndActivityContainer, maxScoreField, new Hr(),
+        formlayout.add(programmeSelector, programmeTypeSelector, courseSelector, sectionAndYearDiv, dateAndActivityContainer, maxScoreField, new Hr(),
                 createActivityButton);
 
         layout.add(headerText, formlayout);
@@ -218,7 +220,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
         // ADD CLICK LISTENER TO THE generateButton TO FETCH AND FILL TABLE RECORDS.
         createActivityButton.addClickListener(clickEvent -> {
             UI.getCurrent().access(() -> {
-                Collection<ActivitiesEntity> data = new DAO().fetchClassListByClassName(programmeSelector.getValue(), sectionSelector.getValue(), levelSelector.getValue());
+                Collection<ActivitiesEntity> data = new DAO().fetchClassListByClassName(programmeSelector.getValue(), sectionSelector.getValue(), levelSelector.getValue(), programmeTypeSelector.getValue());
                 if (data.isEmpty()) {
                     new UserConfirmDialogs().showError("Empty class list");
                     activityTable.setItems(Collections.emptyList());

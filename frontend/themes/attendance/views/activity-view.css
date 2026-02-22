@@ -26,7 +26,8 @@
     background-color: rgb(8, 171, 163);
     width: 100%;    
     text-align: center;
-    padding: 10px 0;
+    padding: 16px 0;
+    margin:auto;
     color:#fff;
 }
 
@@ -149,7 +150,7 @@
     box-sizing: border-box;
 }
 
-.class-level-container .item-selector{
+.class-level-container{
     /* border:1px solid orange; */
     max-width:100%;
 }
@@ -173,6 +174,9 @@
 @media screen and (max-width:600px) {
     .section-and-level-div {
         flex-direction: column;
+    }
+    .activity-inner-teaderText {
+        gap: 0;
     }
     .dashboard-header-text {
         font-size: 14px;

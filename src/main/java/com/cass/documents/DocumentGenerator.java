@@ -3,20 +3,21 @@ package com.cass.documents;
 import ar.com.fdvs.dj.domain.constants.Border;
 import com.cass.data.ActivitiesEntity;
 import com.cass.data.AttendanceRecordsEntity;
-import com.itextpdf.kernel.colors.Color;
+import com.cass.data.StudentEntity;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.colorspace.PdfColorSpace;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
-import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.vaadin.flow.component.grid.Grid;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.batik.css.engine.value.svg12.DeviceColor;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlgraphics.image.codec.png.PNGEncodeParam;
 import org.plutext.jaxb.xslfo.TableHeader;
 
 import java.io.*;
@@ -132,6 +133,48 @@ public class DocumentGenerator {
             workbook.write(outputStream);
             return new ByteArrayInputStream(outputStream.toByteArray());
         }catch (Exception e){}
+
+        return null;
+    }
+
+    public static InputStream generateStudentList(String programme, Grid<StudentEntity> table) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try( Workbook workbook = new XSSFWorkbook()) {
+            Sheet worksheet = workbook.createSheet("CLASS LIST");
+
+            //CREATE SHEET HEADER COLUMNS
+            Row titleRow = worksheet.createRow(0);
+
+            //merge title row cells.
+            titleRow.createCell(0).setCellValue(programme + " CLASS LIST");
+
+            worksheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
+
+            Row cellHeaders = worksheet.createRow(2);
+            cellHeaders.createCell(0   ).setCellValue("INDEX NUMBER");
+            cellHeaders.createCell(1   ).setCellValue("FULL NAME");
+            cellHeaders.createCell(2   ).setCellValue("YEAR");
+            cellHeaders.createCell(3  ).setCellValue("LEVEL");
+            cellHeaders.createCell(4).setCellValue("GROUP");
+            cellHeaders.createCell(5).setCellValue("STATUS");
+
+            int tableSize = table.getListDataView().getItemCount();
+            int rowCounter = 3;
+            for (int i = 0; i < tableSize; i++) {
+                Row row = worksheet.createRow(rowCounter++);
+                StudentEntity items = table.getListDataView().getItem(i);
+                row.createCell(0).setCellValue(items.getIndexNumber());
+                row.createCell(1).setCellValue(items.getFullName());
+                row.createCell(2).setCellValue(items.getYearGroup());
+                row.createCell(3).setCellValue(items.getLevel());
+                row.createCell(4).setCellValue(items.getSection());
+                row.createCell(5).setCellValue(items.getStatus() == 1 ? "ACTIVE" : "INACTIVE");
+            }
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         return null;
     }

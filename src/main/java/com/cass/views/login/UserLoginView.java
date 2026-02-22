@@ -154,6 +154,7 @@ public class UserLoginView extends VerticalLayout {
                         SessionManager.setAttribute("level", repData.get("level"));
                         SessionManager.setAttribute("yearGroup", repData.get("year_group"));
                         SessionManager.setAttribute("class", repData.get("class"));
+                        SessionManager.setAttribute("programmeType", repData.get("programme_type"));
 
                         UI.getCurrent().getPage().setLocation("/rep-dashboard");
                     };
