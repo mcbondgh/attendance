@@ -5,12 +5,18 @@
 }
 
 .login-main-div {
-    margin: auto;
-    margin-top:70px;
+    margin: 70px auto auto;
     border: 1px solid rgb(234, 234, 234);
     width: 300px;
-    box-shadow:rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    border-radius: 5px;
+    box-shadow:rgba(99, 99, 99, 0.2) 0 2px 8px 0;
+    border-radius: 30px;
+}
+.login-input-div vaadin-button {
+    background-color: #066f7f;
+    color: #fff;
+    font-size: small;
+    width: 100%;
+    padding:20px;
 }
 
 .login-div {
@@ -32,9 +38,10 @@
     margin-bottom: 20px;
 }
 .login-header-div, .login-header-div h3 {
-    background-color: rgb(9, 112, 214);
+    background-color: #066f7f;
     color: #fff;
     text-align: center;
+    padding: 10px;
 }
 
 .login-error-container {

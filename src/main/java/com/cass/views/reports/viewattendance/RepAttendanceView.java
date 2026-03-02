@@ -48,9 +48,9 @@ public class RepAttendanceView extends VerticalLayout implements BeforeEnterObse
     private AtomicReference<String> activeUser, section, level, programme, studentYearGroup, programmeType;
     private DAO DATA_SOURCE;
     private final Grid<AttendanceRecordsEntity> studentsGrid = new Grid<>();
-    private final ComboBox<String> courseSelector = new ComboBox<>();
-    private DatePicker startDatePicker = new DatePicker("Start From");
-    private DatePicker endDatePicker = new DatePicker("End At");
+    private final static ComboBox<String> courseSelector = new ComboBox<>();
+    private final static DatePicker startDatePicker = new DatePicker("Start From");
+    private final static DatePicker endDatePicker = new DatePicker("End At");
     private final Anchor exportLink = new Anchor();
 
     public RepAttendanceView() {
@@ -69,7 +69,7 @@ public class RepAttendanceView extends VerticalLayout implements BeforeEnterObse
             section = new AtomicReference<>(SessionManager.getAttribute("section").toString());
 
 //            Notification.show("Successful Navigation to Attendance View: " + activeUser.get());
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
             UI.getCurrent().getPage().setLocation("/");
         }
     }
@@ -80,7 +80,9 @@ public class RepAttendanceView extends VerticalLayout implements BeforeEnterObse
     }
 
     private void configureGridColumns() {
-        studentsGrid.setSizeUndefined();
+//        studentsGrid.setSizeUndefined();
+        studentsGrid.setWidthFull();
+        studentsGrid.setHeight("100vh");
         studentsGrid.setClassName("view-attendance-grid");
 
         // SET GRID COLUMNS
@@ -122,7 +124,7 @@ public class RepAttendanceView extends VerticalLayout implements BeforeEnterObse
         return layout;
     }
 
-    private Component filterSection() {
+    private Div filterSection() {
         var header = new H5("Filter Records");
         header.addClassName("add-student-title");
 
@@ -203,7 +205,7 @@ public class RepAttendanceView extends VerticalLayout implements BeforeEnterObse
         button.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ICON);
         button.addClassName("default-button-style");
 
-        var section = new Section(header, startDatePicker, endDatePicker, courseSelector, new Hr(), button);
+        var section = new Div(header, startDatePicker, endDatePicker, courseSelector, new Hr(), button);
         section.addClassNames("record-form-inner-box", "section-one");
         section.setWidthFull();
         return section;
@@ -239,8 +241,7 @@ public class RepAttendanceView extends VerticalLayout implements BeforeEnterObse
         flexLayout.setWidthFull();
         flexLayout.addClassNames("filter-export-container");
 
-
-        var section = new VerticalLayout(header, new Hr(), flexLayout, studentsGrid);
+        var section = new VerticalLayout(header, flexLayout, studentsGrid);
         section.addClassNames("record-form-inner-box", "section-two");
         section.setWidthFull();
         return section;

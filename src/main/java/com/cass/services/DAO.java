@@ -230,7 +230,7 @@ public class DAO {
                            SUM(CASE WHEN attendanceValue = 'excused' THEN 1 ELSE 0 END) AS excused_count,
                            COUNT(*) AS total_attendance FROM attendance_records AS ar
                            INNER JOIN studentslist AS sl ON ar.rowNumber = sl.id
-                           WHERE(attendanceDate BETWEEN ? AND ? AND ar.programme = ? AND className = ? AND ar.year_group = ? AND course = ?)
+                           WHERE(attendanceDate BETWEEN ? AND ? AND ar.programme = ? AND sl.section = ? AND ar.year_group = ? AND course = ?)
                            GROUP BY ar.indexNumber, fullName, level
                     """;
             PreparedStatement prepare = source.prepareStatement(query);

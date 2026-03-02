@@ -2,7 +2,6 @@ package com.cass.services;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.cass.data.ActivitiesEntity;
@@ -14,8 +13,8 @@ public class ActivityService extends DAO{
 
         try(Connection source = Config.getDataSource()) {
             String query = """
-                INSERT INTO activity_records(rowNumber, level, programme, activityType, course, className, maximumScore, score, activityDate)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO activity_records(rowNumber, level, programme, activityType, course, className, maximumScore, score, activityDate, recorded_by)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
 
             PreparedStatement prepare = source.prepareStatement(query);
@@ -28,6 +27,7 @@ public class ActivityService extends DAO{
             prepare.setDouble(7, entity.getMaximumSocre());
             prepare.setDouble(8, entity.getScore());
             prepare.setDate(9, entity.getActivityDate());
+            prepare.setString(10, entity.getRecordedBy());
             return prepare.executeUpdate();
         } catch (SQLException ignore) { }
         return 0;

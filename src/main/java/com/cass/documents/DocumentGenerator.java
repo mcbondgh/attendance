@@ -147,10 +147,9 @@ public class DocumentGenerator {
 
             //merge title row cells.
             titleRow.createCell(0).setCellValue(programme + " CLASS LIST");
-
             worksheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 5));
 
-            Row cellHeaders = worksheet.createRow(2);
+            Row cellHeaders = worksheet.createRow(1);
             cellHeaders.createCell(0   ).setCellValue("INDEX NUMBER");
             cellHeaders.createCell(1   ).setCellValue("FULL NAME");
             cellHeaders.createCell(2   ).setCellValue("YEAR");
@@ -159,7 +158,7 @@ public class DocumentGenerator {
             cellHeaders.createCell(5).setCellValue("STATUS");
 
             int tableSize = table.getListDataView().getItemCount();
-            int rowCounter = 3;
+            int rowCounter = 2;
             for (int i = 0; i < tableSize; i++) {
                 Row row = worksheet.createRow(rowCounter++);
                 StudentEntity items = table.getListDataView().getItem(i);

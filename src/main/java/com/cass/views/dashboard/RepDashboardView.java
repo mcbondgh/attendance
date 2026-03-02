@@ -41,7 +41,7 @@ public class RepDashboardView extends VerticalLayout {
             String sessionUser = SessionManager.getAttribute("activeUser").toString();
             activeUser = new AtomicReference<>(sessionUser.toUpperCase());
 
-        } catch (NullPointerException e) {
+        } catch (NullPointerException ignored) {
             UI.getCurrent().getPage().setLocation("/login");
         }
     }
@@ -90,7 +90,7 @@ public class RepDashboardView extends VerticalLayout {
         passwordDialog.addClassNames("reset-dialog");
 
         var h6 = new H6("Reset Password");
-        var span = new Span("You are about to change your password. By confirming this process, your password shall be changed your preferred new password.");
+        var span = new Span("You are about to change your password. By confirming this process, your password shall be changed to your preferred new password.");
         var rowOne = new Div(h6, span);
         rowOne.setWidthFull();
         rowOne.getStyle().setAlignItems(Style.AlignItems.CENTER);
@@ -193,7 +193,6 @@ public class RepDashboardView extends VerticalLayout {
         layout.setWidthFull();
         layout.getStyle().setAlignItems(Style.AlignItems.CENTER).setJustifyContent(Style.JustifyContent.CENTER);
         layout.addClassName("menu-card-component");
-
 
         return layout;
     }

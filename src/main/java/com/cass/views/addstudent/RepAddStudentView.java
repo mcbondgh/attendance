@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @PageTitle("Class List")
 @Route("/rep-add-student")
 public class RepAddStudentView extends VerticalLayout {
+
     private AtomicReference<String> activeUser, section, level, programme, studentYearGroup, programmeType;
     private DAO DATA_SOURCE;
     private final Grid<StudentEntity> studentsGrid = new Grid<>();
@@ -56,7 +57,6 @@ public class RepAddStudentView extends VerticalLayout {
         } catch (NullPointerException e) {
             UI.getCurrent().getPage().setLocation("/");
         }
-
     }
 
     @Override
@@ -152,9 +152,8 @@ public class RepAddStudentView extends VerticalLayout {
 
         //check and set the export button to active if the grid is not empty to allow table to be exported.
         if (studentsGrid.getListDataView().getItems().findAny().isPresent()) {
-            String filename = programme.get() + "_class_list.xlsx";
             var stream = DocumentGenerator.generateStudentList(programme.get(), studentsGrid);
-            exportLink.setHref(DocumentStreams.createFileResource(filename, stream));
+            exportLink.setHref(DocumentStreams.createFileResource(programme.get().concat(" CLASS LIST.csv"), stream));
         }
 
         FlexLayout flexLayout = new FlexLayout(filterField, exportLink);

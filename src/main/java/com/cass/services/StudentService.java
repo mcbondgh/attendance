@@ -72,8 +72,8 @@ public class StudentService extends  DAO{
             ResultSet resultSet;
             String query = """
                     INSERT INTO attendance_records(rowNumber, indexNumber, programme, course, level,
-                    className, year_group, attendanceValue, attendanceDate)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    className, year_group, attendanceValue, attendanceDate, recorded_by)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                    """;
             prepare = source.prepareStatement(query);
             prepare.setInt(1, entity.getRowNumber());
@@ -85,6 +85,7 @@ public class StudentService extends  DAO{
             prepare.setString(7, entity.getYearGroup());
             prepare.setString(8, entity.getAttendanceValue());
             prepare.setDate(9, entity.getAttendanceDate());
+            prepare.setString(10, entity.getRecordedBy());
             status = prepare.executeUpdate();
         } catch (SQLException ignore) {
             ignore.printStackTrace();

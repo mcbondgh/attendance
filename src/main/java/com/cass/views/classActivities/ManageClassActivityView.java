@@ -3,14 +3,15 @@ package com.cass.views.classActivities;
 import java.sql.Date;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.cass.security.SessionManager;
 import com.cass.views.reports.ActivitiesView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.dom.Style;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
@@ -69,10 +70,12 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
     private final ComboBox<String> levelSelector = new ComboBox<>("Level");
 //    private final ComboBox<String>yearGroupSelector = new ComboBox<>("Year Group");
 
+
     public ManageClassActivityView() {
         setRequiredFields();
         getContent().add(renderPageHeader(), renderPageView());
         loadFields();
+
     }
 
     /****************************************************************************************************
@@ -315,6 +318,7 @@ public class ManageClassActivityView extends Composite<VerticalLayout> {
                                     entity.setActivityDate(Date.valueOf(datePicker.getValue()));
                                     entity.setScore(item.getScoreField().getValue());
                                     entity.setLevel(levelSelector.getValue());
+                                    entity.setRecordedBy(Objects.requireNonNull(SessionManager.getUsername()));
                                     counter.getAndAdd(new ActivityService().saveAcademicActivity(entity));
                                 });
                                 if (counter.get() > 0) {

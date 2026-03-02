@@ -9,6 +9,11 @@ public class SessionManager {
         VaadinSession.getCurrent().setAttribute(SESSION_KEY, value);
     }
 
+    public static String getUsername() {
+        Object value = VaadinSession.getCurrent().getAttribute(SESSION_KEY);
+        return value != null ? value.toString() : null;
+    }
+
 public static void setAttribute(String key, Object value) {
         VaadinSession.getCurrent().setAttribute(key, value);
     }

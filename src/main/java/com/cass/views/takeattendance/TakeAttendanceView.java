@@ -6,8 +6,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.cass.security.SessionManager;
 import com.itextpdf.forms.form.element.CheckBox;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -272,7 +274,9 @@ public class TakeAttendanceView extends VerticalLayout {
                                 entity.setclassName(sectionSelector.getValue());
                                 entity.setYearGroup(String.valueOf(LocalDate.now().getYear()));
                                 entity.setAttendanceValue(attendanceValue);
+                                entity.setRecordedBy(Objects.requireNonNull(SessionManager.getUsername()));
                                 entity.setAttendanceDate(date);
+
 //                            System.out.println("Index No: " + each.getIndexNumber() + " Attendance: " + attendanceValue);
                                 responseStatus.addAndGet(SERVICE_OBJ.saveAttendance(entity));
                             });

@@ -6,8 +6,8 @@
     <groupId>com.cass</groupId>
     <artifactId>Attendance</artifactId>
     <name>ClassAttendanceStandalone</name>
-    <version>1.6</version>
-    <packaging>jar</packaging>
+    <version>1.8.4</version>
+    <packaging>war</packaging>
     <properties>
         <java.version>21</java.version>
         <vaadin.version>24.3.0.rc1</vaadin.version>
@@ -192,7 +192,7 @@
     <profiles>
         <profile>
             <!-- Production mode is activated using -Pproduction -->
-            <id>development</id>
+            <id>production</id>
             <dependencies>
                 <!-- Exclude development dependencies from production -->
                 <dependency>

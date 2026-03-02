@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.dom.Style.AlignItems;
-import com.vaadin.flow.dom.Style.TextAlign;
 
 public class ActivitiesEntity {
     private int id, activityCount;
@@ -19,6 +18,7 @@ public class ActivitiesEntity {
     private Timestamp dateCreated;
     private NumberField scoreField = new NumberField();
     private String course, level;
+    private String recordedBy;
 
     public ActivitiesEntity() {
     
@@ -239,5 +239,11 @@ public class ActivitiesEntity {
         this.id = id;
     }
 
-    
+
+    public void setRecordedBy(String username) {
+        this.recordedBy = username;
+    }
+    public String getRecordedBy() {
+        return recordedBy;
+    }
 }
